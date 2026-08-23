@@ -78,7 +78,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER STABLE SET search_path = public;
 CREATE TABLE integrations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  platform TEXT NOT NULL CHECK (platform IN ('woocommerce', 'shopify', 'wordpress')),
+  platform TEXT NOT NULL CHECK (platform IN ('woocommerce', 'shopware', 'shopify', 'wordpress')),
   name TEXT NOT NULL,
   -- Encrypted at the application layer (AES-256-GCM, see _shared/crypto.ts) before insert — this
   -- column never holds plaintext credentials, and no policy below grants it to non-service-role
@@ -123,13 +123,13 @@ CREATE TABLE tool_registry (
 INSERT INTO tool_registry (name, domain, risk, description, input_schema, supported_platforms, default_policy) VALUES
   ('orders.search', 'orders', 'low', 'Search orders on an integration.',
    '{"type":"object","required":["integration_id"],"properties":{"integration_id":{"type":"string"},"status":{"type":"string"},"limit":{"type":"number"}}}',
-   ARRAY['woocommerce'], 'allow'),
+   ARRAY['woocommerce','shopware'], 'allow'),
   ('orders.get', 'orders', 'low', 'Get one order by id.',
    '{"type":"object","required":["integration_id","order_id"],"properties":{"integration_id":{"type":"string"},"order_id":{"type":"string"}}}',
-   ARRAY['woocommerce'], 'allow'),
+   ARRAY['woocommerce','shopware'], 'allow'),
   ('orders.refund', 'orders', 'high', 'Refund an existing order (full or partial).',
    '{"type":"object","required":["integration_id","order_id"],"properties":{"integration_id":{"type":"string"},"order_id":{"type":"string"},"amount":{"type":"number"},"reason":{"type":"string"}}}',
-   ARRAY['woocommerce'], 'require_approval')
+   ARRAY['woocommerce','shopware'], 'require_approval')
 ON CONFLICT (name) DO NOTHING;
 
 -- ── Agent tool permissions (most-specific-wins: (agent,tool,integration) -> (agent,tool) -> (agent,'*')) ──

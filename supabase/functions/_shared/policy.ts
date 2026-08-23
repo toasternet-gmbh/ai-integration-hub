@@ -35,11 +35,13 @@ export async function resolvePermission(
   toolName: string,
   integrationId: string,
 ): Promise<PolicyDecision> {
+  // SQL IN never matches NULL (three-valued logic), and PostgREST's .in() serializes a JS `null`
+  // element as the literal string "null" rather than dropping to IS NULL — need an explicit OR.
   const { data: rows, error } = await admin
     .from("agent_tool_permissions")
     .select("integration_id, permission")
     .eq("project_id", projectId).eq("agent_id", agentId).eq("tool_name", toolName)
-    .in("integration_id", [integrationId, null]);
+    .or(`integration_id.eq.${integrationId},integration_id.is.null`);
   if (error) throw new Error(error.message);
   const specific = (rows ?? []).find((r: { integration_id: string | null }) => r.integration_id === integrationId);
   if (specific) return specific.permission as PolicyDecision;

@@ -69,11 +69,21 @@ export class WooCommerceConnector implements Connector {
         const body: Record<string, unknown> = {};
         if (input.amount != null) body.amount = String(input.amount);
         if (input.reason) body.reason = String(input.reason);
-        const data = await this.request(`/orders/${encodeURIComponent(orderId)}/refunds`, {
-          method: "POST",
-          body: JSON.stringify(body),
-        });
-        return { data };
+        try {
+          const data = await this.request(`/orders/${encodeURIComponent(orderId)}/refunds`, { method: "POST", body: JSON.stringify(body) });
+          return { data };
+        } catch (err) {
+          // Many payment methods (bank transfer, cash, most non-Stripe/PayPal gateways) don't
+          // support WooCommerce's automatic gateway refund callback — fall back to recording the
+          // refund without it (api_refund: false), which still marks the order refunded. Without
+          // this fallback, orders.refund would only ever work for a handful of gateways.
+          if (!(err instanceof Error) || !err.message.includes("does not support automatic refunds")) throw err;
+          const data = await this.request(`/orders/${encodeURIComponent(orderId)}/refunds`, {
+            method: "POST",
+            body: JSON.stringify({ ...body, api_refund: false }),
+          });
+          return { data };
+        }
       }
       default:
         throw new Error(`WooCommerce connector does not support tool '${tool}'.`);

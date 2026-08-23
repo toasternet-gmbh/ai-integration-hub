@@ -202,7 +202,10 @@ function IntegrationsTab({ projectId }: { projectId: string }) {
   async function create() {
     setErr(null);
     try {
-      await mcp("create_integration", { platform, name, credentials: { storeUrl, consumerKey, consumerSecret } }, { projectId });
+      const credentials = platform === "shopware"
+        ? { storeUrl, clientId: consumerKey, clientSecret: consumerSecret }
+        : { storeUrl, consumerKey, consumerSecret };
+      await mcp("create_integration", { platform, name, credentials }, { projectId });
       setName(""); setStoreUrl(""); setConsumerKey(""); setConsumerSecret("");
       reload();
     } catch (e) { setErr((e as Error).message); }
@@ -224,12 +227,16 @@ function IntegrationsTab({ projectId }: { projectId: string }) {
           ))}
         </tbody>
       </table>
-      <h3>Connect WooCommerce</h3>
+      <h3>Connect a store</h3>
       <div style={{ display: "grid", gap: 6, maxWidth: 420 }}>
+        <select value={platform} onChange={(e) => setPlatform(e.target.value)}>
+          <option value="woocommerce">WooCommerce</option>
+          <option value="shopware">Shopware 6</option>
+        </select>
         <input placeholder="Integration name (e.g. Main Store)" value={name} onChange={(e) => setName(e.target.value)} />
-        <input placeholder="Store URL (https://mystore.com)" value={storeUrl} onChange={(e) => setStoreUrl(e.target.value)} />
-        <input placeholder="Consumer key" value={consumerKey} onChange={(e) => setConsumerKey(e.target.value)} />
-        <input placeholder="Consumer secret" type="password" value={consumerSecret} onChange={(e) => setConsumerSecret(e.target.value)} />
+        <input placeholder="Store URL (e.g. http://localhost:8090)" value={storeUrl} onChange={(e) => setStoreUrl(e.target.value)} />
+        <input placeholder={platform === "shopware" ? "Client ID" : "Consumer key"} value={consumerKey} onChange={(e) => setConsumerKey(e.target.value)} />
+        <input placeholder={platform === "shopware" ? "Client secret" : "Consumer secret"} type="password" value={consumerSecret} onChange={(e) => setConsumerSecret(e.target.value)} />
         <div><button className="primary" onClick={create}>Connect &amp; test</button></div>
       </div>
     </div>

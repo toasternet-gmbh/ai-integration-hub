@@ -467,7 +467,7 @@ DB_URL=$(_env_val DB_URL)  # used in --remote migration mode
 
 # ── DOMAIN / URL DERIVATION ───────────────────────────────────────────────────
 
-MY_SUPABASE_SUBDOMAIN=$(echo "$VITE_SUPABASE_URL" | sed 's|^https\?://||')
+MY_SUPABASE_SUBDOMAIN=$(echo "$VITE_SUPABASE_URL" | sed -E 's|^https?://||')
 MY_DOMAIN="${VITE_MAIN_DOMAIN:-$(echo "$MY_SUPABASE_SUBDOMAIN" | sed 's/^[^.]*\.//')}"
 
 # Determine scheme early — everything downstream depends on this
@@ -840,6 +840,13 @@ if [ "$CADDY_ONLY" = false ]; then
   fi
   _EFFECTIVE_SUPABASE_URL="${VITE_SUPABASE_URL}"
   [ "$REMOTE_MODE" = false ] && _EFFECTIVE_SUPABASE_URL="${_SCHEME}://${MY_SUPABASE_SUBDOMAIN}"
+  # SUPABASE_URL above is the public-facing URL (used for links/redirects visible to end users).
+  # Edge functions calling back into Auth/PostgREST/etc. from *inside* the Docker network must use
+  # Kong's internal service alias instead — "http://localhost:<port>" from inside the functions
+  # container means the functions container itself, not the host, causing ECONNREFUSED. Only
+  # meaningful in local mode; in --remote mode there's no local Kong to reach.
+  _INTERNAL_SUPABASE_URL=""
+  [ "$REMOTE_MODE" = false ] && _INTERNAL_SUPABASE_URL="http://kong:8000"
 
   echo "🔧 Writing edge-functions env override (docker-compose.functions-env.yml)..."
 
@@ -849,6 +856,7 @@ services:
     environment:
       # ── Supabase ──────────────────────────────────────────────────────────
       SUPABASE_URL: ${_EFFECTIVE_SUPABASE_URL}
+      SUPABASE_INTERNAL_URL: ${_INTERNAL_SUPABASE_URL}
       SUPABASE_SERVICE_ROLE_KEY: ${_LOCAL_SERVICE_KEY}
       SUPABASE_ANON_KEY: ${_LOCAL_ANON_KEY}
       # ── Email (Resend) ────────────────────────────────────────────────────

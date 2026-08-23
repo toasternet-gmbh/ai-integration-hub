@@ -1,5 +1,6 @@
 import type { Connector } from "./types.ts";
 import { WooCommerceConnector } from "./woocommerce.ts";
+import { ShopwareConnector } from "./shopware.ts";
 import { decryptCredentials } from "../crypto.ts";
 
 /** Loads an integration row's encrypted credentials and returns the right Connector for its platform. */
@@ -8,6 +9,8 @@ export async function loadConnector(integration: { platform: string; credentials
   switch (integration.platform) {
     case "woocommerce":
       return new WooCommerceConnector(creds as { storeUrl: string; consumerKey: string; consumerSecret: string });
+    case "shopware":
+      return new ShopwareConnector(creds as { storeUrl: string; clientId: string; clientSecret: string });
     default:
       throw new Error(`No connector implemented for platform '${integration.platform}'.`);
   }
