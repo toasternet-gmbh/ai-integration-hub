@@ -1,0 +1,25 @@
+/* Milestone 1 is intentionally undecorated — just enough to click through the two proof flows.
+   No Tailwind/shadcn setup yet (deferred to a later polish pass, see the plan's "explicitly
+   deferred" section). */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin: 0;
+  background: #f6f7f9;
+  color: #1a1a1a;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 24px; }
+.card { background: white; border: 1px solid #e2e4e8; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+h1, h2, h3 { margin-top: 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #eee; }
+button { cursor: pointer; padding: 6px 12px; border-radius: 6px; border: 1px solid #ccc; background: white; }
+button.primary { background: #16a34a; color: white; border-color: #16a34a; }
+button.danger { background: #dc2626; color: white; border-color: #dc2626; }
+input, select { padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; margin-right: 6px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.tabs button.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+.badge-pending { background: #fef3c7; color: #92400e; }
+.badge-allowed, .badge-executed, .badge-connected { background: #dcfce7; color: #166534; }
+.badge-denied, .badge-error { background: #fee2e2; color: #991b1b; }
+.error { color: #dc2626; font-size: 13px; margin: 8px 0; }
