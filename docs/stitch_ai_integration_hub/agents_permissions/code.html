@@ -1,0 +1,191 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={theme:{extend:{"colors":{"on-tertiary-container":"#f7aa46","on-tertiary-fixed-variant":"#663e00","secondary-fixed-dim":"#77daa3","inverse-on-surface":"#f0f1f3","on-background":"#191c1e","on-surface-variant":"#454653","surface-container-lowest":"#ffffff","error-container":"#ffdad6","on-primary-container":"#abb4ff","secondary":"#006d43","surface-container-highest":"#e1e2e4","primary-fixed-dim":"#bcc2ff","surface-container-low":"#f3f4f6","surface":"#f8f9fb","tertiary":"#4b2d00","secondary-container":"#93f7bd","outline-variant":"#c6c5d5","tertiary-container":"#6a4100","primary":"#12238f","surface-container":"#edeef0","tertiary-fixed-dim":"#ffb962","surface-bright":"#f8f9fb","on-surface":"#191c1e","on-tertiary":"#ffffff","tertiary-fixed":"#ffddb9","on-secondary-container":"#007348","surface-dim":"#d9dadc","on-secondary-fixed":"#002111","on-primary-fixed-variant":"#2b3ba3","on-secondary-fixed-variant":"#005232","error":"#ba1a1a","primary-container":"#2f3ea6","outline":"#767684","inverse-surface":"#2e3132","on-secondary":"#ffffff","on-tertiary-fixed":"#2b1700","on-error":"#ffffff","on-primary":"#ffffff","on-error-container":"#93000a","surface-variant":"#e1e2e4","surface-tint":"#4554bc","on-primary-fixed":"#000c61","inverse-primary":"#bcc2ff","secondary-fixed":"#93f7bd","background":"#f8f9fb","primary-fixed":"#dfe0ff","surface-container-high":"#e7e8ea"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"row-height-density":"40px","gutter":"24px","margin-page":"32px","unit":"4px","component-gap":"12px"},"fontFamily":{"mono-data":["IBM Plex Mono"],"headline-lg":["Archivo"],"headline-sm":["Archivo"],"headline-md":["Archivo"],"body-md":["IBM Plex Sans"],"body-lg":["IBM Plex Sans"],"label-caps":["Archivo"]},"fontSize":{"mono-data":["13px",{"lineHeight":"1.4","fontWeight":"450"}],"headline-lg":["32px",{"lineHeight":"1.2","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"1.4","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"1.3","letterSpacing":"-0.01em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"1.5","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"1.6","fontWeight":"400"}],"label-caps":["11px",{"lineHeight":"1","letterSpacing":"0.08em","fontWeight":"700"}]}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@100..900&family=IBM+Plex+Sans:wght@100..900&display=swap" rel="stylesheet"/></head><body class="bg-surface font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant z-50 flex flex-col"><div class="h-14 px-gutter flex items-center border-b border-outline-variant mb-unit"><span class="font-headline-sm text-primary tracking-tight">AI Integration Hub</span></div><nav class="flex-1 px-unit space-y-unit" data-active-classes="bg-primary-container text-on-primary-container font-bold border-l-4 border-primary"><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="text-body-md">Dashboard</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="integrations" href="#"><span class="material-symbols-outlined text-[20px]">hub</span><span class="text-body-md">Integrations</span></a><a aria-current="page" class="flex items-center gap-component-gap px-gutter py-2 transition-colors bg-primary-container text-on-primary-container font-bold border-l-4 border-primary" data-path="agents-permissions" href="#"><span class="material-symbols-outlined text-[20px]">shield_person</span><span class="text-body-md">Agents & Permissions</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="approvals-inbox" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span class="text-body-md">Approvals Inbox</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="audit-logs" href="#"><span class="material-symbols-outlined text-[20px]">history_edu</span><span class="text-body-md">Audit Logs</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="api-keys" href="#"><span class="material-symbols-outlined text-[20px]">vpn_key</span><span class="text-body-md">API Keys</span></a><div class="mt-4 pt-4 border-t border-outline-variant"><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="help-center" href="#"><span class="material-symbols-outlined text-[20px]">help_center</span><span class="text-body-md">Help Center</span></a></div></nav></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-14 bg-surface border-b border-outline-variant z-40 flex items-center justify-between px-gutter"><div class="flex items-center gap-unit text-on-surface-variant text-body-md"><span class="hover:text-primary cursor-pointer">Organization</span><span class="material-symbols-outlined text-[16px]">chevron_right</span><span class="text-on-surface font-bold">Project</span></div><div class="flex items-center gap-gutter"><div class="flex border border-outline-variant rounded overflow-hidden"><button class="px-2 py-1 text-label-caps bg-primary text-on-primary">EN</button><button class="px-2 py-1 text-label-caps text-on-surface-variant hover:bg-surface-container">DE</button></div><div class="flex items-center gap-component-gap border-l border-outline-variant pl-gutter"><div class="flex flex-col items-end"><span class="text-body-md font-bold">Admin User</span><span class="text-label-caps text-on-surface-variant">Super Admin</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="relative pt-14 min-h-screen bg-background"><div class="flex flex-col w-full min-h-full">
+<div class="flex-1 flex overflow-hidden">
+<!-- Left Column: Agent List -->
+<div class="w-80 border-r border-outline-variant bg-surface flex flex-col shrink-0">
+<div class="p-gutter border-b border-outline-variant flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface m-0">Agents</h2>
+<button class="flex items-center gap-unit px-3 py-1.5 bg-primary text-on-primary rounded text-label-caps font-label-caps hover:bg-primary-container hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined text-[16px]">add</span>
+          New
+        </button>
+</div>
+<div class="flex-1 overflow-y-auto p-unit space-y-unit">
+<!-- Selected Agent -->
+<button class="w-full text-left p-component-gap bg-surface-container-high border border-outline-variant rounded flex items-start gap-component-gap group relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l"></div>
+<div class="w-8 h-8 bg-primary-container text-on-primary-container rounded flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">support_agent</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-1">
+<span class="font-headline-sm text-body-md text-on-surface truncate">Merch Support Agent</span>
+</div>
+<div class="flex items-center gap-unit">
+<div class="flex items-center gap-1 border border-secondary/30 bg-surface-container-lowest px-2 py-0.5 rounded-full">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase">Active</span>
+</div>
+</div>
+</div>
+</button>
+<!-- Other Agents -->
+<button class="w-full text-left p-component-gap hover:bg-surface-container rounded flex items-start gap-component-gap transition-colors group">
+<div class="w-8 h-8 bg-surface-container-highest text-on-surface-variant rounded flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">manage_search</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-1">
+<span class="font-body-md text-body-md text-on-surface truncate group-hover:text-primary transition-colors">Inventory Scanner</span>
+</div>
+<div class="flex items-center gap-unit">
+<div class="flex items-center gap-1 border border-secondary/30 bg-surface-container-lowest px-2 py-0.5 rounded-full">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase">Active</span>
+</div>
+</div>
+</div>
+</button>
+<button class="w-full text-left p-component-gap hover:bg-surface-container rounded flex items-start gap-component-gap transition-colors group">
+<div class="w-8 h-8 bg-surface-container-highest text-on-surface-variant rounded flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-1">
+<span class="font-body-md text-body-md text-on-surface truncate group-hover:text-primary transition-colors">Onboarding Bot</span>
+</div>
+<div class="flex items-center gap-unit">
+<div class="flex items-center gap-1 border border-outline/30 bg-surface-container-lowest px-2 py-0.5 rounded-full opacity-60">
+<div class="w-1.5 h-1.5 rounded-full bg-outline"></div>
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase">Inactive</span>
+</div>
+</div>
+</div>
+</button>
+</div>
+</div>
+<!-- Right Column: Permissions Matrix -->
+<div class="flex-1 flex flex-col bg-background overflow-hidden relative">
+<!-- Subtle dot grid background -->
+<div class="absolute inset-0 pointer-events-none opacity-[0.03]" style="background-image: radial-gradient(circle, #000 1px, transparent 1px); background-size: 16px 16px;"></div>
+<div class="p-margin-page flex-1 overflow-y-auto z-10 relative">
+<div class="max-w-4xl mx-auto">
+<header class="mb-gutter flex items-start justify-between">
+<div>
+<div class="flex items-center gap-component-gap mb-2">
+<div class="w-10 h-10 bg-primary-container text-on-primary-container rounded flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">support_agent</span>
+</div>
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface m-0">Merch Support Agent</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Configure action permissions and tool access.</p>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-component-gap">
+<button class="px-4 py-2 border border-outline-variant text-on-surface font-label-caps text-label-caps rounded hover:bg-surface-container transition-colors">Discard Changes</button>
+<button class="px-4 py-2 bg-primary text-on-primary font-label-caps text-label-caps rounded hover:bg-primary-container hover:text-on-primary-container transition-colors opacity-50 cursor-not-allowed">Save Matrix</button>
+</div>
+</header>
+<div class="bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<div class="p-gutter border-b border-outline-variant bg-surface-container-lowest flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface m-0 flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">gavel</span>
+                Policy Matrix: Orders
+              </h3>
+<!-- Segmented Control Legend -->
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Allow</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-on-tertiary-container"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Require Approval</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-error"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Deny</span>
+</div>
+</div>
+</div>
+<!-- Table Header -->
+<div class="grid grid-cols-12 gap-gutter px-gutter py-3 bg-surface border-b border-outline-variant">
+<div class="col-span-5 font-label-caps text-label-caps text-on-surface-variant">Tool Namespace</div>
+<div class="col-span-7 font-label-caps text-label-caps text-on-surface-variant">Access Level</div>
+</div>
+<!-- Matrix Rows -->
+<div class="flex flex-col">
+<!-- Row 1 -->
+<div class="grid grid-cols-12 gap-gutter px-gutter items-center border-b border-outline-variant/50 hover:bg-surface-container-lowest transition-colors h-[56px]">
+<div class="col-span-5 flex items-center gap-component-gap">
+<span class="font-mono-data text-mono-data text-on-surface bg-surface-container px-2 py-1 rounded">orders.search</span>
+</div>
+<div class="col-span-7 flex items-center">
+<div class="flex border border-outline-variant rounded p-1 bg-surface-container-low gap-1 w-full max-w-sm">
+<button class="flex-1 py-1.5 rounded bg-surface-container-lowest border border-secondary text-secondary font-label-caps text-label-caps flex items-center justify-center gap-1 shadow-sm relative z-10 transition-all">
+<span class="material-symbols-outlined text-[14px]">check</span> Allow
+                    </button>
+<button class="flex-1 py-1.5 rounded text-on-surface-variant hover:bg-surface-container font-label-caps text-[10px] uppercase flex items-center justify-center transition-all opacity-60 hover:opacity-100">
+                      Approval
+                    </button>
+<button class="flex-1 py-1.5 rounded text-on-surface-variant hover:bg-surface-container font-label-caps text-[10px] uppercase flex items-center justify-center transition-all opacity-60 hover:opacity-100">
+                      Deny
+                    </button>
+</div>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="grid grid-cols-12 gap-gutter px-gutter items-center border-b border-outline-variant/50 hover:bg-surface-container-lowest transition-colors h-[56px]">
+<div class="col-span-5 flex items-center gap-component-gap">
+<span class="font-mono-data text-mono-data text-on-surface bg-surface-container px-2 py-1 rounded">orders.get</span>
+</div>
+<div class="col-span-7 flex items-center">
+<div class="flex border border-outline-variant rounded p-1 bg-surface-container-low gap-1 w-full max-w-sm">
+<button class="flex-1 py-1.5 rounded bg-surface-container-lowest border border-secondary text-secondary font-label-caps text-label-caps flex items-center justify-center gap-1 shadow-sm relative z-10 transition-all">
+<span class="material-symbols-outlined text-[14px]">check</span> Allow
+                    </button>
+<button class="flex-1 py-1.5 rounded text-on-surface-variant hover:bg-surface-container font-label-caps text-[10px] uppercase flex items-center justify-center transition-all opacity-60 hover:opacity-100">
+                      Approval
+                    </button>
+<button class="flex-1 py-1.5 rounded text-on-surface-variant hover:bg-surface-container font-label-caps text-[10px] uppercase flex items-center justify-center transition-all opacity-60 hover:opacity-100">
+                      Deny
+                    </button>
+</div>
+</div>
+</div>
+<!-- Row 3 (High Risk) -->
+<div class="grid grid-cols-12 gap-gutter px-gutter py-4 items-start bg-on-tertiary-container/5 border-b-0">
+<div class="col-span-5 flex flex-col gap-2 pt-1.5">
+<div class="flex items-center gap-component-gap">
+<span class="font-mono-data text-mono-data text-on-tertiary-container bg-surface-container px-2 py-1 rounded border border-on-tertiary-container/20">orders.refund</span>
+<span class="material-symbols-outlined text-on-tertiary-container text-[16px]">warning</span>
+</div>
+<!-- Callout Box -->
+<div class="mt-2 p-3 bg-surface-container-lowest border border-on-tertiary-container/30 rounded flex gap-2">
+<span class="material-symbols-outlined text-on-tertiary-container text-[18px] shrink-0 mt-0.5">info</span>
+<p class="font-body-md text-[13px] leading-tight text-on-surface-variant m-0">High-risk tool — defaults to Require approval for every new agent.</p>
+</div>
+</div>
+<div class="col-span-7 pt-1.5 flex items-start">
+<div class="flex border border-outline-variant rounded p-1 bg-surface-container-low gap-1 w-full max-w-sm">
+<button class="flex-1 py-1.5 rounded text-on-surface-variant hover:bg-surface-container font-label-caps text-[10px] uppercase flex items-center justify-center transition-all opacity-60 hover:opacity-100">
+                      Allow
+                    </button>
+<button class="flex-1 py-1.5 rounded bg-surface-container-lowest border border-on-tertiary-container text-on-tertiary-fixed-variant font-label-caps text-[11px] uppercase flex items-center justify-center gap-1 shadow-sm relative z-10 transition-all font-bold tracking-wider">
+<span class="material-symbols-outlined text-[14px]">front_hand</span> Approval
+                    </button>
+<button class="flex-1 py-1.5 rounded text-on-surface-variant hover:bg-surface-container font-label-caps text-[10px] uppercase flex items-center justify-center transition-all opacity-60 hover:opacity-100">
+                      Deny
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></main></div></body></html>

@@ -4,3 +4,6 @@ dist/
 .env.local
 .env.supabase
 *.log
+docs/access-and-accounts.md
+.DS_Store
+supabase/.temp/

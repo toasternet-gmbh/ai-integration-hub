@@ -1,0 +1,199 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={theme:{extend:{"colors":{"on-tertiary-container":"#f7aa46","on-tertiary-fixed-variant":"#663e00","secondary-fixed-dim":"#77daa3","inverse-on-surface":"#f0f1f3","on-background":"#191c1e","on-surface-variant":"#454653","surface-container-lowest":"#ffffff","error-container":"#ffdad6","on-primary-container":"#abb4ff","secondary":"#006d43","surface-container-highest":"#e1e2e4","primary-fixed-dim":"#bcc2ff","surface-container-low":"#f3f4f6","surface":"#f8f9fb","tertiary":"#4b2d00","secondary-container":"#93f7bd","outline-variant":"#c6c5d5","tertiary-container":"#6a4100","primary":"#12238f","surface-container":"#edeef0","tertiary-fixed-dim":"#ffb962","surface-bright":"#f8f9fb","on-surface":"#191c1e","on-tertiary":"#ffffff","tertiary-fixed":"#ffddb9","on-secondary-container":"#007348","surface-dim":"#d9dadc","on-secondary-fixed":"#002111","on-primary-fixed-variant":"#2b3ba3","on-secondary-fixed-variant":"#005232","error":"#ba1a1a","primary-container":"#2f3ea6","outline":"#767684","inverse-surface":"#2e3132","on-secondary":"#ffffff","on-tertiary-fixed":"#2b1700","on-error":"#ffffff","on-primary":"#ffffff","on-error-container":"#93000a","surface-variant":"#e1e2e4","surface-tint":"#4554bc","on-primary-fixed":"#000c61","inverse-primary":"#bcc2ff","secondary-fixed":"#93f7bd","background":"#f8f9fb","primary-fixed":"#dfe0ff","surface-container-high":"#e7e8ea"}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/></head><body class="bg-background font-body-md text-on-surface flex items-center justify-center min-h-screen"><main class="w-full max-w-md"><div class="flex flex-col w-full h-[100dvh] bg-surface relative overflow-hidden text-on-surface font-body-md text-body-md">
+<!-- Faint dot grid substrate -->
+<div class="absolute inset-0 pointer-events-none" style="background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0); background-size: 24px 24px; opacity: 0.03; color: var(--color-on-surface);"></div>
+<div class="flex-1 flex flex-col items-center justify-center p-gutter relative z-10">
+<!-- Wizard Container -->
+<div class="w-full max-w-md flex flex-col relative" id="wizard-container">
+<!-- Structural Hairline Header -->
+<div class="border-b border-on-surface/10 pb-4 mb-8 flex justify-between items-end">
+<div>
+<div class="font-label-caps text-label-caps text-on-surface-variant tracking-[0.08em] uppercase mb-1">Onboarding sequence</div>
+<div class="font-headline-md text-headline-md font-semibold tracking-[-0.01em]">Setup Workspace</div>
+</div>
+<div class="font-mono-data text-mono-data text-on-surface-variant flex items-center gap-2">
+<span id="step-indicator">01/02</span>
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+</div>
+</div>
+<!-- Step 1: Organization -->
+<div class="flex flex-col gap-8 transition-all duration-300 ease-in-out opacity-100 transform translate-x-0" id="step-1">
+<div class="flex flex-col gap-2">
+<h2 class="font-headline-sm text-headline-sm font-semibold">Define Organization</h2>
+<p class="text-on-surface-variant max-w-sm">Establish the root namespace for your primary administrative boundary.</p>
+</div>
+<div class="flex flex-col gap-6">
+<div class="relative flex flex-col gap-2">
+<label class="font-label-caps text-label-caps uppercase tracking-[0.08em] text-on-surface-variant" for="org-name">Organization Name</label>
+<input autocomplete="off" class="w-full bg-surface-container-lowest border border-on-surface/20 rounded-[4px] px-6 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface/30 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200" id="org-name" placeholder="e.g. Acme Corp" type="text"/>
+<!-- Validation hint (hidden by default) -->
+<div class="hidden font-mono-data text-mono-data text-error mt-1 flex items-center gap-1 border-b-2 border-error w-fit" id="org-error">
+<span class="material-symbols-outlined text-[14px]">error</span>
+                            Required field
+                        </div>
+</div>
+<button class="mt-4 w-full bg-primary text-on-primary font-label-caps text-label-caps uppercase tracking-[0.08em] rounded-[4px] py-4 px-6 flex items-center justify-center gap-2 hover:bg-primary-container transition-colors active:scale-[0.98]" id="btn-continue" type="button">
+                        Continue
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Step 2: Project (Initially Hidden) -->
+<div class="hidden flex-col gap-8 transition-all duration-300 ease-in-out opacity-0 transform translate-x-8 absolute top-[112px] left-0 w-full" id="step-2">
+<div class="flex flex-col gap-2">
+<h2 class="font-headline-sm text-headline-sm font-semibold">Initialize Project</h2>
+<p class="text-on-surface-variant max-w-sm">Create the first isolated deployment environment under your organization.</p>
+</div>
+<div class="flex flex-col gap-6">
+<div class="relative flex flex-col gap-2">
+<label class="font-label-caps text-label-caps uppercase tracking-[0.08em] text-on-surface-variant" for="project-name">Project Name</label>
+<input autocomplete="off" class="w-full bg-surface-container-lowest border border-on-surface/20 rounded-[4px] px-6 py-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface/30 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-200" id="project-name" placeholder="e.g. Production Data Core" type="text"/>
+</div>
+<div class="flex items-center gap-3 mt-4">
+<button class="w-12 h-12 flex-shrink-0 bg-transparent border border-primary text-primary rounded-[4px] flex items-center justify-center hover:bg-primary/5 transition-colors" id="btn-back" type="button">
+<span class="material-symbols-outlined text-[16px]">arrow_back</span>
+</button>
+<button class="flex-1 bg-primary text-on-primary font-label-caps text-label-caps uppercase tracking-[0.08em] rounded-[4px] py-4 px-6 flex items-center justify-center gap-2 hover:bg-primary-container transition-colors active:scale-[0.98]" id="btn-create" type="button">
+                            Create Project
+                            <span class="material-symbols-outlined text-[16px]">check</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Success State (Initially Hidden) -->
+<div class="hidden flex-col items-center justify-center gap-6 py-12 transition-all duration-500 ease-out opacity-0 transform scale-95 absolute top-[112px] left-0 w-full text-center" id="step-success">
+<div class="w-16 h-16 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mb-2 shadow-sm border border-secondary-fixed/50">
+<span class="material-symbols-outlined text-[32px]">check_circle</span>
+</div>
+<div class="flex flex-col gap-1 items-center">
+<h3 class="font-headline-md text-headline-md font-semibold">System Initialized</h3>
+<p class="font-mono-data text-mono-data text-on-surface-variant">Redirecting to control panel...</p>
+</div>
+<div class="w-48 h-1 bg-surface-container-highest rounded-full overflow-hidden mt-4">
+<div class="h-full bg-secondary w-full origin-left animate-[scale-x_2s_ease-in-out_infinite]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const step1 = document.getElementById('step-1');
+        const step2 = document.getElementById('step-2');
+        const stepSuccess = document.getElementById('step-success');
+        
+        const btnContinue = document.getElementById('btn-continue');
+        const btnBack = document.getElementById('btn-back');
+        const btnCreate = document.getElementById('btn-create');
+        
+        const orgInput = document.getElementById('org-name');
+        const orgError = document.getElementById('org-error');
+        const stepIndicator = document.getElementById('step-indicator');
+
+        // Simple validation & Transition to Step 2
+        btnContinue.addEventListener('click', () => {
+            if (!orgInput.value.trim()) {
+                orgError.classList.remove('hidden');
+                orgInput.classList.add('border-error');
+                // Shake animation
+                orgInput.classList.add('animate-[shake_0.4s_ease-in-out]');
+                setTimeout(() => orgInput.classList.remove('animate-[shake_0.4s_ease-in-out]'), 400);
+                return;
+            }
+            
+            orgError.classList.add('hidden');
+            orgInput.classList.remove('border-error');
+
+            // Hide Step 1
+            step1.classList.remove('opacity-100', 'translate-x-0', 'relative');
+            step1.classList.add('opacity-0', '-translate-x-8', 'absolute');
+            
+            setTimeout(() => {
+                step1.classList.add('hidden');
+                step1.classList.remove('flex');
+                
+                // Show Step 2
+                step2.classList.remove('hidden');
+                step2.classList.add('flex');
+                
+                // Small reflow delay
+                requestAnimationFrame(() => {
+                    step2.classList.remove('opacity-0', 'translate-x-8', 'absolute');
+                    step2.classList.add('opacity-100', 'translate-x-0', 'relative');
+                    stepIndicator.textContent = '02/02';
+                    document.getElementById('project-name').focus();
+                });
+            }, 300);
+        });
+
+        // Transition back to Step 1
+        btnBack.addEventListener('click', () => {
+            step2.classList.remove('opacity-100', 'translate-x-0', 'relative');
+            step2.classList.add('opacity-0', 'translate-x-8', 'absolute');
+            
+            setTimeout(() => {
+                step2.classList.add('hidden');
+                step2.classList.remove('flex');
+                
+                step1.classList.remove('hidden');
+                step1.classList.add('flex');
+                
+                requestAnimationFrame(() => {
+                    step1.classList.remove('opacity-0', '-translate-x-8', 'absolute');
+                    step1.classList.add('opacity-100', 'translate-x-0', 'relative');
+                    stepIndicator.textContent = '01/02';
+                });
+            }, 300);
+        });
+
+        // Finish
+        btnCreate.addEventListener('click', () => {
+            const btnText = btnCreate.textContent;
+            btnCreate.innerHTML = '<span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>';
+            
+            setTimeout(() => {
+                // Hide header and step 2
+                document.querySelector('.border-b').classList.add('opacity-0', 'transition-opacity');
+                step2.classList.remove('opacity-100', 'translate-x-0', 'relative');
+                step2.classList.add('opacity-0', '-translate-x-8', 'absolute');
+                
+                setTimeout(() => {
+                    step2.classList.add('hidden');
+                    
+                    // Show Success
+                    stepSuccess.classList.remove('hidden');
+                    stepSuccess.classList.add('flex');
+                    
+                    requestAnimationFrame(() => {
+                        stepSuccess.classList.remove('opacity-0', 'scale-95');
+                        stepSuccess.classList.add('opacity-100', 'scale-100');
+                    });
+                }, 300);
+            }, 1000);
+        });
+
+        // Clear error on input
+        orgInput.addEventListener('input', () => {
+            orgError.classList.add('hidden');
+            orgInput.classList.remove('border-error');
+        });
+        
+        // Enter key support
+        orgInput.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') btnContinue.click();
+        });
+    });
+</script>
+<style>
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        75% { transform: translateX(4px); }
+    }
+    @keyframes scale-x {
+        0% { transform: scaleX(0); transform-origin: left; }
+        50% { transform: scaleX(1); transform-origin: left; }
+        50.1% { transform: scaleX(1); transform-origin: right; }
+        100% { transform: scaleX(0); transform-origin: right; }
+    }
+</style></main></body></html>

@@ -1,0 +1,105 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={theme:{extend:{"colors":{"on-tertiary-container":"#f7aa46","on-tertiary-fixed-variant":"#663e00","secondary-fixed-dim":"#77daa3","inverse-on-surface":"#f0f1f3","on-background":"#191c1e","on-surface-variant":"#454653","surface-container-lowest":"#ffffff","error-container":"#ffdad6","on-primary-container":"#abb4ff","secondary":"#006d43","surface-container-highest":"#e1e2e4","primary-fixed-dim":"#bcc2ff","surface-container-low":"#f3f4f6","surface":"#f8f9fb","tertiary":"#4b2d00","secondary-container":"#93f7bd","outline-variant":"#c6c5d5","tertiary-container":"#6a4100","primary":"#12238f","surface-container":"#edeef0","tertiary-fixed-dim":"#ffb962","surface-bright":"#f8f9fb","on-surface":"#191c1e","on-tertiary":"#ffffff","tertiary-fixed":"#ffddb9","on-secondary-container":"#007348","surface-dim":"#d9dadc","on-secondary-fixed":"#002111","on-primary-fixed-variant":"#2b3ba3","on-secondary-fixed-variant":"#005232","error":"#ba1a1a","primary-container":"#2f3ea6","outline":"#767684","inverse-surface":"#2e3132","on-secondary":"#ffffff","on-tertiary-fixed":"#2b1700","on-error":"#ffffff","on-primary":"#ffffff","on-error-container":"#93000a","surface-variant":"#e1e2e4","surface-tint":"#4554bc","on-primary-fixed":"#000c61","inverse-primary":"#bcc2ff","secondary-fixed":"#93f7bd","background":"#f8f9fb","primary-fixed":"#dfe0ff","surface-container-high":"#e7e8ea"}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/></head><body class="bg-background font-body-md text-on-surface flex items-center justify-center min-h-screen"><main class="w-full max-w-md"><div class="flex flex-col w-full min-h-[600px] md:flex-row md:min-h-screen bg-background border-t border-outline-variant">
+<!-- Left Side: Log Scroll -->
+<div class="hidden md:flex flex-col flex-1 bg-surface-container relative overflow-hidden border-r border-outline-variant">
+<div class="absolute inset-0 pointer-events-none opacity-[0.03]" style="background-image: radial-gradient(#191c1e 1px, transparent 1px); background-size: 16px 16px;"></div>
+<div class="p-[var(--margin-page)] border-b border-outline-variant relative z-10 bg-surface-container/90 backdrop-blur">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 bg-primary rounded-full"></div>
+<span class="font-label-caps text-label-caps text-on-surface">SYSTEM_LOGS_ACTIVE</span>
+</div>
+</div>
+<div class="flex-1 overflow-hidden relative z-0 opacity-40 mix-blend-multiply" id="log-container">
+<div class="absolute w-full flex flex-col font-mono-data text-mono-data text-on-surface-variant p-6 gap-3" id="log-content">
+<!-- Logs will be populated by JS -->
+</div>
+</div>
+</div>
+<!-- Right Side: Auth Panel -->
+<div class="flex-1 flex flex-col bg-surface relative">
+<!-- Header with Toggle -->
+<div class="absolute top-0 right-0 p-6 flex justify-end">
+<div class="flex items-center border border-outline-variant rounded p-1 bg-surface-container-lowest">
+<button class="px-3 py-1 font-label-caps text-label-caps text-on-surface bg-surface-variant rounded">EN</button>
+<button class="px-3 py-1 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface">DE</button>
+</div>
+</div>
+<!-- Centered Form -->
+<div class="flex-1 flex flex-col justify-center items-center p-6 md:p-12 w-full max-w-md mx-auto">
+<div class="w-full flex flex-col gap-[var(--component-gap)]">
+<!-- Tabs -->
+<div class="flex border-b border-outline-variant mb-6">
+<button class="flex-1 pb-3 font-label-caps text-label-caps text-primary border-b-2 border-primary relative -mb-[1px]">SIGN IN</button>
+<button class="flex-1 pb-3 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface border-b border-transparent">CREATE ACCOUNT</button>
+</div>
+<div class="mb-4">
+<h1 class="font-headline-md text-headline-md text-on-surface mb-2">Access Control</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Enter your credentials to manage operations.</p>
+</div>
+<form class="flex flex-col gap-[var(--component-gap)]">
+<div class="flex flex-col">
+<label class="font-label-caps text-label-caps text-on-surface-variant mb-1">EMAIL_ADDRESS</label>
+<input class="bg-surface-container-lowest border border-outline-variant opacity-80 focus:opacity-100 text-on-surface font-mono-data text-mono-data p-3 outline-none focus:border-primary transition-colors" placeholder="user@domain.com" type="email"/>
+</div>
+<div class="flex flex-col">
+<div class="flex justify-between items-center mb-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant">AUTH_TOKEN (PASSWORD)</label>
+<a class="font-label-caps text-label-caps text-primary hover:underline" href="#">RECOVER?</a>
+</div>
+<input class="bg-surface-container-lowest border border-outline-variant opacity-80 focus:opacity-100 text-on-surface font-mono-data text-mono-data p-3 outline-none focus:border-primary transition-colors" placeholder="••••••••" type="password"/>
+</div>
+<button class="mt-4 bg-primary text-on-primary font-label-caps text-label-caps py-[14px] px-6 rounded-[4px] hover:bg-primary-container transition-colors w-full flex items-center justify-center gap-2" type="submit">
+<span>AUTHENTICATE</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</form>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Simple vertical scrolling logs simulation
+  const logs = [
+    "orders.refund • require_approval • 2 min ago",
+    "orders.get • allowed • 5 min ago",
+    "users.update_role • denied • 12 min ago",
+    "system.health_check • ok • 15 min ago",
+    "inventory.sync • allowed • 22 min ago",
+    "orders.create • allowed • 28 min ago",
+    "payment.process • require_approval • 35 min ago",
+    "users.login • allowed • 41 min ago",
+    "system.deploy • require_approval • 1 hr ago",
+    "database.backup • ok • 2 hr ago"
+  ];
+
+  const logContent = document.getElementById('log-content');
+  if (logContent) {
+    let html = '';
+    // Duplicate logs to fill screen and create loop effect
+    for (let i = 0; i < 40; i++) {
+      const log = logs[i % logs.length];
+      const statusColor = log.includes('denied') ? 'text-error' : 
+                         log.includes('require_approval') ? 'text-tertiary' : 
+                         'text-secondary';
+                         
+      html += `
+        <div class="flex items-center gap-3 py-1 border-b border-outline-variant/30">
+          <span class="${statusColor}">[${log.split('•')[1].trim().toUpperCase()}]</span>
+          <span>${log.split('•')[0].trim()}</span>
+          <span class="ml-auto opacity-50">${log.split('•')[2].trim()}</span>
+        </div>
+      `;
+    }
+    logContent.innerHTML = html;
+
+    // Simple scroll animation
+    let pos = 0;
+    function scroll() {
+      pos -= 0.5;
+      if (pos <= -1000) pos = 0; // Reset point
+      logContent.style.transform = `translateY(${pos}px)`;
+      requestAnimationFrame(scroll);
+    }
+    scroll();
+  }
+</script></main></body></html>

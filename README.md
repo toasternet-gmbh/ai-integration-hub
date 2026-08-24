@@ -1,76 +1,60 @@
-# AI Integration Hub — Milestone 1
+# AI Integration Hub
 
-A standalone "AI Integration & Agent Control Platform" — lets AI agents safely call external
-business systems (WooCommerce first) through a normalized set of canonical tools (`orders.get`,
-`orders.search`, `orders.refund`), gated by a Policy Engine + human-approval flow + audit log.
+An "AI Integration & Agent Control Platform" — lets AI agents safely call external commerce
+systems through a normalized set of canonical tools (`orders.get`, `orders.search`,
+`orders.refund`), gated by a Policy Engine, a human-approval flow, and an immutable audit log.
 
-See the design/scope rationale in the plan this was built from (self-hosted Supabase stack, reusing
-patterns proven in the `yogaipilot` repo's `mcp-server`).
+## Architecture
+
+This repo is the **frontend only** — a React + Vite + Tailwind single-page app. It talks to a
+Supabase backend over `@supabase/supabase-js` (auth) and a hand-rolled JSON-RPC 2.0 MCP gateway
+(`src/lib/mcp.ts` → `${VITE_SUPABASE_URL}/functions/v1/hub-mcp-server`).
+
+The backend (Postgres schema, GoTrue auth, and the `hub-mcp-server` edge function — MCP gateway,
+Policy Engine, connectors, tool handlers) does **not** live in this repo. It is currently deployed
+as part of the `yogaipilot` repo's shared Supabase instance; see `supabase/README.md` and
+`docs/access-and-accounts.md` (gitignored, contains live credentials) for the full writeup and
+current status of that arrangement. That backend is being migrated to its own dedicated Supabase
+project (same Supabase account/org, separate database) rather than continuing to share
+`yogaipilot`'s — track that migration in the `yogaipilot` repo, not here.
 
 ## Stack
 
-Self-hosted Supabase (Postgres + GoTrue + PostgREST + Kong + Deno Edge Functions), Docker Compose +
-Caddy/Cloudflare Tunnel, deployed with `deploy.sh` (copied from `yogaipilot`, same tool — see its own
-`--help` comments). Frontend: plain React + Vite, deliberately undecorated for Milestone 1 (no
-Tailwind/shadcn yet — see "Explicitly deferred" below).
+React 18 + React Router 7 + Vite 5 + Tailwind 3, TypeScript, Vitest for tests. No backend code or
+edge functions in this repo — see Architecture above.
 
-## What's implemented (Milestone 1)
+## What's implemented
 
-- **Schema** (`supabase/migrations/20260823000000_core_schema.sql`): Organization → Project →
-  {Integration, Agent, ApiKey}, `agent_tool_permissions` (allow/deny/require_approval,
-  most-specific-wins by (agent, tool, integration)), `action_approvals`, `audit_logs`, `tool_registry`
-  seeded with `orders.search` / `orders.get` / `orders.refund`.
-- **MCP gateway** (`supabase/functions/mcp-server/`): hand-rolled JSON-RPC 2.0 server. Auth via a
-  project-scoped API key (`hub_...`) or a Supabase JWT + explicit `project_id` (a user can belong to
-  several projects). Canonical `orders.*` tools run through the Policy Engine
-  (`_shared/policy.ts`) — ALLOW runs now, DENY throws, REQUIRE_APPROVAL parks the call in
-  `action_approvals` and returns `{approval_required, approval_id}`. Every gated call is
-  audit-logged. Meta tools (`create_integration`, `create_agent`, `list_approvals`, `resolve_approval`,
-  ...) are plain project-member operations, no agent/policy involved.
-- **Approve = execute now** (`tools/approvals.ts::resolve_approval`): atomically claims the pending
-  row (`UPDATE ... WHERE status='pending'`) before running the connector call — carried over from a
-  real double-execution race found and fixed in `yogaipilot`'s equivalent code this same session.
-- **WooCommerce connector** (`_shared/connectors/woocommerce.ts`): REST API v3, Consumer Key/Secret
-  Basic Auth. `orders.search` / `orders.get` / `orders.refund` (→ `POST /orders/{id}/refunds`).
-  Credentials encrypted at rest (`_shared/crypto.ts`, AES-256-GCM) before insert, decrypted only
-  inside the edge function right before the connector call.
-- **Frontend** (`src/App.tsx`): sign in/up, create-or-pick Organization → Project, then a project
-  dashboard with 4 tabs — Integrations (connect WooCommerce, see status), Agents (create agent, grant
-  a tool permission), Approvals (list pending, approve/deny — approve runs the real refund), Audit
-  Logs. Verified: `npm install && npx tsc --noEmit` is clean, and the app renders/serves via
-  `npm run dev`.
+- **Auth & onboarding** (`src/pages/SignIn.tsx`, `src/pages/Onboarding.tsx`): Supabase email/password
+  sign-in, password reset, and first-run Organization → Project creation.
+- **Console** (`src/App.tsx`, `src/components/AppShell.tsx`): 8 authenticated sections —
+  Dashboard, Integrations (connect WooCommerce/Shopware/Magento/Shopify stores), Agents (create
+  agents, grant per-tool policy: allow/deny/require-approval), Approvals (pending queue, approve
+  runs the real action), Audit (immutable log, CSV export), API Keys, Team (invite via
+  link-copy), Account (GDPR-style data export/delete).
+- **Marketing/legal pages**: Landing (with in-page Features/Platforms anchors), Help Center with
+  static EN/DE articles (`src/lib/helpArticles.ts`), Imprint, Privacy, Terms.
+- **i18n**: hand-rolled EN/DE dictionary (`src/lib/i18n.tsx`), covering every page's copy.
+- Route-level code-splitting (`React.lazy` per page) and vendor chunk splitting
+  (`vite.config.ts`) to keep the initial JS payload small.
 
-## What's NOT done yet
-
-1. **No live backend deployed.** No self-hosted Supabase instance has been stood up for this project
-   — `deploy.sh` has been copied and lightly adapted (repo name, `CREDENTIALS_ENCRYPTION_KEY`
-   plumbing) but never run. Until it is, there's nothing at a real URL to point the frontend at.
-2. **No real WooCommerce store tested against.** The connector code is written against the documented
-   WooCommerce REST API v3 shape but has not been exercised against a live store.
-3. **`bun.lockb` doesn't exist yet** — `deploy.sh`'s production Dockerfile `COPY`s it; run
-   `bun install` (or adjust the Dockerfile to `npm install`, since this repo actually used `npm`) once
-   before the first real deploy.
-4. Full end-to-end proof (blueprint's two flows: `orders.get` ALLOW, `orders.refund`
-   REQUIRE_APPROVAL → approve → real refund, audit trail visible) has **not been run live** — it
-   needs (1) and (2) above first.
-
-## To actually prove this end-to-end
+## Local development
 
 ```bash
-# 1. Stand up the stack (see deploy.sh's own header comments for all flags/env keys)
-cp .env.example .env.supabase   # fill in a real domain, generate CREDENTIALS_ENCRYPTION_KEY:
-openssl rand -base64 32
-./deploy.sh toasternet/ai-integration-hub
-
-# 2. Point the frontend at it (VITE_SUPABASE_URL etc. from the generated .env.supabase),
-#    sign up, create an Organization + Project, connect a real (or WooCommerce sandbox) store,
-#    create an Agent, leave orders.refund at its require_approval default, call orders.get and
-#    orders.refund (via the UI or a raw curl to the MCP JSON-RPC endpoint), approve the refund,
-#    confirm it landed in the store and in Audit Logs.
+npm install
+cp .env.example .env.local   # fill in VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY
+npm run dev                  # http://localhost:3060
+npm run typecheck
+npm run test
+npm run build
 ```
 
-## Explicitly deferred (Milestone 2+)
+## Known gaps before a real go-live
 
-Shopify/WordPress connectors, conditional Policy Engine (amount thresholds), published
-`@org/integration-sdk` npm package, full UI polish (Tailwind/shadcn), Redis/BullMQ background jobs
-(webhooks/retries/async sync) — see the plan this was built from for the full reasoning.
+1. **Backend has no dedicated production Supabase project yet** — see Architecture above.
+2. **Resend has no verified sending domain** — password-reset/invite emails to real users fail;
+   only the account owner currently receives mail (see `docs/access-and-accounts.md`).
+3. **Shopify connector** is only smoke-tested against a placeholder store; needs a real
+   Partner/dev-store credential set before it can leave "coming soon" status.
+4. No shared UI component library yet (`src/components/ui/` is a placeholder directory) — pages
+   currently hand-roll Tailwind classes directly.

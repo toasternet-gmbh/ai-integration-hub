@@ -1,0 +1,189 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={theme:{extend:{"colors":{"on-tertiary-container":"#f7aa46","on-tertiary-fixed-variant":"#663e00","secondary-fixed-dim":"#77daa3","inverse-on-surface":"#f0f1f3","on-background":"#191c1e","on-surface-variant":"#454653","surface-container-lowest":"#ffffff","error-container":"#ffdad6","on-primary-container":"#abb4ff","secondary":"#006d43","surface-container-highest":"#e1e2e4","primary-fixed-dim":"#bcc2ff","surface-container-low":"#f3f4f6","surface":"#f8f9fb","tertiary":"#4b2d00","secondary-container":"#93f7bd","outline-variant":"#c6c5d5","tertiary-container":"#6a4100","primary":"#12238f","surface-container":"#edeef0","tertiary-fixed-dim":"#ffb962","surface-bright":"#f8f9fb","on-surface":"#191c1e","on-tertiary":"#ffffff","tertiary-fixed":"#ffddb9","on-secondary-container":"#007348","surface-dim":"#d9dadc","on-secondary-fixed":"#002111","on-primary-fixed-variant":"#2b3ba3","on-secondary-fixed-variant":"#005232","error":"#ba1a1a","primary-container":"#2f3ea6","outline":"#767684","inverse-surface":"#2e3132","on-secondary":"#ffffff","on-tertiary-fixed":"#2b1700","on-error":"#ffffff","on-primary":"#ffffff","on-error-container":"#93000a","surface-variant":"#e1e2e4","surface-tint":"#4554bc","on-primary-fixed":"#000c61","inverse-primary":"#bcc2ff","secondary-fixed":"#93f7bd","background":"#f8f9fb","primary-fixed":"#dfe0ff","surface-container-high":"#e7e8ea"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"row-height-density":"40px","gutter":"24px","margin-page":"32px","unit":"4px","component-gap":"12px"},"fontFamily":{"mono-data":["IBM Plex Mono"],"headline-lg":["Archivo"],"headline-sm":["Archivo"],"headline-md":["Archivo"],"body-md":["IBM Plex Sans"],"body-lg":["IBM Plex Sans"],"label-caps":["Archivo"]},"fontSize":{"mono-data":["13px",{"lineHeight":"1.4","fontWeight":"450"}],"headline-lg":["32px",{"lineHeight":"1.2","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"1.4","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"1.3","letterSpacing":"-0.01em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"1.5","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"1.6","fontWeight":"400"}],"label-caps":["11px",{"lineHeight":"1","letterSpacing":"0.08em","fontWeight":"700"}]}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@100..900&family=IBM+Plex+Sans:wght@100..900&display=swap" rel="stylesheet"/></head><body class="bg-surface font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant z-50 flex flex-col"><div class="h-14 px-gutter flex items-center border-b border-outline-variant mb-unit"><span class="font-headline-sm text-primary tracking-tight">AI Integration Hub</span></div><nav class="flex-1 px-unit space-y-unit" data-active-classes="bg-primary-container text-on-primary-container font-bold border-l-4 border-primary"><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="text-body-md">Dashboard</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="integrations" href="#"><span class="material-symbols-outlined text-[20px]">hub</span><span class="text-body-md">Integrations</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="agents-permissions" href="#"><span class="material-symbols-outlined text-[20px]">shield_person</span><span class="text-body-md">Agents & Permissions</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="approvals-inbox" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span class="text-body-md">Approvals Inbox</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="audit-logs" href="#"><span class="material-symbols-outlined text-[20px]">history_edu</span><span class="text-body-md">Audit Logs</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="api-keys" href="#"><span class="material-symbols-outlined text-[20px]">vpn_key</span><span class="text-body-md">API Keys</span></a><div class="mt-4 pt-4 border-t border-outline-variant"><a aria-current="page" class="flex items-center gap-component-gap px-gutter py-2 transition-colors bg-primary-container text-on-primary-container font-bold border-l-4 border-primary" data-path="help-center" href="#"><span class="material-symbols-outlined text-[20px]">help_center</span><span class="text-body-md">Help Center</span></a></div></nav></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-14 bg-surface border-b border-outline-variant z-40 flex items-center justify-between px-gutter"><div class="flex items-center gap-unit text-on-surface-variant text-body-md"><span class="hover:text-primary cursor-pointer">Organization</span><span class="material-symbols-outlined text-[16px]">chevron_right</span><span class="text-on-surface font-bold">Project</span></div><div class="flex items-center gap-gutter"><div class="flex border border-outline-variant rounded overflow-hidden"><button class="px-2 py-1 text-label-caps bg-primary text-on-primary">EN</button><button class="px-2 py-1 text-label-caps text-on-surface-variant hover:bg-surface-container">DE</button></div><div class="flex items-center gap-component-gap border-l border-outline-variant pl-gutter"><div class="flex flex-col items-end"><span class="text-body-md font-bold">Admin User</span><span class="text-label-caps text-on-surface-variant">Super Admin</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="relative pt-14 min-h-screen bg-background"><div class="flex flex-col w-full px-gutter md:px-margin-page pb-24 max-w-6xl mx-auto">
+<div class="w-full text-center py-16 md:py-24 relative">
+<div class="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 via-transparent to-tertiary/5 blur-3xl rounded-full scale-150 transform translate-y-12"></div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-unit">How can we help you?</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-component-gap">Search our knowledge base or browse by category.</p>
+<div class="max-w-2xl mx-auto relative group mt-8 shadow-xl shadow-surface-container-highest/50 rounded-full transition-all duration-300 hover:shadow-primary/10">
+<div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-[24px]">search</span>
+</div>
+<input class="w-full pl-16 pr-6 py-6 bg-surface-container-lowest text-on-surface font-body-lg text-body-lg rounded-full focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-outline-variant transition-all duration-300" placeholder="Search for 'WooCommerce', 'API Keys', 'Permissions'..." type="text"/>
+<div class="absolute inset-y-0 right-3 flex items-center">
+<button class="bg-primary text-on-primary px-6 py-3 rounded-full font-label-caps text-label-caps tracking-widest hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-md">SEARCH</button>
+</div>
+</div>
+</div>
+<div class="w-full grid grid-cols-1 md:grid-cols-3 gap-gutter mt-8">
+<div class="bg-surface-container-lowest rounded-xl p-gutter shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-full -mr-16 -mt-16 group-hover:bg-secondary/10 transition-colors"></div>
+<div class="w-12 h-12 bg-secondary-container text-on-secondary-container rounded-full flex items-center justify-center mb-6 shadow-sm">
+<span class="material-symbols-outlined">fact_check</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-2">I approve or deny requests</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Guides for Operations and Management overseeing agent actions.</p>
+<div class="space-y-4">
+<a class="flex items-start gap-3 group/link" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary mt-0.5 group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+<span class="font-body-md text-body-md text-primary font-medium group-hover/link:underline underline-offset-4 decoration-primary/30">Understanding approval requests</span>
+</a>
+<a class="flex items-start gap-3 group/link" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary mt-0.5 group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+<span class="font-body-md text-body-md text-primary font-medium group-hover/link:underline underline-offset-4 decoration-primary/30">Dashboard overview</span>
+</a>
+<a class="flex items-start gap-3 group/link" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary mt-0.5 group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+<span class="font-body-md text-body-md text-primary font-medium group-hover/link:underline underline-offset-4 decoration-primary/30">Setting up notification channels</span>
+</a>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-gutter shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors"></div>
+<div class="w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center mb-6 shadow-sm">
+<span class="material-symbols-outlined">hub</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-2">I manage stores & agents</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Documentation for Administrators configuring the Hub.</p>
+<div class="space-y-4">
+<a class="flex items-start gap-3 group/link" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary mt-0.5 group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+<span class="font-body-md text-body-md text-primary font-medium group-hover/link:underline underline-offset-4 decoration-primary/30">Connecting WooCommerce</span>
+</a>
+<a class="flex items-start gap-3 group/link" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary mt-0.5 group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+<span class="font-body-md text-body-md text-primary font-medium group-hover/link:underline underline-offset-4 decoration-primary/30">Setting tool permissions</span>
+</a>
+<a class="flex items-start gap-3 group/link" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary mt-0.5 group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+<span class="font-body-md text-body-md text-primary font-medium group-hover/link:underline underline-offset-4 decoration-primary/30">Creating custom agent profiles</span>
+</a>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-gutter shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-32 h-32 bg-tertiary/5 rounded-bl-full -mr-16 -mt-16 group-hover:bg-tertiary/10 transition-colors"></div>
+<div class="w-12 h-12 bg-tertiary-container text-on-tertiary-container rounded-full flex items-center justify-center mb-6 shadow-sm">
+<span class="material-symbols-outlined">terminal</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-2">I'm integrating via API</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Technical references for Developers and System Architects.</p>
+<div class="space-y-4">
+<a class="flex items-start gap-3 group/link" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary mt-0.5 group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+<span class="font-body-md text-body-md text-primary font-medium group-hover/link:underline underline-offset-4 decoration-primary/30">Authentication Guide</span>
+</a>
+<a class="flex items-start gap-3 group/link" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary mt-0.5 group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+<span class="font-body-md text-body-md text-primary font-medium group-hover/link:underline underline-offset-4 decoration-primary/30">Handling require_approval</span>
+</a>
+<a class="flex items-start gap-3 group/link" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary mt-0.5 group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+<span class="font-body-md text-body-md text-primary font-medium group-hover/link:underline underline-offset-4 decoration-primary/30">Webhooks setup & payload reference</span>
+</a>
+</div>
+</div>
+</div>
+<div class="w-full mt-16 md:mt-24 grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<div class="md:col-span-4">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Popular Articles</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Most frequently asked questions and guides from our community.</p>
+<div class="w-full aspect-square rounded-xl overflow-hidden shadow-sm relative group cursor-pointer">
+<div class="bg-cover bg-center w-full h-full transition-transform duration-700 group-hover:scale-105" data-alt="A warm, inviting minimal workspace with a modern laptop showing lines of code, a steaming cup of coffee, and soft natural sunlight filtering through a nearby window. The color palette incorporates deep indigo, soft cream, and subtle hints of warm amber. Cinematic lighting, shallow depth of field, professional aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCYB97j6v650nx_3KDkjTBtbh5UZGgCc0B7_gf8OLZ05UG5zpTP86dfHw_7CgKxkazQ3Gj463mpoFmoB4X8o-M3J8LmB9d136oEMB2yK3C0BX4lCWc878XusHZdHh3Gb66FkuxgzaC0h3yHY0RstE6MJEkfwq1qVlRCzrSMK3r476E3IRstptwmkVS3xUkioM8Fw0YNTM8FumwVIu1wgxckckdgXJBCOBnK1y195RQ2VdoeUnP3M2g')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent flex flex-col justify-end p-6">
+<span class="font-label-caps text-label-caps text-primary mb-2 bg-primary-container/80 backdrop-blur inline-block w-max px-2 py-1 rounded">FEATURED GUIDE</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Getting Started with AI Orchestration</h4>
+</div>
+</div>
+</div>
+<div class="md:col-span-8 bg-surface-container-lowest rounded-xl shadow-sm p-2 md:p-6">
+<ul class="flex flex-col space-y-2">
+<li class="group">
+<a class="flex items-center justify-between p-4 hover:bg-surface-container rounded-lg transition-colors" href="#">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">article</span>
+<div>
+<h4 class="font-body-lg text-body-lg text-on-surface font-medium group-hover:text-primary transition-colors">How to rotate API Keys securely</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-mono-data text-mono-data text-on-surface-variant">SECURITY</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">5 min read</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+</a>
+</li>
+<li class="w-full h-px bg-surface-container-highest my-2"></li>
+<li class="group">
+<a class="flex items-center justify-between p-4 hover:bg-surface-container rounded-lg transition-colors" href="#">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">article</span>
+<div>
+<h4 class="font-body-lg text-body-lg text-on-surface font-medium group-hover:text-primary transition-colors">Troubleshooting Shopify webhooks</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-mono-data text-mono-data text-on-surface-variant">INTEGRATIONS</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">8 min read</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+</a>
+</li>
+<li class="w-full h-px bg-surface-container-highest my-2"></li>
+<li class="group">
+<a class="flex items-center justify-between p-4 hover:bg-surface-container rounded-lg transition-colors" href="#">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">article</span>
+<div>
+<h4 class="font-body-lg text-body-lg text-on-surface font-medium group-hover:text-primary transition-colors">Understanding rate limits</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-mono-data text-mono-data text-on-surface-variant">API</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">3 min read</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+</a>
+</li>
+<li class="w-full h-px bg-surface-container-highest my-2"></li>
+<li class="group">
+<a class="flex items-center justify-between p-4 hover:bg-surface-container rounded-lg transition-colors" href="#">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">article</span>
+<div>
+<h4 class="font-body-lg text-body-lg text-on-surface font-medium group-hover:text-primary transition-colors">Customizing the Approval Inbox view</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-mono-data text-mono-data text-on-surface-variant">DASHBOARD</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">4 min read</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+</a>
+</li>
+</ul>
+<div class="mt-4 text-center">
+<a class="inline-flex items-center gap-2 font-label-caps text-label-caps text-primary hover:text-primary-container px-4 py-2 rounded transition-colors uppercase tracking-widest" href="#">
+          View all articles <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<div class="fixed bottom-margin-page right-margin-page z-50">
+<div class="bg-surface-container-lowest shadow-xl rounded-2xl p-6 flex items-start gap-4 border-l-4 border-primary max-w-sm hover:-translate-y-1 transition-transform">
+<div class="w-10 h-10 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">support_agent</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-1">Still stuck?</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-3">Our support team is ready to help with your integration.</p>
+<a class="font-mono-data text-mono-data text-primary hover:underline underline-offset-4 flex items-center gap-2" href="mailto:info@innov-ai-tive.de">
+<span class="material-symbols-outlined text-[16px]">mail</span> info@innov-ai-tive.de
+        </a>
+</div>
+</div>
+</div>
+</div></main></div></body></html>

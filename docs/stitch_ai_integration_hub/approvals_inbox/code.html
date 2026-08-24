@@ -1,0 +1,207 @@
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={theme:{extend:{"colors":{"on-tertiary-container":"#f7aa46","on-tertiary-fixed-variant":"#663e00","secondary-fixed-dim":"#77daa3","inverse-on-surface":"#f0f1f3","on-background":"#191c1e","on-surface-variant":"#454653","surface-container-lowest":"#ffffff","error-container":"#ffdad6","on-primary-container":"#abb4ff","secondary":"#006d43","surface-container-highest":"#e1e2e4","primary-fixed-dim":"#bcc2ff","surface-container-low":"#f3f4f6","surface":"#f8f9fb","tertiary":"#4b2d00","secondary-container":"#93f7bd","outline-variant":"#c6c5d5","tertiary-container":"#6a4100","primary":"#12238f","surface-container":"#edeef0","tertiary-fixed-dim":"#ffb962","surface-bright":"#f8f9fb","on-surface":"#191c1e","on-tertiary":"#ffffff","tertiary-fixed":"#ffddb9","on-secondary-container":"#007348","surface-dim":"#d9dadc","on-secondary-fixed":"#002111","on-primary-fixed-variant":"#2b3ba3","on-secondary-fixed-variant":"#005232","error":"#ba1a1a","primary-container":"#2f3ea6","outline":"#767684","inverse-surface":"#2e3132","on-secondary":"#ffffff","on-tertiary-fixed":"#2b1700","on-error":"#ffffff","on-primary":"#ffffff","on-error-container":"#93000a","surface-variant":"#e1e2e4","surface-tint":"#4554bc","on-primary-fixed":"#000c61","inverse-primary":"#bcc2ff","secondary-fixed":"#93f7bd","background":"#f8f9fb","primary-fixed":"#dfe0ff","surface-container-high":"#e7e8ea"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"row-height-density":"40px","gutter":"24px","margin-page":"32px","unit":"4px","component-gap":"12px"},"fontFamily":{"mono-data":["IBM Plex Mono"],"headline-lg":["Archivo"],"headline-sm":["Archivo"],"headline-md":["Archivo"],"body-md":["IBM Plex Sans"],"body-lg":["IBM Plex Sans"],"label-caps":["Archivo"]},"fontSize":{"mono-data":["13px",{"lineHeight":"1.4","fontWeight":"450"}],"headline-lg":["32px",{"lineHeight":"1.2","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"1.4","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"1.3","letterSpacing":"-0.01em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"1.5","fontWeight":"400"}],"body-lg":["16px",{"lineHeight":"1.6","fontWeight":"400"}],"label-caps":["11px",{"lineHeight":"1","letterSpacing":"0.08em","fontWeight":"700"}]}}}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@100..900&family=IBM+Plex+Sans:wght@100..900&display=swap" rel="stylesheet"/></head><body class="bg-surface font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant z-50 flex flex-col"><div class="h-14 px-gutter flex items-center border-b border-outline-variant mb-unit"><span class="font-headline-sm text-primary tracking-tight">AI Integration Hub</span></div><nav class="flex-1 px-unit space-y-unit" data-active-classes="bg-primary-container text-on-primary-container font-bold border-l-4 border-primary"><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="text-body-md">Dashboard</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="integrations" href="#"><span class="material-symbols-outlined text-[20px]">hub</span><span class="text-body-md">Integrations</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="agents-permissions" href="#"><span class="material-symbols-outlined text-[20px]">shield_person</span><span class="text-body-md">Agents & Permissions</span></a><a aria-current="page" class="flex items-center gap-component-gap px-gutter py-2 transition-colors bg-primary-container text-on-primary-container font-bold border-l-4 border-primary" data-path="approvals-inbox" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span class="text-body-md">Approvals Inbox</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="audit-logs" href="#"><span class="material-symbols-outlined text-[20px]">history_edu</span><span class="text-body-md">Audit Logs</span></a><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="api-keys" href="#"><span class="material-symbols-outlined text-[20px]">vpn_key</span><span class="text-body-md">API Keys</span></a><div class="mt-4 pt-4 border-t border-outline-variant"><a class="flex items-center gap-component-gap px-gutter py-2 text-on-surface-variant hover:bg-surface-container-high transition-colors" data-path="help-center" href="#"><span class="material-symbols-outlined text-[20px]">help_center</span><span class="text-body-md">Help Center</span></a></div></nav></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-14 bg-surface border-b border-outline-variant z-40 flex items-center justify-between px-gutter"><div class="flex items-center gap-unit text-on-surface-variant text-body-md"><span class="hover:text-primary cursor-pointer">Organization</span><span class="material-symbols-outlined text-[16px]">chevron_right</span><span class="text-on-surface font-bold">Project</span></div><div class="flex items-center gap-gutter"><div class="flex border border-outline-variant rounded overflow-hidden"><button class="px-2 py-1 text-label-caps bg-primary text-on-primary">EN</button><button class="px-2 py-1 text-label-caps text-on-surface-variant hover:bg-surface-container">DE</button></div><div class="flex items-center gap-component-gap border-l border-outline-variant pl-gutter"><div class="flex flex-col items-end"><span class="text-body-md font-bold">Admin User</span><span class="text-label-caps text-on-surface-variant">Super Admin</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="relative pt-14 min-h-screen bg-background"><div class="flex flex-col w-full relative pb-margin-page bg-background">
+<!-- Header Area / Top Controls -->
+<div class="px-gutter pt-gutter pb-4 flex flex-col md:flex-row md:items-end justify-between gap-gutter z-10 relative border-b border-outline-variant">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-background mb-2">Approvals Inbox</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+                Review and authorize high-stakes agent actions before they execute.
+            </p>
+</div>
+<div class="flex items-center gap-component-gap">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface text-on-surface border border-outline-variant rounded hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+<span class="font-label-caps text-label-caps uppercase">Filter</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-surface text-on-surface border border-outline-variant rounded hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">sort</span>
+<span class="font-label-caps text-label-caps uppercase">Sort: Oldest First</span>
+</button>
+</div>
+</div>
+<!-- Main Content Area -->
+<div class="flex-1 px-gutter py-gutter relative z-10 max-w-5xl">
+<!-- Tabs -->
+<div class="flex items-center gap-6 border-b border-outline-variant mb-6">
+<button class="pb-3 border-b-2 border-primary font-headline-sm text-headline-sm text-primary flex items-center gap-2 transition-colors">
+                Pending
+                <span class="bg-primary text-on-primary text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center justify-center h-[20px] min-w-[20px]">1</span>
+</button>
+<button class="pb-3 border-b-2 border-transparent font-headline-sm text-headline-sm text-on-surface-variant hover:text-on-surface transition-colors">
+                Decided History
+            </button>
+</div>
+<!-- Layout Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Left Column: Approvals Feed -->
+<div class="lg:col-span-8 flex flex-col gap-6">
+<!-- Pending Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded flex flex-col group transition-all duration-200 hover:border-outline">
+<!-- Card Header -->
+<div class="px-6 py-5 border-b border-outline-variant flex items-start justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">support_agent</span>
+</div>
+<div class="flex flex-col gap-1 mt-0.5">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface">Merch Support Agent</span>
+<span class="font-body-md text-body-md text-on-surface-variant">requests to execute</span>
+<span class="font-mono-data text-mono-data text-primary px-1.5 py-0.5 bg-primary-fixed-dim/20 rounded">RefundOrder</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface-variant">on <strong class="text-on-surface font-semibold">Merch Store</strong></span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0 gap-1">
+<div class="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-surface-variant border border-outline-variant/30 h-[24px]">
+<div class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></div>
+<span class="font-label-caps text-label-caps text-on-surface uppercase">Awaiting Decision</span>
+</div>
+<span class="font-mono-data text-[12px] text-outline">ID: AUTH-019-B</span>
+</div>
+</div>
+<!-- Action Details -->
+<div class="px-6 py-5 flex flex-col gap-4">
+<div class="flex flex-col gap-2">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Action Summary</span>
+<p class="font-body-lg text-body-lg text-on-surface leading-relaxed">
+                                Refund order <span class="font-mono-data text-mono-data bg-surface-container px-1 py-0.5 rounded">#14</span> on Merch Store.
+                            </p>
+</div>
+<div class="flex flex-col gap-2 p-4 bg-surface-container rounded border border-outline-variant/50 border-l-4 border-l-tertiary-fixed-dim">
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Provided Reason</span>
+<p class="font-body-md text-body-md text-on-surface italic">
+                                "Customer changed their mind and requested cancellation within the 24-hour window."
+                             </p>
+</div>
+<!-- Technical Details Toggle -->
+<div class="mt-2 border border-outline-variant rounded overflow-hidden">
+<button class="w-full flex items-center justify-between px-4 py-3 bg-surface hover:bg-surface-container transition-colors text-left group/btn" id="toggle-tech-details">
+<div class="flex items-center gap-2 text-on-surface-variant group-hover/btn:text-on-surface">
+<span class="material-symbols-outlined text-[18px]">data_object</span>
+<span class="font-label-caps text-label-caps uppercase">Show Technical Details</span>
+</div>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant transition-transform duration-200" id="tech-chevron">expand_more</span>
+</button>
+<div class="hidden border-t border-outline-variant bg-surface-container-lowest p-4" id="tech-details-content">
+<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-outline uppercase">Tool Name</span>
+<code class="font-mono-data text-mono-data text-on-surface">ecommerce_api.issue_refund</code>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-outline uppercase">Raw Payload (JSON)</span>
+<pre class="font-mono-data text-mono-data text-on-surface-variant bg-on-surface p-4 rounded text-surface-container-lowest overflow-x-auto text-[12px] leading-relaxed"><code>{
+  "order_id": "ORD-14",
+  "store_id": "merch-st-prod-01",
+  "amount_override": null,
+  "reason_code": "CUSTOMER_REMORSE",
+  "notify_customer": true,
+  "dry_run": false
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="px-6 py-4 border-t border-outline-variant bg-surface flex flex-col sm:flex-row items-center gap-3">
+<button class="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 px-[calc(1rem*1.3)] py-2.5 bg-primary text-on-primary rounded font-headline-sm text-[16px] hover:bg-primary-container hover:text-on-primary-container transition-colors relative overflow-hidden group/approve">
+<span class="material-symbols-outlined text-[20px] relative z-10">check_circle</span>
+<span class="relative z-10">Approve — Run it now</span>
+<div class="absolute inset-0 bg-white/20 translate-y-[100%] group-hover/approve:translate-y-0 transition-transform duration-300"></div>
+</button>
+<button class="w-full sm:w-auto flex items-center justify-center gap-2 px-[calc(1rem*1.3)] py-2.5 bg-transparent text-error border border-error/50 rounded font-headline-sm text-[16px] hover:bg-error/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">block</span>
+                             Deny
+                         </button>
+</div>
+</div>
+<!-- Decided Card (History) -->
+<div class="mt-8 relative">
+<div class="absolute left-0 top-0 bottom-0 w-px bg-outline-variant ml-4 z-0"></div>
+<div class="flex items-center gap-3 mb-4 relative z-10 bg-background py-1">
+<div class="w-8 h-8 rounded-full bg-surface border border-outline-variant flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[16px]">history</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Earlier Today</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded flex flex-col opacity-75 hover:opacity-100 transition-opacity ml-10">
+<div class="px-5 py-4 flex items-start gap-4">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 border border-outline-variant/30">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div class="flex flex-col gap-2 flex-1">
+<p class="font-body-md text-body-md text-on-surface">
+<strong class="font-semibold">Tobias Hartmann</strong> approved <span class="font-mono-data text-mono-data bg-surface-container px-1 py-0.5 rounded mx-1">Refund #16</span> on Merch Store.
+                                </p>
+<div class="flex items-center gap-3 flex-wrap">
+<span class="font-body-md text-[13px] text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 10 mins ago
+                                    </span>
+<div class="h-3 w-px bg-outline-variant"></div>
+<div class="flex items-center gap-1.5">
+<span class="font-label-caps text-label-caps text-outline uppercase">Result:</span>
+<span class="font-mono-data text-[12px] text-secondary">success_id: 12345</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Context/Stats (Optional visual balance for desktop) -->
+<div class="hidden lg:flex lg:col-span-4 flex-col gap-6">
+<!-- Quick Stats -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded p-5 flex flex-col gap-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase border-b border-outline-variant pb-2">Queue Health</span>
+<div class="flex items-end justify-between">
+<div class="flex flex-col gap-1">
+<span class="font-headline-lg text-headline-lg text-on-surface">1</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Pending</span>
+</div>
+<div class="flex flex-col gap-1 items-end text-right">
+<span class="font-headline-sm text-headline-sm text-on-surface">14m</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Avg. Time to Decide</span>
+</div>
+</div>
+<!-- Decorative Sparkline (Inline SVG) -->
+<div class="w-full h-12 mt-2 relative">
+<svg class="w-full h-full text-outline-variant" preserveaspectratio="none" viewbox="0 0 200 40">
+<path d="M0 35 Q 20 15, 40 25 T 80 15 T 120 30 T 160 10 T 200 20 L 200 40 L 0 40 Z" fill="currentColor" opacity="0.1"></path>
+<path d="M0 35 Q 20 15, 40 25 T 80 15 T 120 30 T 160 10 T 200 20" fill="none" stroke="currentColor" stroke-dasharray="4 4" stroke-width="1.5"></path>
+</svg>
+</div>
+</div>
+<!-- Active Policies -->
+<div class="bg-surface-container p-5 rounded border border-outline-variant/50 border-l-4 border-l-primary flex flex-col gap-3">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Enforced Policy</span>
+<p class="font-body-md text-[13px] text-on-surface leading-relaxed">
+                        Any action classified as <code class="font-mono-data text-[11px] bg-surface-container-lowest px-1 py-0.5 rounded border border-outline-variant/30">FINANCIAL_TRANSACTION</code> requires manual approval by an admin user if the confidence score is below 0.95.
+                    </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggleBtn = document.getElementById('toggle-tech-details');
+        const content = document.getElementById('tech-details-content');
+        const chevron = document.getElementById('tech-chevron');
+
+        if(toggleBtn && content && chevron) {
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = content.classList.contains('hidden');
+                if (isHidden) {
+                    content.classList.remove('hidden');
+                    chevron.classList.add('rotate-180');
+                } else {
+                    content.classList.add('hidden');
+                    chevron.classList.remove('rotate-180');
+                }
+            });
+        }
+    });
+</script></main></div></body></html>

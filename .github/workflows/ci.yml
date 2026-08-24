@@ -1,0 +1,22 @@
+name: CI
+
+# Dormant until this repo has a git remote — kept here so it's ready the moment one exists,
+# rather than being one more thing to remember to set up later.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
