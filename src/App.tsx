@@ -13,6 +13,7 @@ const Agents = lazy(() => import("./pages/Agents"));
 const Approvals = lazy(() => import("./pages/Approvals"));
 const Audit = lazy(() => import("./pages/Audit"));
 const ApiKeys = lazy(() => import("./pages/ApiKeys"));
+const Billing = lazy(() => import("./pages/Billing"));
 const Team = lazy(() => import("./pages/Team"));
 const Account = lazy(() => import("./pages/Account"));
 const Help = lazy(() => import("./pages/Help"));
@@ -83,7 +84,7 @@ function AuthedArea() {
   return (
     <AppShell orgName={selection.orgName} projectName={selection.projectName} onSwitchProject={switchProject}>
       <Routes>
-        <Route element={<ProjectContext projectId={selection.projectId} />}>
+        <Route element={<ProjectContext projectId={selection.projectId} organizationId={selection.orgId} />}>
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="integrations" element={<Integrations />} />
@@ -91,6 +92,7 @@ function AuthedArea() {
           <Route path="approvals" element={<Approvals />} />
           <Route path="audit" element={<Audit />} />
           <Route path="api-keys" element={<ApiKeys />} />
+          <Route path="billing" element={<Billing />} />
           <Route path="team" element={<Team />} />
           <Route path="account" element={<Account />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />
@@ -100,6 +102,6 @@ function AuthedArea() {
   );
 }
 
-function ProjectContext({ projectId }: { projectId: string }) {
-  return <Outlet context={{ projectId }} />;
+function ProjectContext({ projectId, organizationId }: { projectId: string; organizationId: string }) {
+  return <Outlet context={{ projectId, organizationId }} />;
 }

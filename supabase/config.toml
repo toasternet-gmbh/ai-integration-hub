@@ -1,0 +1,7 @@
+project_id = "oipaakxcjmwfhvpzhwcu"
+
+[functions.hub-billing]
+verify_jwt = true
+
+[functions.hub-billing-webhook]
+verify_jwt = false

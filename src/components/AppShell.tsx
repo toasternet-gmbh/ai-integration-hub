@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { to: "/app/approvals", icon: "fact_check", key: "nav.approvals" },
   { to: "/app/audit", icon: "history_edu", key: "nav.audit" },
   { to: "/app/api-keys", icon: "vpn_key", key: "nav.apiKeys" },
+  { to: "/app/billing", icon: "credit_card", key: "nav.billing" },
   { to: "/app/team", icon: "group", key: "nav.team" },
   { to: "/app/account", icon: "account_circle", key: "nav.account" },
 ];
