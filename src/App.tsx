@@ -38,7 +38,12 @@ function PageFallback() {
 type Session = { user: { id: string; email?: string } } | null;
 type ProjectSelection = { orgId: string; orgName: string; projectId: string; projectName: string };
 
-const STORAGE_KEY = "hub_project_selection";
+/** Scoped per user id — otherwise a second account signing in on the same browser (e.g. a
+ * platform admin with no org membership) would inherit the previous account's project selection
+ * and immediately hit "Not a member of project ..." trying to load data for it. */
+function storageKey(userId: string) {
+  return `hub_project_selection:${userId}`;
+}
 
 export default function App() {
   const [session, setSession] = useState<Session>(null);
@@ -104,19 +109,27 @@ function LocalizedApp({ session }: { session: Session }) {
     <I18nProvider lang={lang} setLang={setLang}>
       <Routes>
         <Route index element={<Landing />} />
-        <Route path="signin" element={session ? <Navigate to={`/${lang}/app`} replace /> : <SignIn />} />
+        <Route path="signin" element={session ? <PostSignInRedirect lang={lang} /> : <SignIn />} />
         <Route path="reset-password" element={<ResetPassword />} />
         <Route path="imprint" element={<Imprint />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="terms" element={<Terms />} />
         <Route path="help" element={<Help />} />
         <Route path="help/:slug" element={<HelpArticle />} />
-        <Route path="app/*" element={session ? <AuthedArea /> : <Navigate to={`/${lang}/signin`} replace />} />
+        <Route path="app/*" element={session ? <AuthedArea session={session} /> : <Navigate to={`/${lang}/signin`} replace />} />
         <Route path="superadmin/*" element={session ? <SuperAdminGate /> : <Navigate to={`/${lang}/signin`} replace />} />
         <Route path="*" element={<Navigate to={`/${lang}`} replace />} />
       </Routes>
     </I18nProvider>
   );
+}
+
+/** A platform admin has no org membership of their own, so `/app` has nothing to show them —
+ * send them straight to `/superadmin` instead. Everyone else goes to `/app` as before. */
+function PostSignInRedirect({ lang }: { lang: Lang }) {
+  const isAdmin = usePlatformAdmin();
+  if (isAdmin === null) return <div className="min-h-screen flex items-center justify-center font-body-md text-on-surface-variant">Loading…</div>;
+  return <Navigate to={`/${lang}/${isAdmin ? "superadmin" : "app"}`} replace />;
 }
 
 /** Guards /superadmin/*: only a platform admin gets past the loading state, everyone else is
@@ -144,21 +157,22 @@ function SuperAdminGate() {
   );
 }
 
-function AuthedArea() {
+function AuthedArea({ session }: { session: Session }) {
   const navigate = useNavigate();
   const { path } = useI18n();
+  const key = storageKey(session!.user.id);
   const [selection, setSelection] = useState<ProjectSelection | null>(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null"); } catch { return null; }
+    try { return JSON.parse(localStorage.getItem(key) ?? "null"); } catch { return null; }
   });
 
   function onOnboarded(orgId: string, orgName: string, projectId: string, projectName: string) {
     const next = { orgId, orgName, projectId, projectName };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    localStorage.setItem(key, JSON.stringify(next));
     setSelection(next);
   }
 
   function switchProject() {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(key);
     setSelection(null);
     navigate(path("/app"));
   }
