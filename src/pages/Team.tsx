@@ -45,12 +45,12 @@ export default function Team() {
   return (
     <div className="flex flex-col w-full h-full relative font-body-md text-on-surface">
       <div className="px-margin-page py-gutter flex flex-col gap-margin-page max-w-7xl mx-auto w-full">
-        <div className="flex justify-between items-end flex-wrap gap-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
           <div>
             <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">{t("team.title")}</h1>
             <p className="font-body-md text-body-md text-on-surface-variant mt-unit">{t("team.subtitle")}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               value={email} onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") invite(); }}
@@ -58,36 +58,40 @@ export default function Team() {
               type="email"
               className="px-3 py-2 border border-outline-variant rounded font-body-md text-body-md bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary"
             />
-            <select
-              value={role} onChange={(e) => setRole(e.target.value as "member" | "owner")}
-              className="px-3 py-2 border border-outline-variant rounded font-body-md text-body-md bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary"
-            >
-              <option value="member">{t("team.role.member")}</option>
-              <option value="owner">{t("team.role.owner")}</option>
-            </select>
-            <button disabled={busy} onClick={invite} className="bg-primary text-on-primary px-gutter py-2 rounded flex items-center gap-component-gap font-body-md hover:bg-on-primary-container transition-colors disabled:opacity-60">
-              <span className="material-symbols-outlined text-[18px]">person_add</span>
-              {t("team.invite")}
-            </button>
+            <div className="flex gap-2">
+              <select
+                value={role} onChange={(e) => setRole(e.target.value as "member" | "owner")}
+                className="flex-1 sm:flex-none px-3 py-2 border border-outline-variant rounded font-body-md text-body-md bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary"
+              >
+                <option value="member">{t("team.role.member")}</option>
+                <option value="owner">{t("team.role.owner")}</option>
+              </select>
+              <button disabled={busy} onClick={invite} className="shrink-0 whitespace-nowrap bg-primary text-on-primary px-gutter py-2 rounded flex items-center justify-center gap-component-gap font-body-md hover:bg-on-primary-container transition-colors disabled:opacity-60">
+                <span className="material-symbols-outlined text-[18px]">person_add</span>
+                {t("team.invite")}
+              </button>
+            </div>
           </div>
         </div>
 
         {err && <p className="text-error font-body-md text-body-md">{err}</p>}
 
-        <div className="bg-surface-container-lowest flex flex-col rounded">
-          <div className="grid grid-cols-[2fr_1fr_1fr_auto] gap-gutter px-gutter py-3 border-b border-outline-variant bg-surface-container-low font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider items-center">
-            <div>{t("team.col.email")}</div><div>{t("team.col.role")}</div><div>{t("team.col.since")}</div><div className="w-8" />
-          </div>
+        <div className="bg-surface-container-lowest flex flex-col rounded border border-outline-variant">
           {rows.length === 0 && <div className="px-gutter py-6 text-on-surface-variant font-body-md text-body-md">{t("team.empty")}</div>}
           {rows.map((m) => (
-            <div key={m.user_id} className="grid grid-cols-[2fr_1fr_1fr_auto] gap-gutter px-gutter py-4 border-b border-outline-variant last:border-b-0 items-center hover:bg-surface-container transition-colors">
-              <div className="font-body-md text-body-md font-bold text-on-surface flex items-center gap-component-gap">
-                <div className="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-[14px] text-on-secondary-container">person</span>
+            <div key={m.user_id} className="flex flex-col sm:flex-row sm:items-center gap-3 px-gutter py-4 border-b border-outline-variant last:border-b-0 hover:bg-surface-container transition-colors">
+              <div className="flex-1 flex items-center justify-between gap-3 min-w-0">
+                <div className="font-body-md text-body-md font-bold text-on-surface flex items-center gap-component-gap min-w-0">
+                  <div className="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-[14px] text-on-secondary-container">person</span>
+                  </div>
+                  <span className="truncate">{m.email}</span>
                 </div>
-                {m.email}
+                <button onClick={() => remove(m.user_id)} className="sm:hidden shrink-0 text-on-surface-variant hover:text-error transition-colors w-8 h-8 flex items-center justify-center rounded hover:bg-surface bg-transparent border-none">
+                  <span className="material-symbols-outlined text-[20px]">person_remove</span>
+                </button>
               </div>
-              <div>
+              <div className="flex items-center gap-3 shrink-0">
                 <select
                   value={m.role}
                   onChange={(e) => changeRole(m.user_id, e.target.value)}
@@ -96,11 +100,11 @@ export default function Team() {
                   <option value="member">{t("team.role.member")}</option>
                   <option value="owner">{t("team.role.owner")}</option>
                 </select>
+                <span className="font-body-md text-body-md text-on-surface-variant whitespace-nowrap">{new Date(m.created_at).toLocaleDateString()}</span>
+                <button onClick={() => remove(m.user_id)} className="hidden sm:flex shrink-0 text-on-surface-variant hover:text-error transition-colors w-8 h-8 items-center justify-center rounded hover:bg-surface bg-transparent border-none">
+                  <span className="material-symbols-outlined text-[20px]">person_remove</span>
+                </button>
               </div>
-              <div className="font-body-md text-body-md text-on-surface-variant">{new Date(m.created_at).toLocaleDateString()}</div>
-              <button onClick={() => remove(m.user_id)} className="text-on-surface-variant hover:text-error transition-colors w-8 h-8 flex items-center justify-center rounded hover:bg-surface bg-transparent border-none">
-                <span className="material-symbols-outlined text-[20px]">person_remove</span>
-              </button>
             </div>
           ))}
         </div>

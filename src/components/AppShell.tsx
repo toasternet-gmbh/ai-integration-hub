@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
 import { supabase } from "../lib/supabase";
@@ -23,10 +23,23 @@ export function AppShell({
   orgName, projectName, onSwitchProject, children,
 }: { orgName: string; projectName: string; onSwitchProject: () => void; children: ReactNode }) {
   const { lang, setLang, t, path } = useI18n();
+  const [navOpen, setNavOpen] = useState(false);
 
   return (
     <div className="bg-surface font-body-md text-on-surface min-h-screen">
-      <aside className="fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant z-50 flex flex-col">
+      {navOpen && (
+        <div
+          className="fixed inset-0 bg-on-surface/40 z-40 lg:hidden"
+          onClick={() => setNavOpen(false)}
+        />
+      )}
+
+      <aside
+        className={
+          "fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant z-50 flex flex-col transition-transform duration-200 lg:translate-x-0 " +
+          (navOpen ? "translate-x-0" : "-translate-x-full")
+        }
+      >
         <div className="h-14 px-gutter flex items-center gap-2 border-b border-outline-variant mb-unit">
           <img src="/icon.png" alt="" className="h-7 w-7 shrink-0" />
           <span className="font-headline-sm text-on-surface tracking-tight truncate">AI Integration Hub</span>
@@ -36,6 +49,7 @@ export function AppShell({
             <NavLink
               key={item.to}
               to={path(item.to)}
+              onClick={() => setNavOpen(false)}
               className={({ isActive }) =>
                 "flex items-center gap-component-gap px-gutter py-2 rounded-lg transition-colors " +
                 (isActive
@@ -59,14 +73,23 @@ export function AppShell({
         </nav>
       </aside>
 
-      <div className="pl-64">
-        <header className="fixed top-0 left-64 right-0 h-14 bg-surface border-b border-outline-variant z-40 flex items-center justify-between px-gutter">
-          <div className="flex items-center gap-unit text-on-surface-variant text-body-md">
-            <button onClick={onSwitchProject} className="hover:text-primary cursor-pointer bg-transparent border-none p-0 font-body-md text-body-md text-on-surface-variant">{orgName}</button>
-            <Icon name="chevron_right" size={16} />
-            <span className="text-on-surface font-bold">{projectName}</span>
+      <div className="lg:pl-64">
+        <header className="fixed top-0 left-0 right-0 lg:left-64 h-14 bg-surface border-b border-outline-variant z-30 flex items-center justify-between gap-2 px-gutter">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <button
+              onClick={() => setNavOpen(true)}
+              className="lg:hidden shrink-0 -ml-1 p-1 bg-transparent border-none cursor-pointer text-on-surface-variant hover:text-primary"
+              aria-label={t("topbar.openMenu")}
+            >
+              <Icon name="menu" size={22} />
+            </button>
+            <div className="flex items-center gap-unit text-on-surface-variant text-body-md min-w-0">
+              <button onClick={onSwitchProject} className="hover:text-primary cursor-pointer bg-transparent border-none p-0 font-body-md text-body-md text-on-surface-variant truncate">{orgName}</button>
+              <Icon name="chevron_right" size={16} />
+              <span className="text-on-surface font-bold truncate">{projectName}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-gutter">
+          <div className="flex items-center gap-2 sm:gap-gutter shrink-0">
             <div className="flex border border-outline-variant rounded overflow-hidden">
               <button
                 onClick={() => setLang("en")}
@@ -77,11 +100,14 @@ export function AppShell({
                 className={"px-2 py-1 text-label-caps font-label-caps " + (lang === "de" ? "bg-primary text-on-primary" : "text-on-surface-variant hover:bg-surface-container")}
               >DE</button>
             </div>
-            <div className="flex items-center gap-component-gap border-l border-outline-variant pl-gutter">
-              <button onClick={() => supabase.auth.signOut()} className="text-body-md text-on-surface-variant hover:text-primary bg-transparent border-none cursor-pointer">
+            <div className="flex items-center gap-component-gap border-l border-outline-variant pl-2 sm:pl-gutter">
+              <button onClick={() => supabase.auth.signOut()} className="hidden sm:inline text-body-md text-on-surface-variant hover:text-primary bg-transparent border-none cursor-pointer whitespace-nowrap">
                 {t("topbar.signOut")}
               </button>
-              <div className="w-8 h-8 rounded-full bg-brand-gradient text-on-primary flex items-center justify-center">
+              <button onClick={() => supabase.auth.signOut()} aria-label={t("topbar.signOut")} className="sm:hidden p-1 bg-transparent border-none cursor-pointer text-on-surface-variant hover:text-primary">
+                <Icon name="logout" size={20} />
+              </button>
+              <div className="w-8 h-8 rounded-full bg-brand-gradient text-on-primary flex items-center justify-center shrink-0">
                 <Icon name="person" size={18} />
               </div>
             </div>

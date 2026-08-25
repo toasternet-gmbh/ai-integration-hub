@@ -27,6 +27,7 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   // Topbar
   "topbar.signOut": { en: "Sign out", de: "Abmelden" },
   "topbar.switchProject": { en: "Switch project", de: "Projekt wechseln" },
+  "topbar.openMenu": { en: "Open menu", de: "Menü öffnen" },
   // Common actions
   "action.approve": { en: "Approve", de: "Genehmigen" },
   "action.deny": { en: "Deny", de: "Ablehnen" },

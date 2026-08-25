@@ -62,12 +62,12 @@ export default function Integrations() {
 
   return (
     <div className="flex flex-col w-full relative">
-      <div className="px-margin-page py-margin-page flex items-center justify-between border-b border-outline-variant bg-surface-container-low/50">
+      <div className="px-margin-page py-margin-page flex flex-col sm:flex-row sm:items-center justify-between gap-gutter border-b border-outline-variant bg-surface-container-low/50">
         <div>
           <h1 className="font-headline-lg text-headline-lg text-on-surface">{t("integrations.title")}</h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-unit">{t("integrations.subtitle")}</p>
         </div>
-        <button onClick={() => setOpen(true)} className="bg-primary hover:bg-on-primary-container text-on-primary font-label-caps text-label-caps px-4 py-2 rounded flex items-center gap-2 transition-colors">
+        <button onClick={() => setOpen(true)} className="self-start sm:self-auto shrink-0 bg-primary hover:bg-on-primary-container text-on-primary font-label-caps text-label-caps px-4 py-2 rounded flex items-center gap-2 transition-colors">
           <span className="material-symbols-outlined text-[16px]">add</span>
           {t("integrations.connectStore").toUpperCase()}
         </button>
@@ -83,30 +83,30 @@ export default function Integrations() {
             </div>
             {rows.length === 0 && <div className="p-gutter text-on-surface-variant font-body-md text-body-md">{t("integrations.empty")}</div>}
             {rows.map((r) => (
-              <div key={r.id} className="flex items-center justify-between p-gutter hover:bg-surface-container-lowest transition-colors border-b border-outline-variant last:border-b-0">
-                <div className="flex items-center gap-gutter">
-                  <div className="w-12 h-12 flex items-center justify-center bg-surface-container border border-outline-variant rounded">
+              <div key={r.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-gutter hover:bg-surface-container-lowest transition-colors border-b border-outline-variant last:border-b-0">
+                <div className="flex items-center gap-gutter min-w-0">
+                  <div className="w-12 h-12 shrink-0 flex items-center justify-center bg-surface-container border border-outline-variant rounded">
                     <span className="material-symbols-outlined text-on-surface-variant text-[24px]">{PLATFORM_ICON[r.platform] ?? "hub"}</span>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <h3 className="font-headline-sm text-headline-sm text-on-surface">{r.name}</h3>
-                      <div className={"h-6 px-2 flex items-center gap-2 border rounded-full " + (r.status === "connected" ? "bg-surface-container border-secondary/30" : "bg-error-container border-error/30")}>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h3 className="font-headline-sm text-headline-sm text-on-surface truncate">{r.name}</h3>
+                      <div className={"h-6 px-2 flex items-center gap-2 border rounded-full shrink-0 " + (r.status === "connected" ? "bg-surface-container border-secondary/30" : "bg-error-container border-error/30")}>
                         <span className={"w-1.5 h-1.5 rounded-full " + (r.status === "connected" ? "bg-secondary" : "bg-error")} />
-                        <span className="font-label-caps text-label-caps text-on-surface">{r.status === "connected" ? t("status.connected").toUpperCase() : r.status.toUpperCase()}</span>
+                        <span className="font-label-caps text-label-caps text-on-surface whitespace-nowrap">{r.status === "connected" ? t("status.connected").toUpperCase() : r.status.toUpperCase()}</span>
                       </div>
                     </div>
                     <p className="font-body-md text-body-md text-on-surface-variant mt-1 flex items-center gap-2">
                       <span className="font-mono-data text-mono-data text-on-surface">{r.platform}</span>
-                      {r.error_status && <><span>•</span><span className="text-error">{r.error_status}</span></>}
+                      {r.error_status && <><span>•</span><span className="text-error truncate">{r.error_status}</span></>}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => testConnection(r.id)} className="px-4 py-2 border border-primary text-primary font-label-caps text-label-caps rounded hover:bg-primary/5 transition-colors">
+                <div className="flex items-center gap-3 shrink-0">
+                  <button onClick={() => testConnection(r.id)} className="px-4 py-2 border border-primary text-primary font-label-caps text-label-caps rounded hover:bg-primary/5 transition-colors whitespace-nowrap">
                     {t("action.testConnection").toUpperCase()}
                   </button>
-                  <button onClick={() => disconnect(r.id, r.name)} className="w-9 h-9 flex items-center justify-center border border-outline-variant text-on-surface-variant hover:text-error hover:border-error rounded transition-colors bg-transparent">
+                  <button onClick={() => disconnect(r.id, r.name)} className="w-9 h-9 shrink-0 flex items-center justify-center border border-outline-variant text-on-surface-variant hover:text-error hover:border-error rounded transition-colors bg-transparent">
                     <span className="material-symbols-outlined text-[18px]">link_off</span>
                   </button>
                 </div>
