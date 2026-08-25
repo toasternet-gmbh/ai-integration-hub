@@ -8,7 +8,7 @@ import { useI18n } from "../lib/i18n";
  *  ever mounts, so by the time we're here the user is already authenticated — we just need their
  *  new password via updateUser(). */
 export default function ResetPassword() {
-  const { t } = useI18n();
+  const { t, path } = useI18n();
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
   const [password, setPassword] = useState("");
@@ -31,7 +31,7 @@ export default function ResetPassword() {
     setBusy(false);
     if (error) { setErr(error.message); return; }
     setDone(true);
-    setTimeout(() => navigate("/app"), 1500);
+    setTimeout(() => navigate(path("/app")), 1500);
   }
 
   return (
@@ -60,7 +60,7 @@ export default function ResetPassword() {
               />
             </div>
             {err && <p className="text-error font-body-md text-body-md">{err}</p>}
-            <button disabled={busy} type="submit" className="mt-2 bg-primary text-on-primary font-label-caps text-label-caps py-[14px] px-6 rounded hover:bg-primary-container transition-colors w-full disabled:opacity-60">
+            <button disabled={busy} type="submit" className="mt-2 bg-primary text-on-primary font-label-caps text-label-caps py-[14px] px-6 rounded hover:bg-on-primary-container transition-colors w-full disabled:opacity-60">
               {busy ? "…" : t("resetPassword.submit").toUpperCase()}
             </button>
           </form>
@@ -68,7 +68,7 @@ export default function ResetPassword() {
 
         {done && <p className="font-body-md text-body-md text-secondary">{t("resetPassword.success")}</p>}
 
-        <Link to="/signin" className="text-on-surface-variant text-body-md hover:text-primary mt-4 no-underline">&larr; {t("resetPassword.backToSignIn")}</Link>
+        <Link to={path("/signin")} className="text-on-surface-variant text-body-md hover:text-primary mt-4 no-underline">&larr; {t("resetPassword.backToSignIn")}</Link>
       </div>
     </div>
   );

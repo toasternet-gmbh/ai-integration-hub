@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
 import { PublicShell } from "../components/PublicShell";
-import { HELP_ARTICLES, type HelpCategory } from "../lib/helpArticles";
+import { CATEGORY_LABEL, CATEGORY_ORDER, HELP_ARTICLES, type HelpCategory } from "../lib/helpArticles";
+import { DocsSidebar } from "../components/DocsSidebar";
 
 const CATEGORY_META: Record<HelpCategory, { icon: string; tone: string; title: { en: string; de: string }; body: { en: string; de: string } }> = {
   operations: {
@@ -22,19 +23,13 @@ const CATEGORY_META: Record<HelpCategory, { icon: string; tone: string; title: {
   },
 };
 
-const CATEGORY_ORDER: HelpCategory[] = ["operations", "admin", "developer"];
 const TONE_BG: Record<string, string> = { secondary: "bg-secondary-container text-on-secondary-container", primary: "bg-primary-container text-on-primary-container", tertiary: "bg-tertiary-container text-on-tertiary-container" };
-const CATEGORY_LABEL: Record<HelpCategory, { en: string; de: string }> = {
-  operations: { en: "OPERATIONS", de: "BETRIEB" },
-  admin: { en: "ADMIN", de: "ADMIN" },
-  developer: { en: "DEVELOPER", de: "ENTWICKLUNG" },
-};
 
 const FEATURED_SLUG = "getting-started-with-ai-integration-hub";
 const POPULAR_SLUGS = ["how-to-rotate-api-keys", "troubleshooting-a-failed-connection", "policy-engine-basics", "handling-require-approval"];
 
 export default function Help() {
-  const { lang, t } = useI18n();
+  const { lang, t, path } = useI18n();
   const [search, setSearch] = useState("");
 
   const query = search.trim().toLowerCase();
@@ -47,7 +42,9 @@ export default function Help() {
 
   return (
     <PublicShell>
-      <div className="flex flex-col w-full px-gutter md:px-margin-page pb-24 max-w-6xl mx-auto">
+      <div className="flex flex-row w-full px-gutter md:px-margin-page pb-24 max-w-7xl mx-auto gap-gutter">
+        <DocsSidebar />
+        <div className="flex flex-col w-full min-w-0">
         <div className="w-full text-center py-16 md:py-24 relative">
           <h1 className="font-headline-lg text-headline-lg text-on-surface mb-unit">{t("help.title")}</h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant mb-component-gap">{t("help.subtitle")}</p>
@@ -67,11 +64,11 @@ export default function Help() {
 
         {filtered ? (
           <div className="w-full bg-surface-container-lowest rounded-xl shadow-sm p-2 md:p-6">
-            {filtered.length === 0 && <p className="font-body-md text-body-md text-on-surface-variant p-4">{lang === "en" ? "No articles match your search." : "Keine Artikel gefunden."}</p>}
+            {filtered.length === 0 && <p className="font-body-md text-body-md text-on-surface-variant p-4">{t("help.noResults")}</p>}
             <ul className="flex flex-col space-y-2">
               {filtered.map((a) => (
                 <li key={a.slug}>
-                  <Link to={`/help/${a.slug}`} className="flex items-center justify-between p-4 hover:bg-surface-container rounded-lg transition-colors no-underline">
+                  <Link to={path(`/help/${a.slug}`)} className="flex items-center justify-between p-4 hover:bg-surface-container rounded-lg transition-colors no-underline">
                     <div className="flex items-center gap-4">
                       <span className="material-symbols-outlined text-on-surface-variant">article</span>
                       <div>
@@ -79,7 +76,7 @@ export default function Help() {
                         <div className="flex items-center gap-2 mt-1">
                           <span className="font-mono-data text-mono-data text-on-surface-variant">{CATEGORY_LABEL[a.category][lang]}</span>
                           <span className="w-1 h-1 rounded-full bg-outline-variant" />
-                          <span className="font-mono-data text-mono-data text-on-surface-variant">{a.readMins} {lang === "en" ? "min read" : "Min. Lesezeit"}</span>
+                          <span className="font-mono-data text-mono-data text-on-surface-variant">{a.readMins} {t("help.minRead")}</span>
                         </div>
                       </div>
                     </div>
@@ -104,7 +101,7 @@ export default function Help() {
                     <p className="font-body-md text-body-md text-on-surface-variant mb-6">{meta.body[lang]}</p>
                     <div className="space-y-4">
                       {articles.map((a) => (
-                        <Link key={a.slug} to={`/help/${a.slug}`} className="flex items-start gap-3 no-underline">
+                        <Link key={a.slug} to={path(`/help/${a.slug}`)} className="flex items-start gap-3 no-underline">
                           <span className="material-symbols-outlined text-[18px] text-primary mt-0.5">arrow_forward</span>
                           <span className="font-body-md text-body-md text-primary font-medium">{a.title[lang]}</span>
                         </Link>
@@ -117,12 +114,12 @@ export default function Help() {
 
             <div className="w-full mt-16 md:mt-24 grid grid-cols-1 md:grid-cols-12 gap-gutter">
               <div className="md:col-span-4">
-                <h3 className="font-headline-md text-headline-md text-on-surface mb-2">{lang === "en" ? "Popular Articles" : "Beliebte Artikel"}</h3>
+                <h3 className="font-headline-md text-headline-md text-on-surface mb-2">{t("help.popularArticles")}</h3>
                 <p className="font-body-md text-body-md text-on-surface-variant mb-6">
-                  {lang === "en" ? "The questions that come up most often." : "Die am häufigsten gestellten Fragen."}
+                  {t("help.popularSubtitle")}
                 </p>
-                <Link to={`/help/${featured.slug}`} className="block w-full rounded-xl overflow-hidden shadow-sm relative group bg-primary p-6 min-h-[220px] flex flex-col justify-end no-underline">
-                  <span className="font-label-caps text-label-caps text-on-primary/80 mb-2">{lang === "en" ? "FEATURED GUIDE" : "EMPFOHLENER LEITFADEN"}</span>
+                <Link to={path(`/help/${featured.slug}`)} className="block w-full rounded-xl overflow-hidden shadow-sm relative group bg-primary p-6 min-h-[220px] flex flex-col justify-end no-underline">
+                  <span className="font-label-caps text-label-caps text-on-primary/80 mb-2">{t("help.featuredGuide")}</span>
                   <h4 className="font-headline-sm text-headline-sm text-on-primary">{featured.title[lang]}</h4>
                 </Link>
               </div>
@@ -130,7 +127,7 @@ export default function Help() {
                 <ul className="flex flex-col space-y-2">
                   {popular.map((a, i) => (
                     <li key={a.slug} className="group">
-                      <Link to={`/help/${a.slug}`} className="flex items-center justify-between p-4 hover:bg-surface-container rounded-lg transition-colors no-underline">
+                      <Link to={path(`/help/${a.slug}`)} className="flex items-center justify-between p-4 hover:bg-surface-container rounded-lg transition-colors no-underline">
                         <div className="flex items-center gap-4">
                           <span className="material-symbols-outlined text-on-surface-variant">article</span>
                           <div>
@@ -138,7 +135,7 @@ export default function Help() {
                             <div className="flex items-center gap-2 mt-1">
                               <span className="font-mono-data text-mono-data text-on-surface-variant">{CATEGORY_LABEL[a.category][lang]}</span>
                               <span className="w-1 h-1 rounded-full bg-outline-variant" />
-                              <span className="font-mono-data text-mono-data text-on-surface-variant">{a.readMins} {lang === "en" ? "min read" : "Min. Lesezeit"}</span>
+                              <span className="font-mono-data text-mono-data text-on-surface-variant">{a.readMins} {t("help.minRead")}</span>
                             </div>
                           </div>
                         </div>
@@ -166,6 +163,7 @@ export default function Help() {
               </a>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </PublicShell>

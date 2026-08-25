@@ -1,6 +1,14 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 
 export type Lang = "en" | "de";
+
+/** The language a fresh visit (no `/en`/`/de` in the URL) should redirect to — last one the user
+ * picked, falling back to the browser's language, defaulting to English. */
+export function preferredLang(): Lang {
+  const stored = localStorage.getItem("hub_lang");
+  if (stored === "en" || stored === "de") return stored;
+  return navigator.language.toLowerCase().startsWith("de") ? "de" : "en";
+}
 
 // Exported (only) so tests can assert every key has real, non-empty strings in both languages —
 // not part of the app's runtime API, use t()/useI18n() for that.
@@ -30,6 +38,8 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "action.delete": { en: "Delete", de: "Löschen" },
   "action.continue": { en: "Continue", de: "Weiter" },
   "action.back": { en: "Back", de: "Zurück" },
+  "action.previous": { en: "Previous", de: "Zurück" },
+  "action.next": { en: "Next", de: "Weiter" },
   "status.allow": { en: "Allow", de: "Erlauben" },
   "status.deny": { en: "Deny", de: "Verweigern" },
   "status.requireApproval": { en: "Require approval", de: "Freigabe nötig" },
@@ -39,6 +49,10 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "status.inactive": { en: "Inactive", de: "Inaktiv" },
   "status.success": { en: "Success", de: "Erfolgreich" },
   "status.error": { en: "Error", de: "Fehler" },
+  "status.pendingApproval": { en: "Pending approval", de: "Wartet auf Entscheidung" },
+  "status.denied": { en: "Denied", de: "Abgelehnt" },
+  "status.approved": { en: "Approved", de: "Genehmigt" },
+  "status.executed": { en: "Executed", de: "Ausgeführt" },
   // Sign in
   "signin.title": { en: "Access Control", de: "Zugriffskontrolle" },
   "signin.subtitle": { en: "Enter your credentials to manage operations.", de: "Melden Sie sich an, um Vorgänge zu verwalten." },
@@ -84,6 +98,11 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "dashboard.recentActivity": { en: "Recent Activity", de: "Letzte Aktivitäten" },
   "dashboard.actionRequired": { en: "Action Required", de: "Handlung erforderlich" },
   "dashboard.nothingPending": { en: "Nothing pending — all clear.", de: "Nichts ausstehend — alles erledigt." },
+  "dashboard.stat.errorsTitle": { en: "System Errors", de: "Systemfehler" },
+  "table.timestamp": { en: "Timestamp", de: "Zeitstempel" },
+  "table.tool": { en: "Tool", de: "Tool" },
+  "table.status": { en: "Status", de: "Status" },
+  "table.detail": { en: "Detail", de: "Detail" },
   // Integrations
   "integrations.title": { en: "Integrations", de: "Integrationen" },
   "integrations.subtitle": { en: "Manage external data sources and e-commerce platforms.", de: "Verwalten Sie externe Datenquellen und E-Commerce-Plattformen." },
@@ -117,12 +136,24 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "approvals.reason": { en: "Provided reason", de: "Angegebener Grund" },
   "approvals.summary": { en: "Action summary", de: "Zusammenfassung" },
   "approvals.empty": { en: "Nothing pending.", de: "Nichts ausstehend." },
+  "approvals.emptyHistory": { en: "No decisions yet.", de: "Noch keine Entscheidungen." },
+  "approvals.awaitingDecision": { en: "Awaiting Decision", de: "Wartet auf Entscheidung" },
+  "approvals.refundOrder": { en: "Refund order #{id}", de: "Rückerstattung für Bestellung #{id}" },
+  // Landing page mock inbox (ProductPreview) — kept distinct from the real Approvals copy above
+  // since the compact card needs shorter, punchier phrasing.
+  "preview.approvalsLabel": { en: "Approvals", de: "Freigaben" },
+  "preview.refundOrderDemo": { en: "Refund order #ORD-8821A", de: "Rückerstattung für Bestellung #ORD-8821A" },
+  "preview.reasonLabel": { en: "Reason", de: "Begründung" },
+  "preview.reasonQuote": { en: "\"Customer reported item never arrived.\"", de: "„Kunde meldet, Artikel nie erhalten zu haben.“" },
+  "preview.approveRun": { en: "Approve & Run", de: "Genehmigen & Ausführen" },
   // Audit
   "audit.title": { en: "Audit Logs", de: "Audit-Protokolle" },
   "audit.subtitle": { en: "Review and trace integration activity across all agents.", de: "Verfolgen Sie die Aktivität aller Agenten und Integrationen." },
   "audit.search": { en: "Search action or tool", de: "Aktion oder Tool suchen" },
   "audit.export": { en: "Export CSV", de: "CSV exportieren" },
   "audit.empty": { en: "No activity recorded yet.", de: "Noch keine Aktivität erfasst." },
+  "audit.statusFilter": { en: "Status", de: "Status" },
+  "audit.searchPlaceholder": { en: "e.g. orders.refund", de: "z. B. orders.refund" },
   // API Keys
   "apiKeys.title": { en: "API Keys", de: "API-Schlüssel" },
   "apiKeys.subtitle": { en: "Manage access credentials for the Integration Hub.", de: "Verwalten Sie Zugangsdaten für den Integration Hub." },
@@ -136,6 +167,10 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "apiKeys.copy": { en: "Copy", de: "Kopieren" },
   "apiKeys.empty": { en: "No API keys yet.", de: "Noch keine API-Schlüssel." },
   "apiKeys.nameRequired": { en: "Enter a name for the key first.", de: "Bitte zuerst einen Namen für den Schlüssel eingeben." },
+  "apiKeys.col.name": { en: "Name", de: "Name" },
+  "apiKeys.col.keySuffix": { en: "Key Suffix", de: "Schlüssel-Suffix" },
+  "apiKeys.col.created": { en: "Created", de: "Erstellt" },
+  "apiKeys.col.lastUsed": { en: "Last Used", de: "Zuletzt verwendet" },
   // Team
   "team.title": { en: "Team", de: "Team" },
   "team.subtitle": { en: "Manage who can access this project.", de: "Verwalten Sie den Zugriff auf dieses Projekt." },
@@ -175,16 +210,26 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "help.search": { en: "Search for 'WooCommerce', 'API Keys', 'Permissions'…", de: "Suche nach „WooCommerce“, „API-Schlüssel“, „Rechte“ …" },
   "help.stillStuck": { en: "Still stuck?", de: "Noch Fragen?" },
   "help.stillStuckBody": { en: "Our support team is ready to help with your integration.", de: "Unser Support-Team hilft Ihnen gerne bei Ihrer Integration." },
+  "help.noResults": { en: "No articles match your search.", de: "Keine Artikel gefunden." },
+  "help.minRead": { en: "min read", de: "Min. Lesezeit" },
+  "help.popularArticles": { en: "Popular Articles", de: "Beliebte Artikel" },
+  "help.popularSubtitle": { en: "The questions that come up most often.", de: "Die am häufigsten gestellten Fragen." },
+  "help.featuredGuide": { en: "FEATURED GUIDE", de: "EMPFOHLENER LEITFADEN" },
+  "helpArticle.onThisPage": { en: "On this page", de: "Auf dieser Seite" },
   // Landing
   "nav.features": { en: "Features", de: "Funktionen" },
+  "nav.howItWorks": { en: "How it works", de: "So funktioniert's" },
+  "nav.preview": { en: "Preview", de: "Vorschau" },
   "nav.platforms": { en: "Platforms", de: "Plattformen" },
   "nav.docs": { en: "Docs", de: "Doku" },
+  "landing.eyebrow": { en: "AI agent infrastructure for commerce", de: "KI-Agenten-Infrastruktur für Commerce" },
   "landing.headline1": { en: "One canonical tool.", de: "Ein einheitliches Werkzeug." },
   "landing.headline2": { en: "Every commerce platform.", de: "Jede Commerce-Plattform." },
   "landing.subhead": { en: "Standardize your AI agent operations across disjointed e-commerce backends. Deploy policies, audit actions, and route intents through a single integration point.", de: "Vereinheitlichen Sie die Aktionen Ihrer KI-Agenten über verschiedene E-Commerce-Systeme hinweg. Richtlinien durchsetzen, Aktionen protokollieren, alles über einen Zugangspunkt." },
   "landing.getStarted": { en: "Get started", de: "Jetzt starten" },
   "landing.viewDocs": { en: "View documentation", de: "Dokumentation ansehen" },
   "landing.signIn": { en: "Sign in", de: "Anmelden" },
+  "landing.goToApp": { en: "Go to app", de: "Zur App" },
   "landing.supportedPlatforms": { en: "Supported Platforms", de: "Unterstützte Plattformen" },
   "landing.prop1.title": { en: "Connect once.", de: "Einmal verbinden." },
   "landing.prop1.body": { en: "Build your agent against a single, canonical schema. We handle the translation layer to every underlying commerce API automatically.", de: "Bauen Sie Ihren Agenten gegen ein einheitliches Schema. Wir übersetzen automatisch in jede zugrunde liegende Commerce-API." },
@@ -192,6 +237,22 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "landing.prop2.body": { en: "Define strict policies on what agents can do. Block destructive actions or require human-in-the-loop approval for high-value transactions.", de: "Legen Sie fest, was Agenten dürfen. Blockieren Sie kritische Aktionen oder verlangen Sie eine menschliche Freigabe bei hochwertigen Transaktionen." },
   "landing.prop3.title": { en: "Audit everything.", de: "Alles protokollieren." },
   "landing.prop3.body": { en: "Every API call, policy decision, and resulting payload is logged immutably. Trace any agent action back to its origin.", de: "Jeder API-Aufruf, jede Richtlinien-Entscheidung und jede Nutzlast wird unveränderlich protokolliert — jede Aktion bleibt nachvollziehbar." },
+
+  "landing.howItWorks.eyebrow": { en: "How it works", de: "So funktioniert es" },
+  "landing.howItWorks.title": { en: "From a fresh account to a working, gated agent.", de: "Vom neuen Konto zum funktionierenden, kontrollierten Agenten." },
+  "landing.howItWorks.step1.title": { en: "Connect a store", de: "Shop verbinden" },
+  "landing.howItWorks.step1.body": { en: "Link a WooCommerce, Shopware, Shopify, or Magento store in minutes. Credentials are encrypted at rest and tested on connect.", de: "Einen WooCommerce-, Shopware-, Shopify- oder Magento-Shop in wenigen Minuten verbinden. Zugangsdaten werden verschlüsselt gespeichert und beim Verbinden geprüft." },
+  "landing.howItWorks.step2.title": { en: "Create an agent", de: "Agent erstellen" },
+  "landing.howItWorks.step2.body": { en: "Give each AI system or automation its own identity, so every action can always be traced back to it.", de: "Jedem KI-System oder jeder Automatisierung eine eigene Identität geben, damit sich jede Aktion stets zurückverfolgen lässt." },
+  "landing.howItWorks.step3.title": { en: "Set policy", de: "Richtlinien festlegen" },
+  "landing.howItWorks.step3.body": { en: "Allow, deny, or require human approval — per tool, per integration. Sensible defaults are applied out of the box.", de: "Erlauben, verweigern oder eine menschliche Freigabe verlangen — pro Tool, pro Integration. Sinnvolle Standardwerte sind von Anfang an aktiv." },
+  "landing.howItWorks.step4.title": { en: "Act, audited", de: "Handeln, protokolliert" },
+  "landing.howItWorks.step4.body": { en: "Every call is logged immutably. Gated actions pause for a real human decision before anything actually happens.", de: "Jeder Aufruf wird unveränderlich protokolliert. Kontrollierte Aktionen pausieren, bis ein Mensch entscheidet — bevor etwas wirklich passiert." },
+
+  "landing.preview.eyebrow": { en: "See it in action", de: "In Aktion sehen" },
+  "landing.preview.title": { en: "A real approval, waiting on a real human.", de: "Eine echte Freigabe, die auf eine echte Entscheidung wartet." },
+  "landing.preview.subtitle": { en: "This is what lands in the Approvals inbox the moment an agent tries a gated action — nothing runs until someone decides.", de: "So sieht es im Freigabe-Postfach aus, sobald ein Agent eine kontrollierte Aktion versucht — nichts wird ausgeführt, bevor jemand entscheidet." },
+
   "footer.rights": { en: "Technical AI Systems", de: "Technische KI-Systeme" },
   "footer.imprint": { en: "Imprint", de: "Impressum" },
   "footer.privacy": { en: "Privacy", de: "Datenschutz" },
@@ -203,13 +264,36 @@ export function t(key: string, lang: Lang): string {
   return STRINGS[key]?.[lang] ?? key;
 }
 
-interface I18nContextValue { lang: Lang; setLang: (l: Lang) => void; t: (key: string) => string }
+/** Maps the raw backend status strings (audit logs, approvals) to their translation key, so every
+ * screen that renders a status badge shows the same, translated wording instead of the raw enum. */
+export const STATUS_LABEL_KEYS: Record<string, string> = {
+  allowed: "status.success",
+  executed: "status.executed",
+  approved: "status.approved",
+  require_approval: "status.pendingApproval",
+  denied: "status.denied",
+  error: "status.error",
+};
+
+interface I18nContextValue {
+  lang: Lang;
+  setLang: (l: Lang) => void;
+  t: (key: string) => string;
+  /** Prefixes an absolute path (e.g. "/help") with the current language, so every internal link
+   * stays on `/en/...` or `/de/...` instead of dropping back to the un-prefixed URL. */
+  path: (p: string) => string;
+}
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => (localStorage.getItem("hub_lang") as Lang) || "en");
-  const setLang = (l: Lang) => { localStorage.setItem("hub_lang", l); setLangState(l); };
-  const value = useMemo<I18nContextValue>(() => ({ lang, setLang, t: (key: string) => t(key, lang) }), [lang]);
+/** Controlled by the router (see `LocalizedApp` in App.tsx) — the URL's `/:lang` segment is the
+ * single source of truth for the current language, not local component state. */
+export function I18nProvider({ lang, setLang, children }: { lang: Lang; setLang: (l: Lang) => void; children: ReactNode }) {
+  const value = useMemo<I18nContextValue>(() => ({
+    lang,
+    setLang,
+    t: (key: string) => t(key, lang),
+    path: (p: string) => (p === "/" ? `/${lang}` : `/${lang}${p}`),
+  }), [lang, setLang]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 

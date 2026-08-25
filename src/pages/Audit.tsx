@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { mcp } from "../lib/mcp";
-import { useI18n } from "../lib/i18n";
+import { STATUS_LABEL_KEYS, useI18n } from "../lib/i18n";
 
 type Ctx = { projectId: string };
 type AuditLog = { id: string; tool_name: string; integration_id: string | null; status: string; error_message: string | null; created_at: string };
@@ -62,11 +62,11 @@ export default function Audit() {
           <label className="font-label-caps text-label-caps text-on-surface-variant uppercase mb-unit block">{t("audit.search")}</label>
           <div className="relative h-row-height-density flex items-center bg-surface-container rounded border border-outline-variant/20 focus-within:border-primary-container transition-colors">
             <span className="material-symbols-outlined text-[20px] text-on-surface-variant ml-3">search</span>
-            <input value={search} onChange={(e) => setSearch(e.target.value)} className="flex-1 h-full bg-transparent border-none outline-none px-3 font-body-md text-body-md text-on-surface" placeholder="e.g. orders.refund" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} className="flex-1 h-full bg-transparent border-none outline-none px-3 font-body-md text-body-md text-on-surface" placeholder={t("audit.searchPlaceholder")} />
           </div>
         </div>
         <div className="w-full lg:w-auto">
-          <label className="font-label-caps text-label-caps text-on-surface-variant uppercase mb-unit block">Status</label>
+          <label className="font-label-caps text-label-caps text-on-surface-variant uppercase mb-unit block">{t("audit.statusFilter")}</label>
           <div className="flex items-center gap-unit flex-wrap">
             {[
               { key: "allowed", label: t("status.success"), color: "bg-secondary" },
@@ -91,10 +91,10 @@ export default function Audit() {
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
               <tr className="border-b border-outline-variant/30 bg-surface-container-low">
-                <th className="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Timestamp</th>
-                <th className="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Tool</th>
-                <th className="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Status</th>
-                <th className="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Detail</th>
+                <th className="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest whitespace-nowrap">{t("table.timestamp")}</th>
+                <th className="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">{t("table.tool")}</th>
+                <th className="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">{t("table.status")}</th>
+                <th className="py-3 px-4 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">{t("table.detail")}</th>
               </tr>
             </thead>
             <tbody className="font-body-md text-body-md text-on-surface">
@@ -108,7 +108,7 @@ export default function Audit() {
                   <td className="py-3 px-4">
                     <div className={"inline-flex items-center gap-2 h-6 px-2 rounded-full border " + (STATUS_STYLE[r.status] ?? "bg-surface-variant border-outline-variant/20 text-on-surface-variant")}>
                       <span className="w-[6px] h-[6px] rounded-full bg-current" />
-                      <span className="font-label-caps text-label-caps uppercase">{r.status}</span>
+                      <span className="font-label-caps text-label-caps uppercase">{t(STATUS_LABEL_KEYS[r.status] ?? r.status)}</span>
                     </div>
                   </td>
                   <td className="py-3 px-4 text-on-surface-variant truncate max-w-[300px]" title={r.error_message ?? ""}>{r.error_message}</td>

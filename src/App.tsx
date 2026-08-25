@@ -1,7 +1,8 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "./lib/supabase";
 import { AppShell } from "./components/AppShell";
+import { I18nProvider, preferredLang, useI18n, type Lang } from "./lib/i18n";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const SignIn = lazy(() => import("./pages/SignIn"));
@@ -46,23 +47,71 @@ export default function App() {
   return (
     <Suspense fallback={<PageFallback />}>
       <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/signin" element={session ? <Navigate to="/app" replace /> : <SignIn />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/imprint" element={<Imprint />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/help" element={<Help />} />
-        <Route path="/help/:slug" element={<HelpArticle />} />
-        <Route path="/app/*" element={session ? <AuthedArea /> : <Navigate to="/signin" replace />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/" element={<Navigate to={`/${preferredLang()}`} replace />} />
+        <Route path="/:lang/*" element={<LocalizedApp session={session} />} />
+        {/* Bare, un-prefixed paths (old links/bookmarks from before language-prefixed URLs) —
+         * redirect to the same page under the preferred language instead of 404ing. */}
+        <Route path="/signin" element={<LegacyRedirect />} />
+        <Route path="/reset-password" element={<LegacyRedirect />} />
+        <Route path="/imprint" element={<LegacyRedirect />} />
+        <Route path="/privacy" element={<LegacyRedirect />} />
+        <Route path="/terms" element={<LegacyRedirect />} />
+        <Route path="/help" element={<LegacyRedirect />} />
+        <Route path="/help/:slug" element={<LegacyRedirect />} />
+        <Route path="/app/*" element={<LegacyRedirect />} />
+        <Route path="*" element={<Navigate to={`/${preferredLang()}`} replace />} />
       </Routes>
     </Suspense>
   );
 }
 
+/** Redirects an old, un-prefixed URL (e.g. `/help`) to its `/en/help` or `/de/help` equivalent.
+ * Keeps the hash too — GoTrue's password-recovery links carry the session token in the fragment,
+ * which would otherwise get silently dropped by this redirect. */
+function LegacyRedirect() {
+  const location = useLocation();
+  return <Navigate to={`/${preferredLang()}${location.pathname}${location.search}${location.hash}`} replace />;
+}
+
+/** Everything under `/:lang/*` — validates the language segment, makes it the source of truth for
+ * `useI18n()`, and renders the app's real routes (relative to this prefix) underneath it. */
+function LocalizedApp({ session }: { session: Session }) {
+  const { lang: rawLang } = useParams<{ lang: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const restPath = location.pathname.split("/").slice(2).join("/");
+
+  useEffect(() => {
+    if (rawLang === "en" || rawLang === "de") localStorage.setItem("hub_lang", rawLang);
+  }, [rawLang]);
+
+  if (rawLang !== "en" && rawLang !== "de") {
+    return <Navigate to={`/${preferredLang()}${restPath ? `/${restPath}` : ""}${location.search}${location.hash}`} replace />;
+  }
+  const lang = rawLang as Lang;
+  const setLang = (l: Lang) => navigate(`/${l}${restPath ? `/${restPath}` : ""}${location.search}${location.hash}`);
+
+  return (
+    <I18nProvider lang={lang} setLang={setLang}>
+      <Routes>
+        <Route index element={<Landing />} />
+        <Route path="signin" element={session ? <Navigate to={`/${lang}/app`} replace /> : <SignIn />} />
+        <Route path="reset-password" element={<ResetPassword />} />
+        <Route path="imprint" element={<Imprint />} />
+        <Route path="privacy" element={<Privacy />} />
+        <Route path="terms" element={<Terms />} />
+        <Route path="help" element={<Help />} />
+        <Route path="help/:slug" element={<HelpArticle />} />
+        <Route path="app/*" element={session ? <AuthedArea /> : <Navigate to={`/${lang}/signin`} replace />} />
+        <Route path="*" element={<Navigate to={`/${lang}`} replace />} />
+      </Routes>
+    </I18nProvider>
+  );
+}
+
 function AuthedArea() {
   const navigate = useNavigate();
+  const { path } = useI18n();
   const [selection, setSelection] = useState<ProjectSelection | null>(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null"); } catch { return null; }
   });
@@ -76,7 +125,7 @@ function AuthedArea() {
   function switchProject() {
     localStorage.removeItem(STORAGE_KEY);
     setSelection(null);
-    navigate("/app");
+    navigate(path("/app"));
   }
 
   if (!selection) return <Onboarding onDone={onOnboarded} />;

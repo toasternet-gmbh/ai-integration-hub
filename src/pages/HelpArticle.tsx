@@ -2,49 +2,165 @@ import { Fragment } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
 import { PublicShell } from "../components/PublicShell";
-import { findArticle } from "../lib/helpArticles";
+import { DocsSidebar } from "../components/DocsSidebar";
+import { CATEGORY_LABEL, HELP_ARTICLES, findArticle } from "../lib/helpArticles";
 
-/** Article bodies write technical tokens as `backtick spans` — render those as inline <code>. */
+/**
+ * Article bodies write technical tokens as `backtick spans` — render those as inline <code> — and
+ * emphasis as **double-asterisk spans** — render those as <strong>.
+ */
 function renderWithCode(text: string) {
-  return text.split(/(`[^`]+`)/g).map((part, i) =>
-    part.startsWith("`") && part.endsWith("`") ? (
-      <code key={i} className="font-mono-data text-[14px] bg-surface-container px-1.5 py-0.5 rounded border border-outline-variant/50">
-        {part.slice(1, -1)}
-      </code>
-    ) : (
-      <Fragment key={i}>{part}</Fragment>
-    ),
-  );
+  return text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g).map((part, i) => {
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return (
+        <code key={i} className="font-mono-data text-[14px] bg-surface-container px-1.5 py-0.5 rounded border border-outline-variant/50">
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    }
+    return <Fragment key={i}>{part}</Fragment>;
+  });
+}
+
+function slugifyHeading(text: string) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+/**
+ * Groups raw body lines into blocks so a plain string[] can still express structure:
+ * - a line starting with "## " becomes a heading
+ * - consecutive lines starting with "- " become one bullet list
+ * - anything else is a paragraph
+ */
+type Block = { type: "heading"; text: string } | { type: "list"; items: string[] } | { type: "paragraph"; text: string };
+
+function groupBlocks(lines: string[]): Block[] {
+  const blocks: Block[] = [];
+  for (const line of lines) {
+    if (line.startsWith("## ")) {
+      blocks.push({ type: "heading", text: line.slice(3) });
+    } else if (line.startsWith("- ")) {
+      const last = blocks[blocks.length - 1];
+      if (last?.type === "list") last.items.push(line.slice(2));
+      else blocks.push({ type: "list", items: [line.slice(2)] });
+    } else {
+      blocks.push({ type: "paragraph", text: line });
+    }
+  }
+  return blocks;
 }
 
 export default function HelpArticle() {
-  const { lang } = useI18n();
+  const { lang, t, path } = useI18n();
   const { slug } = useParams<{ slug: string }>();
   const article = slug ? findArticle(slug) : undefined;
 
-  if (!article) return <Navigate to="/help" replace />;
+  if (!article) return <Navigate to={path("/help")} replace />;
+
+  const blocks = groupBlocks(article.body[lang]);
+  const headings = blocks.filter((b): b is Extract<Block, { type: "heading" }> => b.type === "heading");
+
+  const index = HELP_ARTICLES.findIndex((a) => a.slug === article.slug);
+  const prev = index > 0 ? HELP_ARTICLES[index - 1] : undefined;
+  const next = index >= 0 && index < HELP_ARTICLES.length - 1 ? HELP_ARTICLES[index + 1] : undefined;
 
   return (
     <PublicShell>
-      <div className="flex flex-col w-full max-w-3xl mx-auto px-margin-page py-margin-page">
-        <Link to="/help" className="font-label-caps text-label-caps text-primary flex items-center gap-1 mb-gutter no-underline w-fit">
-          <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          {lang === "en" ? "Back to Help Center" : "Zurück zum Hilfe-Center"}
-        </Link>
-        <div className="mb-gutter">
-          <h1 className="font-headline-lg text-headline-lg text-on-surface mb-unit">{article.title[lang]}</h1>
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            {article.readMins} {lang === "en" ? "min read" : "Min. Lesezeit"}
-          </p>
-        </div>
-        <div className="h-[1px] w-full bg-outline-variant mb-margin-page opacity-50" />
-        <div className="flex flex-col gap-component-gap">
-          {article.body[lang].map((paragraph, i) => (
-            <p key={i} className="font-body-lg text-body-lg text-on-surface leading-relaxed">
-              {renderWithCode(paragraph)}
+      <div className="flex flex-row w-full px-gutter md:px-margin-page py-margin-page max-w-7xl mx-auto gap-gutter">
+        <DocsSidebar activeSlug={article.slug} />
+
+        <div className="flex flex-col w-full min-w-0 max-w-3xl">
+          <div className="flex items-center gap-2 mb-gutter font-label-caps text-label-caps text-on-surface-variant">
+            <Link to={path("/help")} className="hover:text-primary no-underline text-on-surface-variant">
+              {t("nav.help")}
+            </Link>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span>{CATEGORY_LABEL[article.category][lang]}</span>
+          </div>
+
+          <div className="mb-gutter">
+            <h1 className="font-headline-lg text-headline-lg text-on-surface mb-unit">{article.title[lang]}</h1>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              {article.readMins} {t("help.minRead")}
             </p>
-          ))}
+          </div>
+          <div className="h-[1px] w-full bg-outline-variant mb-margin-page opacity-50" />
+
+          <div className="flex flex-col gap-component-gap">
+            {blocks.map((block, i) => {
+              if (block.type === "heading") {
+                return (
+                  <h2 key={i} id={slugifyHeading(block.text)} className="font-headline-sm text-headline-sm text-on-surface mt-unit scroll-mt-8">
+                    {block.text}
+                  </h2>
+                );
+              }
+              if (block.type === "list") {
+                return (
+                  <ul key={i} className="list-disc pl-5 flex flex-col gap-1">
+                    {block.items.map((item, j) => (
+                      <li key={j} className="font-body-lg text-body-lg text-on-surface leading-relaxed">
+                        {renderWithCode(item)}
+                      </li>
+                    ))}
+                  </ul>
+                );
+              }
+              return (
+                <p key={i} className="font-body-lg text-body-lg text-on-surface leading-relaxed">
+                  {renderWithCode(block.text)}
+                </p>
+              );
+            })}
+          </div>
+
+          {(prev || next) && (
+            <div className="grid grid-cols-2 gap-gutter mt-margin-page pt-gutter border-t border-outline-variant">
+              <div>
+                {prev && (
+                  <Link to={path(`/help/${prev.slug}`)} className="flex flex-col gap-1 p-4 rounded-lg border border-outline-variant hover:border-primary hover:bg-surface-container transition-colors no-underline">
+                    <span className="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">arrow_back</span>
+                      {t("action.previous")}
+                    </span>
+                    <span className="font-body-md text-body-md text-on-surface font-medium">{prev.title[lang]}</span>
+                  </Link>
+                )}
+              </div>
+              <div>
+                {next && (
+                  <Link to={path(`/help/${next.slug}`)} className="flex flex-col gap-1 p-4 rounded-lg border border-outline-variant hover:border-primary hover:bg-surface-container transition-colors no-underline text-right items-end">
+                    <span className="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1">
+                      {t("action.next")}
+                      <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                    </span>
+                    <span className="font-body-md text-body-md text-on-surface font-medium">{next.title[lang]}</span>
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
         </div>
+
+        {headings.length > 0 && (
+          <nav className="hidden xl:block w-56 shrink-0 sticky top-8 self-start">
+            <h4 className="font-label-caps text-label-caps text-on-surface-variant mb-2 tracking-wide">
+              {t("helpArticle.onThisPage")}
+            </h4>
+            <ul className="flex flex-col gap-1.5 border-l border-outline-variant">
+              {headings.map((h) => (
+                <li key={h.text}>
+                  <a href={`#${slugifyHeading(h.text)}`} className="block pl-3 -ml-px font-body-md text-body-md text-on-surface-variant hover:text-primary no-underline">
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
       </div>
     </PublicShell>
   );

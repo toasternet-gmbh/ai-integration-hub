@@ -50,7 +50,7 @@ export default function Account() {
           <p className="font-body-md text-body-md text-on-surface-variant">{t("account.export.body")}</p>
           <button
             disabled={exporting} onClick={exportData}
-            className="self-start bg-primary text-on-primary px-gutter py-2 rounded flex items-center gap-component-gap font-body-md hover:bg-primary-container transition-colors disabled:opacity-60"
+            className="self-start bg-primary text-on-primary px-gutter py-2 rounded flex items-center gap-component-gap font-body-md hover:bg-on-primary-container transition-colors disabled:opacity-60"
           >
             <span className="material-symbols-outlined text-[18px]">download</span>
             {exporting ? "…" : t("account.export.button")}

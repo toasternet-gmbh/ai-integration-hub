@@ -72,7 +72,7 @@ export default function Billing() {
             {isPro ? (
               <button
                 disabled={working} onClick={manage}
-                className="self-start bg-primary text-on-primary px-gutter py-2 rounded flex items-center gap-component-gap font-body-md hover:bg-primary-container transition-colors disabled:opacity-60"
+                className="self-start bg-primary text-on-primary px-gutter py-2 rounded flex items-center gap-component-gap font-body-md hover:bg-on-primary-container transition-colors disabled:opacity-60"
               >
                 <span className="material-symbols-outlined text-[18px]">credit_card</span>
                 {working ? "…" : t("billing.manageButton")}
@@ -80,7 +80,7 @@ export default function Billing() {
             ) : (
               <button
                 disabled={working} onClick={upgrade}
-                className="self-start bg-primary text-on-primary px-gutter py-2 rounded flex items-center gap-component-gap font-body-md hover:bg-primary-container transition-colors disabled:opacity-60"
+                className="self-start bg-primary text-on-primary px-gutter py-2 rounded flex items-center gap-component-gap font-body-md hover:bg-on-primary-container transition-colors disabled:opacity-60"
               >
                 <span className="material-symbols-outlined text-[18px]">upgrade</span>
                 {working ? "…" : t("billing.upgradeButton")}

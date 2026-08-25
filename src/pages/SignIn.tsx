@@ -21,7 +21,7 @@ function statusColor(log: string) {
 }
 
 export default function SignIn() {
-  const { lang, setLang, t } = useI18n();
+  const { lang, setLang, t, path } = useI18n();
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,7 +50,7 @@ export default function SignIn() {
     setBusy(true);
 
     if (mode === "forgot") {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}${path("/reset-password")}` });
       setBusy(false);
       if (error) setErr(error.message); else setResetSent(true);
       return;
@@ -143,7 +143,7 @@ export default function SignIn() {
                   </div>
                 )}
                 {err && <p className="text-error font-body-md text-body-md">{err}</p>}
-                <button disabled={busy} type="submit" className="mt-4 bg-primary text-on-primary font-label-caps text-label-caps py-[14px] px-6 rounded hover:bg-primary-container transition-colors w-full flex items-center justify-center gap-2 disabled:opacity-60">
+                <button disabled={busy} type="submit" className="mt-4 bg-primary text-on-primary font-label-caps text-label-caps py-[14px] px-6 rounded hover:bg-on-primary-container transition-colors w-full flex items-center justify-center gap-2 disabled:opacity-60">
                   <span>{busy ? "…" : mode === "forgot" ? t("signin.forgot.submit").toUpperCase() : t("signin.submit").toUpperCase()}</span>
                   {!busy && <span className="material-symbols-outlined text-[16px]">arrow_forward</span>}
                 </button>
@@ -154,12 +154,12 @@ export default function SignIn() {
                 )}
                 {mode === "signup" && (
                   <p className="font-body-md text-[12px] text-on-surface-variant text-center">
-                    {t("signin.agreePrefix")} <Link to="/terms" target="_blank" className="text-primary hover:underline">{t("footer.terms")}</Link> {t("signin.agreeAnd")} <Link to="/privacy" target="_blank" className="text-primary hover:underline">{t("footer.privacy")}</Link>.
+                    {t("signin.agreePrefix")} <Link to={path("/terms")} target="_blank" className="text-primary hover:underline">{t("footer.terms")}</Link> {t("signin.agreeAnd")} <Link to={path("/privacy")} target="_blank" className="text-primary hover:underline">{t("footer.privacy")}</Link>.
                   </p>
                 )}
               </form>
               )}
-              <Link to="/" className="text-on-surface-variant text-body-md hover:text-primary mt-6 no-underline">&larr; Back to site</Link>
+              <Link to={path("/")} className="text-on-surface-variant text-body-md hover:text-primary mt-6 no-underline">&larr; Back to site</Link>
             </div>
           </div>
         </div>

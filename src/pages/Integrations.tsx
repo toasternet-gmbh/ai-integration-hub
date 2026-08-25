@@ -67,7 +67,7 @@ export default function Integrations() {
           <h1 className="font-headline-lg text-headline-lg text-on-surface">{t("integrations.title")}</h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-unit">{t("integrations.subtitle")}</p>
         </div>
-        <button onClick={() => setOpen(true)} className="bg-primary hover:bg-primary-container text-on-primary font-label-caps text-label-caps px-4 py-2 rounded flex items-center gap-2 transition-colors">
+        <button onClick={() => setOpen(true)} className="bg-primary hover:bg-on-primary-container text-on-primary font-label-caps text-label-caps px-4 py-2 rounded flex items-center gap-2 transition-colors">
           <span className="material-symbols-outlined text-[16px]">add</span>
           {t("integrations.connectStore").toUpperCase()}
         </button>
@@ -181,7 +181,7 @@ export default function Integrations() {
               )}
             </div>
             <div className="p-gutter border-t border-outline-variant bg-surface-container-lowest sticky bottom-0">
-              <button disabled={busy} onClick={connect} className="w-full bg-primary hover:bg-primary-container text-on-primary font-label-caps text-label-caps px-4 py-3 rounded transition-colors flex justify-center items-center gap-2 disabled:opacity-60">
+              <button disabled={busy} onClick={connect} className="w-full bg-primary hover:bg-on-primary-container text-on-primary font-label-caps text-label-caps px-4 py-3 rounded transition-colors flex justify-center items-center gap-2 disabled:opacity-60">
                 {t("action.connect").toUpperCase()}
                 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
               </button>

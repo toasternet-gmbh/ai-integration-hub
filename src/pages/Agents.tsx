@@ -62,7 +62,7 @@ export default function Agents() {
           </div>
           <div className="p-gutter border-b border-outline-variant flex gap-2">
             <input value={newName} onChange={(e) => setNewName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") createAgent(); }} placeholder={t("agents.namePlaceholder")} className="flex-1 px-3 py-1.5 border border-outline-variant rounded font-body-md text-body-md bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" />
-            <button onClick={createAgent} className="flex items-center gap-unit px-3 py-1.5 bg-primary text-on-primary rounded text-label-caps font-label-caps hover:bg-primary-container transition-colors">
+            <button onClick={createAgent} className="flex items-center gap-unit px-3 py-1.5 bg-primary text-on-primary rounded text-label-caps font-label-caps hover:bg-on-primary-container transition-colors">
               <span className="material-symbols-outlined text-[16px]">add</span>
             </button>
           </div>

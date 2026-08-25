@@ -22,23 +22,24 @@ function Icon({ name, size = 20 }: { name: string; size?: number }) {
 export function AppShell({
   orgName, projectName, onSwitchProject, children,
 }: { orgName: string; projectName: string; onSwitchProject: () => void; children: ReactNode }) {
-  const { lang, setLang, t } = useI18n();
+  const { lang, setLang, t, path } = useI18n();
 
   return (
     <div className="bg-surface font-body-md text-on-surface min-h-screen">
       <aside className="fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant z-50 flex flex-col">
-        <div className="h-14 px-gutter flex items-center border-b border-outline-variant mb-unit">
-          <span className="font-headline-sm text-primary tracking-tight">AI Integration Hub</span>
+        <div className="h-14 px-gutter flex items-center gap-2 border-b border-outline-variant mb-unit">
+          <img src="/icon.png" alt="" className="h-7 w-7 shrink-0" />
+          <span className="font-headline-sm text-on-surface tracking-tight truncate">AI Integration Hub</span>
         </div>
         <nav className="flex-1 px-unit space-y-unit">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
-              to={item.to}
+              to={path(item.to)}
               className={({ isActive }) =>
-                "flex items-center gap-component-gap px-gutter py-2 transition-colors " +
+                "flex items-center gap-component-gap px-gutter py-2 rounded-lg transition-colors " +
                 (isActive
-                  ? "bg-primary-container text-on-primary-container font-bold border-l-4 border-primary"
+                  ? "bg-primary-container text-on-primary-container font-bold"
                   : "text-on-surface-variant hover:bg-surface-container-high")
               }
             >
@@ -48,7 +49,7 @@ export function AppShell({
           ))}
           <div className="mt-4 pt-4 border-t border-outline-variant">
             <a
-              href="/help"
+              href={path("/help")}
               className="flex items-center gap-component-gap px-gutter py-2 transition-colors text-on-surface-variant hover:bg-surface-container-high"
             >
               <Icon name="help_center" />
@@ -80,7 +81,7 @@ export function AppShell({
               <button onClick={() => supabase.auth.signOut()} className="text-body-md text-on-surface-variant hover:text-primary bg-transparent border-none cursor-pointer">
                 {t("topbar.signOut")}
               </button>
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-brand-gradient text-on-primary flex items-center justify-center">
                 <Icon name="person" size={18} />
               </div>
             </div>

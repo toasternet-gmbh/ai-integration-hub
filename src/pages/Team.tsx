@@ -65,7 +65,7 @@ export default function Team() {
               <option value="member">{t("team.role.member")}</option>
               <option value="owner">{t("team.role.owner")}</option>
             </select>
-            <button disabled={busy} onClick={invite} className="bg-primary text-on-primary px-gutter py-2 rounded flex items-center gap-component-gap font-body-md hover:bg-primary-container transition-colors disabled:opacity-60">
+            <button disabled={busy} onClick={invite} className="bg-primary text-on-primary px-gutter py-2 rounded flex items-center gap-component-gap font-body-md hover:bg-on-primary-container transition-colors disabled:opacity-60">
               <span className="material-symbols-outlined text-[18px]">person_add</span>
               {t("team.invite")}
             </button>
@@ -123,7 +123,7 @@ export default function Team() {
                   <input readOnly value={inviteLink} className="flex-1 bg-surface-container px-3 py-2 font-mono-data text-mono-data text-on-surface border border-outline-variant border-r-0 focus:outline-none text-[12px]" />
                   <button
                     onClick={() => { navigator.clipboard.writeText(inviteLink); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                    className="bg-primary text-on-primary px-4 py-2 border border-primary hover:bg-primary-container transition-colors flex items-center gap-2"
+                    className="bg-primary text-on-primary px-4 py-2 border border-primary hover:bg-on-primary-container transition-colors flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined text-[18px]">{copied ? "check" : "content_copy"}</span>
                     <span className="font-body-md font-bold">{t("apiKeys.copy")}</span>

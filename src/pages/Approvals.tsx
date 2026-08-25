@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { mcp } from "../lib/mcp";
-import { useI18n } from "../lib/i18n";
+import { STATUS_LABEL_KEYS, useI18n } from "../lib/i18n";
 
 type Ctx = { projectId: string };
 type Approval = {
@@ -77,7 +77,7 @@ export default function Approvals() {
                   <div className="flex flex-col items-end shrink-0 gap-1">
                     <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-surface-variant border border-outline-variant/30 h-[24px]">
                       <div className="w-1.5 h-1.5 rounded-full bg-on-tertiary-container" />
-                      <span className="font-label-caps text-label-caps text-on-surface uppercase">Awaiting Decision</span>
+                      <span className="font-label-caps text-label-caps text-on-surface uppercase">{t("approvals.awaitingDecision")}</span>
                     </div>
                     <span className="font-mono-data text-[12px] text-outline">{new Date(a.created_at).toLocaleString()}</span>
                   </div>
@@ -87,7 +87,7 @@ export default function Approvals() {
                   <div className="flex flex-col gap-2">
                     <span className="font-label-caps text-label-caps text-outline uppercase tracking-wider">{t("approvals.summary")}</span>
                     <p className="font-body-lg text-body-lg text-on-surface leading-relaxed">
-                      {String(a.input.order_id ? `Refund order #${a.input.order_id}` : a.tool_name)}
+                      {a.input.order_id ? t("approvals.refundOrder").replace("{id}", String(a.input.order_id)) : a.tool_name}
                     </p>
                   </div>
                   {typeof a.input.reason === "string" && (
@@ -113,7 +113,7 @@ export default function Approvals() {
                 </div>
 
                 <div className="px-6 py-4 border-t border-outline-variant bg-surface flex flex-col sm:flex-row items-center gap-3">
-                  <button onClick={() => decide(a.id, "approve")} className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-on-primary rounded font-headline-sm text-[16px] hover:bg-primary-container transition-colors">
+                  <button onClick={() => decide(a.id, "approve")} className="w-full sm:w-auto flex-1 flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-on-primary rounded font-headline-sm text-[16px] hover:bg-on-primary-container transition-colors">
                     <span className="material-symbols-outlined text-[20px]">check_circle</span>
                     <span>{t("approvals.approveRun")}</span>
                   </button>
@@ -129,7 +129,7 @@ export default function Approvals() {
 
         {tab === "history" && (
           <div className="flex flex-col gap-4">
-            {history.length === 0 && <p className="font-body-md text-body-md text-on-surface-variant">No decisions yet.</p>}
+            {history.length === 0 && <p className="font-body-md text-body-md text-on-surface-variant">{t("approvals.emptyHistory")}</p>}
             {history.map((a) => (
               <div key={a.id} className="bg-surface-container-lowest border border-outline-variant rounded flex flex-col opacity-90">
                 <div className="px-5 py-4 flex items-start gap-4">
@@ -139,7 +139,7 @@ export default function Approvals() {
                   <div className="flex flex-col gap-2 flex-1">
                     <p className="font-body-md text-body-md text-on-surface">
                       <span className="font-mono-data text-mono-data bg-surface-container px-1 py-0.5 rounded mr-1">{a.tool_name}</span>
-                      {a.status}
+                      {t(STATUS_LABEL_KEYS[a.status] ?? a.status)}
                     </p>
                     <span className="font-body-md text-[13px] text-on-surface-variant">{new Date(a.decided_at ?? a.created_at).toLocaleString()}</span>
                   </div>

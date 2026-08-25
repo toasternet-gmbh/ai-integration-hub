@@ -109,7 +109,7 @@ export default function Onboarding({ onDone }: { onDone: (orgId: string, orgName
                 <button
                   disabled={busy}
                   onClick={createOrgAndContinue}
-                  className="w-full bg-primary text-on-primary font-label-caps text-label-caps uppercase tracking-[0.08em] rounded py-4 px-6 flex items-center justify-center gap-2 hover:bg-primary-container transition-colors disabled:opacity-60"
+                  className="w-full bg-primary text-on-primary font-label-caps text-label-caps uppercase tracking-[0.08em] rounded py-4 px-6 flex items-center justify-center gap-2 hover:bg-on-primary-container transition-colors disabled:opacity-60"
                 >
                   {t("action.continue")}
                   <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
@@ -158,7 +158,7 @@ export default function Onboarding({ onDone }: { onDone: (orgId: string, orgName
                   <button
                     disabled={busy}
                     onClick={createProjectAndFinish}
-                    className="flex-1 bg-primary text-on-primary font-label-caps text-label-caps uppercase tracking-[0.08em] rounded py-4 px-6 flex items-center justify-center gap-2 hover:bg-primary-container transition-colors disabled:opacity-60"
+                    className="flex-1 bg-primary text-on-primary font-label-caps text-label-caps uppercase tracking-[0.08em] rounded py-4 px-6 flex items-center justify-center gap-2 hover:bg-on-primary-container transition-colors disabled:opacity-60"
                   >
                     {t("onboarding.project.create")}
                     <span className="material-symbols-outlined text-[16px]">check</span>

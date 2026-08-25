@@ -30,6 +30,7 @@ export async function mcp<T = unknown>(
     }),
   });
   const json = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(json?.error?.message ?? json?.msg ?? `HTTP ${res.status}`);
   if (!json) throw new Error(`HTTP ${res.status}`);
   if (json.error) throw new Error(json.error.message);
 

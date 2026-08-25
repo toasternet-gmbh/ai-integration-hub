@@ -45,7 +45,7 @@ export default function ApiKeys() {
           </div>
           <div className="flex items-center gap-2">
             <input value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") create(); }} placeholder={t("apiKeys.namePlaceholder")} className="px-3 py-2 border border-outline-variant rounded font-body-md text-body-md bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" />
-            <button onClick={create} className="bg-primary text-on-primary px-gutter py-2 rounded flex items-center gap-component-gap font-body-md hover:bg-primary-container transition-colors">
+            <button onClick={create} className="bg-primary text-on-primary px-gutter py-2 rounded flex items-center gap-component-gap font-body-md hover:bg-on-primary-container transition-colors">
               <span className="material-symbols-outlined text-[18px]">add</span>
               {t("apiKeys.create")}
             </button>
@@ -56,7 +56,7 @@ export default function ApiKeys() {
 
         <div className="bg-surface-container-lowest flex flex-col rounded">
           <div className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-gutter px-gutter py-3 border-b border-outline-variant bg-surface-container-low font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider items-center">
-            <div>Name</div><div>Key Suffix</div><div>Created</div><div>Last Used</div><div className="w-8" />
+            <div>{t("apiKeys.col.name")}</div><div>{t("apiKeys.col.keySuffix")}</div><div>{t("apiKeys.col.created")}</div><div>{t("apiKeys.col.lastUsed")}</div><div className="w-8" />
           </div>
           {rows.length === 0 && <div className="px-gutter py-6 text-on-surface-variant font-body-md text-body-md">{t("apiKeys.empty")}</div>}
           {rows.map((k) => (
@@ -128,7 +128,7 @@ const orders = await client.tools.orders.get({
                   <input readOnly value={newKey} className="flex-1 bg-surface-container px-3 py-2 font-mono-data text-mono-data text-on-surface border border-outline-variant border-r-0 focus:outline-none" />
                   <button
                     onClick={() => { navigator.clipboard.writeText(newKey); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                    className="bg-primary text-on-primary px-4 py-2 border border-primary hover:bg-primary-container transition-colors flex items-center gap-2"
+                    className="bg-primary text-on-primary px-4 py-2 border border-primary hover:bg-on-primary-container transition-colors flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined text-[18px]">{copied ? "check" : "content_copy"}</span>
                     <span className="font-body-md font-bold">{t("apiKeys.copy")}</span>
