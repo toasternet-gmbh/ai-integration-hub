@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
 import { supabase } from "../lib/supabase";
+import { usePlatformAdmin } from "../lib/usePlatformAdmin";
 
 const NAV_ITEMS = [
   { to: "/app/dashboard", icon: "grid_view", key: "nav.dashboard" },
@@ -24,6 +25,7 @@ export function AppShell({
 }: { orgName: string; projectName: string; onSwitchProject: () => void; children: ReactNode }) {
   const { lang, setLang, t, path } = useI18n();
   const [navOpen, setNavOpen] = useState(false);
+  const isPlatformAdmin = usePlatformAdmin();
 
   return (
     <div className="bg-surface font-body-md text-on-surface min-h-screen">
@@ -69,6 +71,15 @@ export function AppShell({
               <Icon name="help_center" />
               <span className="text-body-md">{t("nav.help")}</span>
             </a>
+            {isPlatformAdmin && (
+              <a
+                href={path("/superadmin")}
+                className="flex items-center gap-component-gap px-gutter py-2 mt-unit rounded-lg transition-colors text-brand-mint hover:bg-secondary/10"
+              >
+                <Icon name="shield_person" />
+                <span className="text-body-md font-medium">{t("superadmin.badge")}</span>
+              </a>
+            )}
           </div>
         </nav>
       </aside>

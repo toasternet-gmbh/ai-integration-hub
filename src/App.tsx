@@ -2,7 +2,9 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "./lib/supabase";
 import { AppShell } from "./components/AppShell";
+import { SuperAdminShell } from "./components/SuperAdminShell";
 import { I18nProvider, preferredLang, useI18n, type Lang } from "./lib/i18n";
+import { usePlatformAdmin } from "./lib/usePlatformAdmin";
 
 const Landing = lazy(() => import("./pages/Landing"));
 const SignIn = lazy(() => import("./pages/SignIn"));
@@ -22,6 +24,12 @@ const HelpArticle = lazy(() => import("./pages/HelpArticle"));
 const Imprint = lazy(() => import("./pages/Imprint"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
+const SuperAdminOverview = lazy(() => import("./pages/superadmin/Overview"));
+const SuperAdminOrganizations = lazy(() => import("./pages/superadmin/Organizations"));
+const SuperAdminUsers = lazy(() => import("./pages/superadmin/Users"));
+const SuperAdminPlatforms = lazy(() => import("./pages/superadmin/Platforms"));
+const SuperAdminAdmins = lazy(() => import("./pages/superadmin/Admins"));
+const SuperAdminSettings = lazy(() => import("./pages/superadmin/Settings"));
 
 function PageFallback() {
   return <div className="min-h-screen flex items-center justify-center font-body-md text-on-surface-variant">Loading…</div>;
@@ -59,6 +67,7 @@ export default function App() {
         <Route path="/help" element={<LegacyRedirect />} />
         <Route path="/help/:slug" element={<LegacyRedirect />} />
         <Route path="/app/*" element={<LegacyRedirect />} />
+        <Route path="/superadmin/*" element={<LegacyRedirect />} />
         <Route path="*" element={<Navigate to={`/${preferredLang()}`} replace />} />
       </Routes>
     </Suspense>
@@ -103,9 +112,35 @@ function LocalizedApp({ session }: { session: Session }) {
         <Route path="help" element={<Help />} />
         <Route path="help/:slug" element={<HelpArticle />} />
         <Route path="app/*" element={session ? <AuthedArea /> : <Navigate to={`/${lang}/signin`} replace />} />
+        <Route path="superadmin/*" element={session ? <SuperAdminGate /> : <Navigate to={`/${lang}/signin`} replace />} />
         <Route path="*" element={<Navigate to={`/${lang}`} replace />} />
       </Routes>
     </I18nProvider>
+  );
+}
+
+/** Guards /superadmin/*: only a platform admin gets past the loading state, everyone else is
+ * bounced back into their own Hub area — this is Hub-wide, not something to leave half-visible. */
+function SuperAdminGate() {
+  const { path } = useI18n();
+  const isAdmin = usePlatformAdmin();
+
+  if (isAdmin === null) return <div className="min-h-screen flex items-center justify-center font-body-md text-on-surface-variant">Loading…</div>;
+  if (isAdmin === false) return <Navigate to={path("/app")} replace />;
+
+  return (
+    <SuperAdminShell>
+      <Routes>
+        <Route index element={<Navigate to="overview" replace />} />
+        <Route path="overview" element={<SuperAdminOverview />} />
+        <Route path="organizations" element={<SuperAdminOrganizations />} />
+        <Route path="users" element={<SuperAdminUsers />} />
+        <Route path="platforms" element={<SuperAdminPlatforms />} />
+        <Route path="admins" element={<SuperAdminAdmins />} />
+        <Route path="settings" element={<SuperAdminSettings />} />
+        <Route path="*" element={<Navigate to="overview" replace />} />
+      </Routes>
+    </SuperAdminShell>
   );
 }
 
