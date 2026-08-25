@@ -1,7 +1,8 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
 import { supabase } from "../lib/supabase";
+import { mcp } from "../lib/mcp";
 import { Icon } from "./AppShell";
 
 const NAV_ITEMS = [
@@ -18,6 +19,14 @@ const NAV_ITEMS = [
 export function SuperAdminShell({ children }: { children: ReactNode }) {
   const { lang, setLang, t, path } = useI18n();
   const [navOpen, setNavOpen] = useState(false);
+  // A pure platform admin belongs to no organization — /app has nothing for them but a forced
+  // "create your own org" onboarding flow, which doesn't make sense for a Hub-wide role. Only show
+  // the link back to it when they actually own/belong to at least one org (e.g. an admin who is
+  // also a normal org owner elsewhere).
+  const [hasOrg, setHasOrg] = useState(false);
+  useEffect(() => {
+    mcp<{ id: string }[]>("list_my_organizations").then((orgs) => setHasOrg(orgs.length > 0)).catch(() => setHasOrg(false));
+  }, []);
 
   return (
     <div className="bg-surface font-body-md text-on-surface min-h-screen">
@@ -48,12 +57,14 @@ export function SuperAdminShell({ children }: { children: ReactNode }) {
               <span className="text-body-md">{t(item.key)}</span>
             </NavLink>
           ))}
-          <div className="mt-4 pt-4 border-t border-white/10">
-            <a href={path("/app")} className="flex items-center gap-component-gap px-gutter py-2 transition-colors text-inverse-on-surface/70 hover:bg-white/5">
-              <Icon name="arrow_back" />
-              <span className="text-body-md">{t("superadmin.backToHub")}</span>
-            </a>
-          </div>
+          {hasOrg && (
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <a href={path("/app")} className="flex items-center gap-component-gap px-gutter py-2 transition-colors text-inverse-on-surface/70 hover:bg-white/5">
+                <Icon name="arrow_back" />
+                <span className="text-body-md">{t("superadmin.backToHub")}</span>
+              </a>
+            </div>
+          )}
         </nav>
       </aside>
 

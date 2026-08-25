@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "./lib/supabase";
+import { mcp } from "./lib/mcp";
 import { AppShell } from "./components/AppShell";
 import { SuperAdminShell } from "./components/SuperAdminShell";
 import { I18nProvider, preferredLang, useI18n, type Lang } from "./lib/i18n";
@@ -177,7 +178,23 @@ function AuthedArea({ session }: { session: Session }) {
     navigate(path("/app"));
   }
 
-  if (!selection) return <Onboarding onDone={onOnboarded} />;
+  // A cached selection can go stale (the org/project got deleted, or membership was revoked) —
+  // confirm it's still real in the background rather than leaving the user stuck looking at a
+  // dashboard that 403s on every request. list_my_projects silently omits anything the caller no
+  // longer belongs to, so an empty match means "this selection no longer exists for you".
+  useEffect(() => {
+    if (!selection) return;
+    mcp<{ id: string }[]>("list_my_projects", { organization_id: selection.orgId })
+      .then((projects) => {
+        if (!projects.some((p) => p.id === selection.projectId)) {
+          localStorage.removeItem(key);
+          setSelection(null);
+        }
+      })
+      .catch(() => {});
+  }, [selection?.orgId, selection?.projectId, key]);
+
+  if (!selection) return <NoSelectionYet onOnboarded={onOnboarded} />;
 
   return (
     <AppShell orgName={selection.orgName} projectName={selection.projectName} onSwitchProject={switchProject}>
@@ -202,4 +219,16 @@ function AuthedArea({ session }: { session: Session }) {
 
 function ProjectContext({ projectId, organizationId }: { projectId: string; organizationId: string }) {
   return <Outlet context={{ projectId, organizationId }} />;
+}
+
+/** A platform admin has their own dedicated area and no org of their own by design (see
+ * docs/access-and-accounts.md) — send them to /superadmin instead of forcing them through
+ * "create your own organization" onboarding just because they landed on /app with nothing
+ * selected yet. Everyone else gets the normal onboarding flow. */
+function NoSelectionYet({ onOnboarded }: { onOnboarded: (orgId: string, orgName: string, projectId: string, projectName: string) => void }) {
+  const { path } = useI18n();
+  const isAdmin = usePlatformAdmin();
+  if (isAdmin === null) return <div className="min-h-screen flex items-center justify-center font-body-md text-on-surface-variant">Loading…</div>;
+  if (isAdmin) return <Navigate to={path("/superadmin")} replace />;
+  return <Onboarding onDone={onOnboarded} />;
 }

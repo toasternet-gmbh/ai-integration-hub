@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { mcp } from "../lib/mcp";
 import { useI18n } from "../lib/i18n";
 
@@ -16,6 +16,11 @@ export default function Onboarding({ onDone }: { onDone: (orgId: string, orgName
   const [newProjectName, setNewProjectName] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // `busy` (state) only re-renders/disables the button on the NEXT tick — a fast double-click or an
+  // Enter keypress landing in the same tick as a click can both slip through before that happens
+  // and create two organizations/projects. This ref is set synchronously, so the second call bails
+  // immediately regardless of when React re-renders.
+  const submitting = useRef(false);
 
   useEffect(() => {
     mcp<Org[]>("list_my_organizations").then(setOrgs).catch((e) => setErr((e as Error).message));
@@ -33,23 +38,27 @@ export default function Onboarding({ onDone }: { onDone: (orgId: string, orgName
   }
 
   async function createOrgAndContinue() {
+    if (submitting.current) return;
     if (!newOrgName.trim()) { setErr("Organization name is required."); return; }
+    submitting.current = true;
     setErr(null);
     setBusy(true);
     try {
       const org = await mcp<{ id: string; name: string }>("create_organization", { name: newOrgName.trim() });
       await continueToProject(org.id, org.name);
-    } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+    } catch (e) { setErr((e as Error).message); } finally { setBusy(false); submitting.current = false; }
   }
 
   async function createProjectAndFinish() {
+    if (submitting.current) return;
     if (!newProjectName.trim()) { setErr("Project name is required."); return; }
+    submitting.current = true;
     setErr(null);
     setBusy(true);
     try {
       const project = await mcp<{ id: string; name: string }>("create_project", { organization_id: orgId, name: newProjectName.trim() });
       onDone(orgId, orgName, project.id, project.name);
-    } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+    } catch (e) { setErr((e as Error).message); } finally { setBusy(false); submitting.current = false; }
   }
 
   return (
