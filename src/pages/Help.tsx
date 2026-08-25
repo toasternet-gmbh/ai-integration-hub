@@ -34,7 +34,10 @@ export default function Help() {
 
   const query = search.trim().toLowerCase();
   const filtered = query
-    ? HELP_ARTICLES.filter((a) => a.title[lang].toLowerCase().includes(query) || a.summary[lang].toLowerCase().includes(query))
+    ? HELP_ARTICLES.filter((a) =>
+        a.title[lang].toLowerCase().includes(query) ||
+        a.summary[lang].toLowerCase().includes(query) ||
+        a.body[lang].some((p) => p.toLowerCase().includes(query)))
     : null;
 
   const featured = HELP_ARTICLES.find((a) => a.slug === FEATURED_SLUG)!;
