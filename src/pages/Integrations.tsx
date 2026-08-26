@@ -4,7 +4,8 @@ import { mcp } from "../lib/mcp";
 import { useI18n } from "../lib/i18n";
 
 type Ctx = { projectId: string };
-type Integration = { id: string; platform: string; name: string; status: string; error_status: string | null };
+type Capability = { domain: string; tools: string[] };
+type Integration = { id: string; platform: string; name: string; status: string; error_status: string | null; capabilities: Capability[] | null };
 
 const PLATFORM_ICON: Record<string, string> = { woocommerce: "shopping_cart", shopware: "storefront", shopify: "local_mall", magento: "inventory" };
 const PLATFORMS = [
@@ -45,9 +46,19 @@ export default function Integrations() {
         : TOKEN_AUTH_PLATFORMS.has(platform) ? { storeUrl, accessToken: secret }
         : { storeUrl, consumerKey: key, consumerSecret: secret };
       await mcp("create_integration", { platform, name, credentials }, { projectId });
-      setResult({ ok: true, message: `Connected — 3 capabilities discovered: orders.search, orders.get, orders.refund` });
+      // Re-fetch rather than trust a hardcoded capability list — hub_integrations.capabilities
+      // is what create_integration actually populates, and it varies by platform/tool support.
+      const updated = await mcp<Integration[]>("list_integrations", {}, { projectId });
+      setRows(updated);
+      const created = updated.find((r) => r.platform === platform && r.name === name);
+      const toolNames = (created?.capabilities ?? []).flatMap((c) => c.tools);
+      setResult({
+        ok: true,
+        message: toolNames.length
+          ? `Connected — ${toolNames.length} ${toolNames.length === 1 ? "capability" : "capabilities"} discovered: ${toolNames.join(", ")}`
+          : `Connected — no capabilities discovered yet for ${platform}. Check the integration's status once the next sync completes.`,
+      });
       setName(""); setStoreUrl(""); setKey(""); setSecret("");
-      reload();
     } catch (e) { setResult({ ok: false, message: (e as Error).message }); } finally { setBusy(false); }
   }
 

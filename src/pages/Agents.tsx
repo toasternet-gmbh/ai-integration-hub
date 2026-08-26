@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { mcp } from "../lib/mcp";
+import { supabase } from "../lib/supabase";
 import { useI18n } from "../lib/i18n";
 
 type Ctx = { projectId: string };
 type Agent = { id: string; name: string; description: string | null; status: string };
 type Permission = { id: string; tool_name: string; integration_id: string | null; permission: string };
-
-const TOOLS = ["orders.search", "orders.get", "orders.refund"];
-const DEFAULTS: Record<string, string> = { "orders.search": "allow", "orders.get": "allow", "orders.refund": "require_approval" };
+type ToolDef = { name: string; domain: string; risk: "low" | "medium" | "high"; default_policy: string };
 
 export default function Agents() {
   const { projectId } = useOutletContext<Ctx>();
@@ -16,6 +15,7 @@ export default function Agents() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selected, setSelected] = useState<string>("");
   const [perms, setPerms] = useState<Permission[]>([]);
+  const [tools, setTools] = useState<ToolDef[]>([]);
   const [newName, setNewName] = useState("");
   const [err, setErr] = useState<string | null>(null);
 
@@ -29,13 +29,29 @@ export default function Agents() {
   useEffect(() => { reload(); }, [projectId]);
 
   useEffect(() => {
+    // hub_tool_registry is readable by any authenticated user (RLS: "Anyone select
+    // hub_tool_registry") — read it directly instead of hardcoding the tool list, so newly
+    // registered tools (e.g. products.*/inventory.*) show up here without a code change.
+    supabase
+      .from("hub_tool_registry")
+      .select("name, domain, risk, default_policy")
+      .eq("enabled", true)
+      .order("domain")
+      .order("name")
+      .then(({ data, error }) => {
+        if (error) { setErr(error.message); return; }
+        setTools((data ?? []) as ToolDef[]);
+      });
+  }, []);
+
+  useEffect(() => {
     if (!selected) return;
     mcp<Permission[]>("list_agent_tool_permissions", { agent_id: selected }, { projectId }).then(setPerms).catch((e) => setErr((e as Error).message));
   }, [selected, projectId]);
 
   function permissionFor(tool: string): string {
     const specific = perms.find((p) => p.tool_name === tool && p.integration_id === null);
-    return specific?.permission ?? DEFAULTS[tool] ?? "deny";
+    return specific?.permission ?? tools.find((td) => td.name === tool)?.default_policy ?? "deny";
   }
 
   async function setPermission(tool: string, permission: string) {
@@ -122,14 +138,14 @@ export default function Agents() {
                     <div className="col-span-5 font-label-caps text-label-caps text-on-surface-variant">Tool Namespace</div>
                     <div className="col-span-7 font-label-caps text-label-caps text-on-surface-variant">Access Level</div>
                   </div>
-                  {TOOLS.map((tool) => {
-                    const current = permissionFor(tool);
-                    const isHighRisk = tool === "orders.refund";
+                  {tools.map((tool) => {
+                    const current = permissionFor(tool.name);
+                    const isHighRisk = tool.risk === "high";
                     return (
-                      <div key={tool} className={"grid grid-cols-12 gap-gutter px-gutter items-center border-b border-outline-variant/50 last:border-b-0 " + (isHighRisk ? "py-4 items-start bg-on-tertiary-container/5" : "h-[56px]")}>
+                      <div key={tool.name} className={"grid grid-cols-12 gap-gutter px-gutter items-center border-b border-outline-variant/50 last:border-b-0 " + (isHighRisk ? "py-4 items-start bg-on-tertiary-container/5" : "h-[56px]")}>
                         <div className="col-span-5 flex flex-col gap-2 pt-1.5">
                           <div className="flex items-center gap-component-gap">
-                            <span className={"font-mono-data text-mono-data px-2 py-1 rounded " + (isHighRisk ? "text-on-tertiary-container bg-surface-container border border-on-tertiary-container/20" : "text-on-surface bg-surface-container")}>{tool}</span>
+                            <span className={"font-mono-data text-mono-data px-2 py-1 rounded " + (isHighRisk ? "text-on-tertiary-container bg-surface-container border border-on-tertiary-container/20" : "text-on-surface bg-surface-container")}>{tool.name}</span>
                             {isHighRisk && <span className="material-symbols-outlined text-on-tertiary-container text-[16px]">warning</span>}
                           </div>
                           {isHighRisk && (
@@ -144,7 +160,7 @@ export default function Agents() {
                             {(["allow", "require_approval", "deny"] as const).map((opt) => (
                               <button
                                 key={opt}
-                                onClick={() => setPermission(tool, opt)}
+                                onClick={() => setPermission(tool.name, opt)}
                                 className={
                                   "flex-1 py-1.5 rounded font-label-caps text-[10px] uppercase flex items-center justify-center gap-1 transition-all " +
                                   (current === opt
