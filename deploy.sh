@@ -47,6 +47,8 @@
 #   VITE_LOCAL_FUNCTIONS_PORT      50000
 #   VITE_REALTIME_WORKER_URL_LOCAL http://localhost:52000
 #   OPENAI_API_KEY                 sk-...
+#   GOCARDLESS_SECRET_ID           <secret-id>       (optional — banking/GoCardless connector)
+#   GOCARDLESS_SECRET_KEY          <secret-key>      (optional — banking/GoCardless connector)
 #   RESEND_API_KEY                 re_...
 #   STRIPE_SECRET_KEY              rk_live_...  (or sk_live_...)
 #   STRIPE_WEBHOOK_SECRET          whsec_...
@@ -206,6 +208,11 @@ PAYMENT_TEST_USER="test@yourdomain.com"
 
 # ── AI ────────────────────────────────────────────────────────────────────
 OPENAI_API_KEY="sk-..."
+
+# ── Banking (GoCardless Bank Account Data) — optional, only needed to enable ───────────────
+# the 'gocardless' platform. From the GoCardless Bank Account Data user secrets portal.
+GOCARDLESS_SECRET_ID=""
+GOCARDLESS_SECRET_KEY=""
 
 # ── Email (Resend) ────────────────────────────────────────────────────────
 RESEND_API_KEY="re_..."
@@ -445,6 +452,8 @@ VITE_SPORT_SUBDOMAINS=$(_env_val VITE_SPORT_SUBDOMAINS)
 
 # yogAIpilot-specific
 OPENAI_API_KEY=$(_env_val OPENAI_API_KEY)
+GOCARDLESS_SECRET_ID=$(_env_val GOCARDLESS_SECRET_ID)
+GOCARDLESS_SECRET_KEY=$(_env_val GOCARDLESS_SECRET_KEY)
 RESEND_API_KEY=$(_env_val RESEND_API_KEY)
 EMAIL_FROM=$(_env_val EMAIL_FROM)
 EMAIL_FROM_NAME=$(_env_val EMAIL_FROM_NAME)
@@ -754,6 +763,8 @@ if [ "$REMOTE_MODE" = false ] && [ "$CADDY_ONLY" = false ]; then
 
   # yogAIpilot secrets
   [ -n "$OPENAI_API_KEY"              ] && _upsert_env "OPENAI_API_KEY"              "$OPENAI_API_KEY"
+  [ -n "$GOCARDLESS_SECRET_ID"        ] && _upsert_env "GOCARDLESS_SECRET_ID"        "$GOCARDLESS_SECRET_ID"
+  [ -n "$GOCARDLESS_SECRET_KEY"       ] && _upsert_env "GOCARDLESS_SECRET_KEY"       "$GOCARDLESS_SECRET_KEY"
   [ -n "$STRIPE_LIVE"                 ] && _upsert_env "STRIPE_LIVE"                 "$STRIPE_LIVE"
   [ -n "$STRIPE_SECRET_KEY"           ] && _upsert_env "STRIPE_SECRET_KEY"           "$STRIPE_SECRET_KEY"
   [ -n "$STRIPE_WEBHOOK_SECRET"       ] && _upsert_env "STRIPE_WEBHOOK_SECRET"       "$STRIPE_WEBHOOK_SECRET"
@@ -866,6 +877,9 @@ services:
       EMAIL_REPLY_TO: ${EMAIL_REPLY_TO}
       # ── AI ────────────────────────────────────────────────────────────────
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # ── Banking (GoCardless Bank Account Data) ─────────────────────────────
+      GOCARDLESS_SECRET_ID: ${GOCARDLESS_SECRET_ID}
+      GOCARDLESS_SECRET_KEY: ${GOCARDLESS_SECRET_KEY}
       # ── Stripe ────────────────────────────────────────────────────────────
       STRIPE_LIVE: ${STRIPE_LIVE}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}

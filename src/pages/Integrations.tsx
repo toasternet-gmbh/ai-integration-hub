@@ -6,20 +6,30 @@ import { useI18n } from "../lib/i18n";
 type Ctx = { projectId: string };
 type Capability = { domain: string; tools: string[] };
 type Integration = { id: string; platform: string; name: string; status: string; error_status: string | null; capabilities: Capability[] | null };
+type Institution = { id: string; name: string };
 
-const PLATFORM_ICON: Record<string, string> = { woocommerce: "shopping_cart", shopware: "storefront", shopify: "local_mall", magento: "inventory" };
+const PLATFORM_ICON: Record<string, string> = { woocommerce: "shopping_cart", shopware: "storefront", shopify: "local_mall", magento: "inventory", lexoffice: "receipt_long", wordpress: "edit_note", toggl: "schedule", gocardless: "account_balance" };
 const PLATFORMS = [
   { id: "woocommerce", icon: "shopping_cart", label: "WooCommerce", disabled: false },
   { id: "shopware", icon: "storefront", label: "Shopware 6", disabled: false },
   { id: "shopify", icon: "local_mall", label: "Shopify", disabled: false },
   { id: "magento", icon: "inventory", label: "Magento", disabled: false },
+  { id: "lexoffice", icon: "receipt_long", label: "Lexoffice", disabled: false },
+  { id: "wordpress", icon: "edit_note", label: "WordPress", disabled: false },
+  { id: "toggl", icon: "schedule", label: "Toggl Track", disabled: false },
+  { id: "gocardless", icon: "account_balance", label: "GoCardless", disabled: false },
 ];
 
 const TOKEN_AUTH_PLATFORMS = new Set(["shopify", "magento"]);
+// Single-API-key platforms — no store URL, no separate key/secret pair.
+const NO_STORE_URL_PLATFORMS = new Set(["lexoffice", "toggl"]);
+// Consent-redirect platforms — no credentials form at all; the user picks their bank and is sent
+// to GoCardless to authenticate, same auth_type='oauth2' distinction hub_platform_types makes.
+const OAUTH2_PLATFORMS = new Set(["gocardless"]);
 
 export default function Integrations() {
   const { projectId } = useOutletContext<Ctx>();
-  const { t } = useI18n();
+  const { t, path } = useI18n();
   const [rows, setRows] = useState<Integration[]>([]);
   const [open, setOpen] = useState(false);
   const [platform, setPlatform] = useState("woocommerce");
@@ -31,10 +41,38 @@ export default function Integrations() {
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
+  const [bankCountry, setBankCountry] = useState("de");
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [institutionId, setInstitutionId] = useState("");
+  const [institutionsBusy, setInstitutionsBusy] = useState(false);
+
   async function reload() {
     try { setRows(await mcp<Integration[]>("list_integrations", {}, { projectId })); } catch (e) { setErr((e as Error).message); }
   }
   useEffect(() => { reload(); }, [projectId]);
+
+  async function searchInstitutions() {
+    setInstitutionsBusy(true);
+    setResult(null);
+    try { setInstitutions(await mcp<Institution[]>("list_bank_institutions", { country: bankCountry })); }
+    catch (e) { setResult({ ok: false, message: (e as Error).message }); }
+    finally { setInstitutionsBusy(false); }
+  }
+
+  async function connectBank() {
+    setErr(null);
+    setResult(null);
+    setBusy(true);
+    try {
+      const redirectUrl = `${window.location.origin}${path("/app/integrations/bank-callback")}`;
+      const { redirect_url } = await mcp<{ integration_id: string; redirect_url: string }>(
+        "start_bank_connection",
+        { institution_id: institutionId, name, redirect_url: redirectUrl },
+        { projectId },
+      );
+      window.location.href = redirect_url;
+    } catch (e) { setResult({ ok: false, message: (e as Error).message }); setBusy(false); }
+  }
 
   async function connect() {
     setErr(null);
@@ -42,7 +80,10 @@ export default function Integrations() {
     setBusy(true);
     try {
       const credentials =
-        platform === "shopware" ? { storeUrl, clientId: key, clientSecret: secret }
+        platform === "lexoffice" ? { apiKey: secret }
+        : platform === "toggl" ? { apiToken: secret }
+        : platform === "wordpress" ? { siteUrl: storeUrl, username: key, appPassword: secret }
+        : platform === "shopware" ? { storeUrl, clientId: key, clientSecret: secret }
         : TOKEN_AUTH_PLATFORMS.has(platform) ? { storeUrl, accessToken: secret }
         : { storeUrl, consumerKey: key, consumerSecret: secret };
       await mcp("create_integration", { platform, name, credentials }, { projectId });
@@ -164,22 +205,48 @@ export default function Integrations() {
                   <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">{t("integrations.name").toUpperCase()}</label>
                   <input value={name} onChange={(e) => setName(e.target.value)} className="w-full px-4 py-2 border border-outline-variant rounded font-body-md text-body-md bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" placeholder="Main Store" />
                 </div>
-                <div>
-                  <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">{t("integrations.storeUrl").toUpperCase()}</label>
-                  <input value={storeUrl} onChange={(e) => setStoreUrl(e.target.value)} className="w-full px-4 py-2 border border-outline-variant rounded font-body-md text-body-md bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" placeholder="https://your-store.com" type="url" />
-                </div>
-                {!TOKEN_AUTH_PLATFORMS.has(platform) && (
+                {!OAUTH2_PLATFORMS.has(platform) && !NO_STORE_URL_PLATFORMS.has(platform) && (
                   <div>
-                    <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">{(platform === "shopware" ? t("integrations.clientId") : t("integrations.consumerKey")).toUpperCase()}</label>
+                    <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">{t("integrations.storeUrl").toUpperCase()}</label>
+                    <input value={storeUrl} onChange={(e) => setStoreUrl(e.target.value)} className="w-full px-4 py-2 border border-outline-variant rounded font-body-md text-body-md bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" placeholder="https://your-store.com" type="url" />
+                  </div>
+                )}
+                {!TOKEN_AUTH_PLATFORMS.has(platform) && !NO_STORE_URL_PLATFORMS.has(platform) && !OAUTH2_PLATFORMS.has(platform) && (
+                  <div>
+                    <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">{(platform === "shopware" ? t("integrations.clientId") : platform === "wordpress" ? t("integrations.username") : t("integrations.consumerKey")).toUpperCase()}</label>
                     <input value={key} onChange={(e) => setKey(e.target.value)} className="w-full px-4 py-2 border border-outline-variant rounded font-mono-data text-mono-data bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" />
                   </div>
                 )}
-                <div>
-                  <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">
-                    {(platform === "shopware" ? t("integrations.clientSecret") : TOKEN_AUTH_PLATFORMS.has(platform) ? t("integrations.accessToken") : t("integrations.consumerSecret")).toUpperCase()}
-                  </label>
-                  <input value={secret} onChange={(e) => setSecret(e.target.value)} type="password" className="w-full px-4 py-2 border border-outline-variant rounded font-mono-data text-mono-data bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" placeholder={platform === "shopify" ? "shpat_..." : undefined} />
-                </div>
+                {!OAUTH2_PLATFORMS.has(platform) && (
+                  <div>
+                    <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">
+                      {(platform === "lexoffice" || platform === "toggl" ? t("integrations.apiKey") : platform === "wordpress" ? t("integrations.applicationPassword") : platform === "shopware" ? t("integrations.clientSecret") : TOKEN_AUTH_PLATFORMS.has(platform) ? t("integrations.accessToken") : t("integrations.consumerSecret")).toUpperCase()}
+                    </label>
+                    <input value={secret} onChange={(e) => setSecret(e.target.value)} type="password" className="w-full px-4 py-2 border border-outline-variant rounded font-mono-data text-mono-data bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" placeholder={platform === "shopify" ? "shpat_..." : undefined} />
+                  </div>
+                )}
+                {OAUTH2_PLATFORMS.has(platform) && (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">{t("integrations.bankCountry").toUpperCase()}</label>
+                      <div className="flex gap-2">
+                        <input value={bankCountry} onChange={(e) => setBankCountry(e.target.value.toLowerCase())} maxLength={2} className="w-20 px-4 py-2 border border-outline-variant rounded font-mono-data text-mono-data bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary uppercase" placeholder="de" />
+                        <button type="button" disabled={institutionsBusy} onClick={searchInstitutions} className="px-4 py-2 border border-primary text-primary font-label-caps text-label-caps rounded hover:bg-primary/5 transition-colors disabled:opacity-60">
+                          {t("integrations.searchBanks").toUpperCase()}
+                        </button>
+                      </div>
+                    </div>
+                    {institutions.length > 0 && (
+                      <div>
+                        <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">{t("integrations.selectBank").toUpperCase()}</label>
+                        <select value={institutionId} onChange={(e) => setInstitutionId(e.target.value)} className="w-full px-4 py-2 border border-outline-variant rounded font-body-md text-body-md bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary">
+                          <option value="">—</option>
+                          {institutions.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                )}
               </form>
 
               {result && (
@@ -192,8 +259,8 @@ export default function Integrations() {
               )}
             </div>
             <div className="p-gutter border-t border-outline-variant bg-surface-container-lowest sticky bottom-0">
-              <button disabled={busy} onClick={connect} className="w-full bg-primary hover:bg-on-primary-container text-on-primary font-label-caps text-label-caps px-4 py-3 rounded transition-colors flex justify-center items-center gap-2 disabled:opacity-60">
-                {t("action.connect").toUpperCase()}
+              <button disabled={busy || (OAUTH2_PLATFORMS.has(platform) && !institutionId)} onClick={OAUTH2_PLATFORMS.has(platform) ? connectBank : connect} className="w-full bg-primary hover:bg-on-primary-container text-on-primary font-label-caps text-label-caps px-4 py-3 rounded transition-colors flex justify-center items-center gap-2 disabled:opacity-60">
+                {OAUTH2_PLATFORMS.has(platform) ? t("integrations.connectBank").toUpperCase() : t("action.connect").toUpperCase()}
                 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
               </button>
             </div>

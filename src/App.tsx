@@ -13,6 +13,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Integrations = lazy(() => import("./pages/Integrations"));
+const BankCallback = lazy(() => import("./pages/BankCallback"));
 const Agents = lazy(() => import("./pages/Agents"));
 const Approvals = lazy(() => import("./pages/Approvals"));
 const Audit = lazy(() => import("./pages/Audit"));
@@ -205,6 +206,7 @@ function AuthedArea({ session }: { session: Session }) {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="integrations" element={<Integrations />} />
+          <Route path="integrations/bank-callback" element={<BankCallback />} />
           <Route path="agents" element={<Agents />} />
           <Route path="approvals" element={<Approvals />} />
           <Route path="audit" element={<Audit />} />
