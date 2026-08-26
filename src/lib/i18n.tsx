@@ -223,6 +223,7 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "nav.preview": { en: "Preview", de: "Vorschau" },
   "nav.platforms": { en: "Platforms", de: "Plattformen" },
   "nav.docs": { en: "Docs", de: "Doku" },
+  "nav.blueprint": { en: "Blueprint", de: "Blueprint" },
   "landing.eyebrow": { en: "AI agent infrastructure for commerce", de: "KI-Agenten-Infrastruktur für Commerce" },
   "landing.headline1": { en: "One canonical tool.", de: "Ein einheitliches Werkzeug." },
   "landing.headline2": { en: "Every commerce platform.", de: "Jede Commerce-Plattform." },
@@ -253,6 +254,52 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "landing.preview.eyebrow": { en: "See it in action", de: "In Aktion sehen" },
   "landing.preview.title": { en: "A real approval, waiting on a real human.", de: "Eine echte Freigabe, die auf eine echte Entscheidung wartet." },
   "landing.preview.subtitle": { en: "This is what lands in the Approvals inbox the moment an agent tries a gated action — nothing runs until someone decides.", de: "So sieht es im Freigabe-Postfach aus, sobald ein Agent eine kontrollierte Aktion versucht — nichts wird ausgeführt, bevor jemand entscheidet." },
+
+  // Blueprint (public "how it works" page)
+  "blueprint.eyebrow": { en: "System blueprint", de: "System-Blueprint" },
+  "blueprint.title": { en: "Integration Hub Blueprint", de: "Integration Hub Blueprint" },
+  "blueprint.subtitle": {
+    en: "A complete map of how the Hub works today — the architecture, who can do what, and the workflow behind every screen.",
+    de: "Eine vollständige Übersicht, wie der Hub heute funktioniert — die Architektur, wer was darf, und der Ablauf hinter jedem Bildschirm.",
+  },
+  "blueprint.nav.architecture": { en: "Architecture", de: "Architektur" },
+  "blueprint.nav.roles": { en: "Roles & permissions", de: "Rollen & Berechtigungen" },
+  "blueprint.nav.workflows": { en: "Workflows", de: "Abläufe" },
+  "blueprint.nav.platforms": { en: "Platforms", de: "Plattformen" },
+
+  "blueprint.architecture.eyebrow": { en: "Architecture", de: "Architektur" },
+  "blueprint.architecture.title": { en: "One console, one policy engine, every store", de: "Eine Konsole, eine Policy Engine, jeder Shop" },
+  "blueprint.architecture.p1": {
+    en: "AI Integration Hub sits between your AI agents and the commerce platforms you run — WooCommerce, Shopware, Magento, and Shopify. Agents never talk to a store directly. Every action goes through a small set of canonical tools, so the same agent logic works identically no matter which platform is behind an integration.",
+    de: "AI Integration Hub steht zwischen Ihren KI-Agenten und den Commerce-Plattformen, die Sie betreiben — WooCommerce, Shopware, Magento und Shopify. Agenten sprechen nie direkt mit einem Shop. Jede Aktion läuft über eine kleine Menge kanonischer Tools, sodass dieselbe Agentenlogik unabhängig von der dahinterliegenden Plattform funktioniert.",
+  },
+  "blueprint.architecture.p2": {
+    en: "Every tool call passes through the Policy Engine before it runs. Depending on how that tool is configured for that agent, the call is allowed immediately, blocked, or parked for a human to approve. Every decision — allowed, denied, or pending — is written to an append-only audit log.",
+    de: "Jeder Tool-Aufruf durchläuft vor der Ausführung die Policy Engine. Je nachdem, wie dieses Tool für diesen Agenten konfiguriert ist, wird der Aufruf sofort erlaubt, blockiert oder für eine menschliche Freigabe zurückgestellt. Jede Entscheidung — erlaubt, abgelehnt oder ausstehend — wird in einem unveränderlichen Audit-Log festgehalten.",
+  },
+  "blueprint.architecture.diagramTitle": { en: "How a project is organized", de: "Wie ein Projekt aufgebaut ist" },
+  "blueprint.architecture.node.org": { en: "Organization", de: "Organisation" },
+  "blueprint.architecture.node.project": { en: "Project", de: "Projekt" },
+  "blueprint.architecture.node.resources": { en: "Integrations · Agents · API keys", de: "Integrationen · Agenten · API-Schlüssel" },
+  "blueprint.architecture.node.outcome": { en: "Approvals & audit log", de: "Freigaben & Audit-Log" },
+  "blueprint.architecture.policyTitle": { en: "How the Policy Engine decides", de: "Wie die Policy Engine entscheidet" },
+
+  "blueprint.roles.eyebrow": { en: "Roles & permissions", de: "Rollen & Berechtigungen" },
+  "blueprint.roles.title": { en: "Three layers, so access always matches responsibility", de: "Drei Ebenen, damit Zugriff immer der Verantwortung entspricht" },
+  "blueprint.roles.subtitle": {
+    en: "Organization and project roles apply to your own workspace. Platform admin is a separate, Hub-wide role for the team operating the Hub itself.",
+    de: "Organisations- und Projektrollen gelten für Ihren eigenen Arbeitsbereich. Plattform-Admin ist eine eigene, Hub-weite Rolle für das Team, das den Hub selbst betreibt.",
+  },
+
+  "blueprint.workflows.eyebrow": { en: "Workflows", de: "Abläufe" },
+  "blueprint.workflows.title": { en: "Nine workflows, in the order a new account moves through them", de: "Neun Abläufe, in der Reihenfolge eines neuen Kontos" },
+
+  "blueprint.platforms.eyebrow": { en: "Platforms", de: "Plattformen" },
+  "blueprint.platforms.title": { en: "One integration model, four commerce platforms", de: "Ein Integrationsmodell, vier Commerce-Plattformen" },
+  "blueprint.platforms.subtitle": {
+    en: "Connect any of these and the same agents, the same policies, and the same audit log apply — nothing about how you operate the Hub changes per platform.",
+    de: "Verbinden Sie eine dieser Plattformen — dieselben Agenten, dieselben Richtlinien und dasselbe Audit-Log gelten unverändert, unabhängig von der Plattform.",
+  },
 
   "footer.rights": { en: "Technical AI Systems", de: "Technische KI-Systeme" },
   "footer.imprint": { en: "Imprint", de: "Impressum" },

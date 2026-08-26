@@ -20,6 +20,7 @@ const ApiKeys = lazy(() => import("./pages/ApiKeys"));
 const Billing = lazy(() => import("./pages/Billing"));
 const Team = lazy(() => import("./pages/Team"));
 const Account = lazy(() => import("./pages/Account"));
+const Blueprint = lazy(() => import("./pages/Blueprint"));
 const Help = lazy(() => import("./pages/Help"));
 const HelpArticle = lazy(() => import("./pages/HelpArticle"));
 const Imprint = lazy(() => import("./pages/Imprint"));
@@ -115,6 +116,7 @@ function LocalizedApp({ session }: { session: Session }) {
         <Route path="imprint" element={<Imprint />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="terms" element={<Terms />} />
+        <Route path="blueprint" element={<Blueprint />} />
         <Route path="help" element={<Help />} />
         <Route path="help/:slug" element={<HelpArticle />} />
         <Route path="app/*" element={session ? <AuthedArea session={session} /> : <Navigate to={`/${lang}/signin`} replace />} />
