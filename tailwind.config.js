@@ -94,7 +94,7 @@ export default {
         "headline-md": ["24px", { lineHeight: "1.3", letterSpacing: "-0.01em", fontWeight: "600" }],
         "body-md": ["14px", { lineHeight: "1.5", fontWeight: "400" }],
         "body-lg": ["16px", { lineHeight: "1.6", fontWeight: "400" }],
-        "label-caps": ["12.5px", { lineHeight: "1.4", letterSpacing: "0.06em", fontWeight: "700" }],
+        "label-caps": ["14px", { lineHeight: "1.4", letterSpacing: "0.06em", fontWeight: "700" }],
       },
     },
   },
