@@ -12,6 +12,10 @@ import { PersonioConnector } from "./personio.ts";
 import { DatevConnector } from "./datev.ts";
 import { JtlConnector } from "./jtl.ts";
 import { Typo3Connector } from "./typo3.ts";
+import { ContentfulConnector } from "./contentful.ts";
+import { ClockifyConnector } from "./clockify.ts";
+import { PrestaShopConnector } from "./prestashop.ts";
+import { HubSpotConnector } from "./hubspot.ts";
 import { decryptCredentials } from "../crypto.ts";
 import { assertPublicHttpUrl } from "../urlGuard.ts";
 
@@ -63,6 +67,17 @@ export async function loadConnector(integration: { platform: string; credentials
       assertPublicHttpUrl(c.siteUrl, "siteUrl");
       return new Typo3Connector(c);
     }
+    case "contentful":
+      return new ContentfulConnector(creds as { spaceId: string; accessToken: string; environmentId?: string });
+    case "clockify":
+      return new ClockifyConnector(creds as { workspaceId: string; apiKey: string });
+    case "prestashop": {
+      const c = creds as { storeUrl: string; accessToken: string };
+      assertPublicHttpUrl(c.storeUrl, "storeUrl");
+      return new PrestaShopConnector(c);
+    }
+    case "hubspot":
+      return new HubSpotConnector(creds as { accessToken: string });
     default:
       throw new Error(`No connector implemented for platform '${integration.platform}'.`);
   }

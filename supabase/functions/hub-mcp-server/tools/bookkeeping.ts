@@ -41,11 +41,20 @@ export const definitions: ToolDefinition[] = [
   },
   {
     name: "contacts.search",
-    description: "Search contacts (customers/vendors) on a bookkeeping integration.",
+    description: "Search contacts (customers/vendors/leads) on a bookkeeping or CRM integration.",
     inputSchema: {
       type: "object",
       required: ["integration_id"],
       properties: { integration_id: { type: "string" }, name: { type: "string" }, email: { type: "string" }, page: { type: "number" } },
+    },
+  },
+  {
+    name: "contacts.get",
+    description: "Get one contact by id.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "contact_id"],
+      properties: { integration_id: { type: "string" }, contact_id: { type: "string" } },
     },
   },
 ];
@@ -67,5 +76,11 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("contacts.search", args)).data;
+  },
+
+  async "contacts.get"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("contacts.get", args)).data;
   },
 };

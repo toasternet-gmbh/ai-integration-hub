@@ -8,10 +8,10 @@
 
 export type Bi = { en: string; de: string };
 
-export type PlatformCategory = "ecommerce" | "bookkeeping" | "cms" | "time_tracking" | "banking";
+export type PlatformCategory = "ecommerce" | "bookkeeping" | "cms" | "time_tracking" | "banking" | "crm";
 
 /** Display order for category groups wherever platforms are grouped. */
-export const CATEGORY_ORDER: PlatformCategory[] = ["ecommerce", "bookkeeping", "cms", "time_tracking", "banking"];
+export const CATEGORY_ORDER: PlatformCategory[] = ["ecommerce", "bookkeeping", "cms", "time_tracking", "banking", "crm"];
 
 export const CATEGORY_LABEL: Record<PlatformCategory, Bi> = {
   ecommerce: { en: "E-commerce", de: "E-Commerce" },
@@ -19,6 +19,7 @@ export const CATEGORY_LABEL: Record<PlatformCategory, Bi> = {
   cms: { en: "CMS", de: "CMS" },
   time_tracking: { en: "Time tracking", de: "Zeiterfassung" },
   banking: { en: "Banking", de: "Banking" },
+  crm: { en: "CRM", de: "CRM" },
 };
 
 export interface PlatformMeta {
@@ -124,6 +125,34 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
     description: {
       en: "Page search and lookup — requires the target site to have a REST API extension (e.g. cundd/rest) installed; TYPO3 core has none built in.",
       de: "Seitensuche und -abfrage — erfordert eine installierte REST-API-Extension (z. B. cundd/rest) auf der Zielseite; der TYPO3-Kern bringt keine mit.",
+    },
+  },
+  {
+    id: "contentful", category: "cms", name: "Contentful", icon: "cloud_queue", color: "#3C8DBC",
+    description: {
+      en: "Page search and lookup via Contentful's Content Delivery API, a real REST surface built for exactly this.",
+      de: "Seitensuche und -abfrage über die Content-Delivery-API von Contentful, eine echte REST-Schnittstelle genau dafür.",
+    },
+  },
+  {
+    id: "clockify", category: "time_tracking", name: "Clockify", icon: "timer", color: "#03A9F4",
+    description: {
+      en: "Time entry search and lookup against a Clockify workspace.",
+      de: "Suche und Abfrage von Zeiteinträgen in einem Clockify-Workspace.",
+    },
+  },
+  {
+    id: "prestashop", category: "ecommerce", name: "PrestaShop", icon: "local_mall", color: "#DF0067",
+    description: {
+      en: "Order and product search and lookup via PrestaShop's Webservice API.",
+      de: "Bestell- und Produktsuche sowie -abfrage über die Webservice-API von PrestaShop.",
+    },
+  },
+  {
+    id: "hubspot", category: "crm", name: "HubSpot", icon: "handshake", color: "#FF7A59",
+    description: {
+      en: "Contact and deal search and lookup via HubSpot's CRM API — the Hub's first CRM platform.",
+      de: "Kontakt- und Deal-Suche sowie -Abfrage über die CRM-API von HubSpot — die erste CRM-Plattform des Hubs.",
     },
   },
 ];

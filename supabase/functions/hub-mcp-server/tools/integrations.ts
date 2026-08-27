@@ -21,7 +21,7 @@ export const definitions: ToolDefinition[] = [
       properties: {
         platform: {
           type: "string",
-          enum: ["woocommerce", "shopware", "shopify", "magento", "wordpress", "lexoffice", "toggl", "sevdesk", "personio", "datev", "jtl", "typo3"],
+          enum: ["woocommerce", "shopware", "shopify", "magento", "wordpress", "lexoffice", "toggl", "sevdesk", "personio", "datev", "jtl", "typo3", "contentful", "clockify", "prestashop", "hubspot"],
         },
         name: { type: "string" },
         credentials: {
@@ -32,7 +32,9 @@ export const definitions: ToolDefinition[] = [
             "magento: {storeUrl, accessToken}; lexoffice: {apiKey}; " +
             "wordpress: {siteUrl, username, appPassword}; toggl: {apiToken}; sevdesk: {apiKey}; " +
             "personio: {clientId, clientSecret}; datev: {clientId, clientSecret}; " +
-            "jtl: {clientId, clientSecret}; typo3: {siteUrl, accessToken}.",
+            "jtl: {clientId, clientSecret}; typo3: {siteUrl, accessToken}; " +
+            "contentful: {spaceId, accessToken, environmentId?}; clockify: {workspaceId, apiKey}; " +
+            "prestashop: {storeUrl, accessToken (webservice key)}; hubspot: {accessToken (private app token)}.",
         },
       },
     },
