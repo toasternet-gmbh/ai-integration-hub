@@ -2,23 +2,14 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { mcp } from "../lib/mcp";
 import { useI18n } from "../lib/i18n";
+import { CATEGORY_LABEL, PLATFORM_CATALOG, platformsByCategory } from "../lib/platformCatalog";
 
 type Ctx = { projectId: string };
 type Capability = { domain: string; tools: string[] };
 type Integration = { id: string; platform: string; name: string; status: string; error_status: string | null; capabilities: Capability[] | null };
 type Institution = { id: string; name: string };
 
-const PLATFORM_ICON: Record<string, string> = { woocommerce: "shopping_cart", shopware: "storefront", shopify: "local_mall", magento: "inventory", lexoffice: "receipt_long", wordpress: "edit_note", toggl: "schedule", gocardless: "account_balance" };
-const PLATFORMS = [
-  { id: "woocommerce", icon: "shopping_cart", label: "WooCommerce", disabled: false },
-  { id: "shopware", icon: "storefront", label: "Shopware 6", disabled: false },
-  { id: "shopify", icon: "local_mall", label: "Shopify", disabled: false },
-  { id: "magento", icon: "inventory", label: "Magento", disabled: false },
-  { id: "lexoffice", icon: "receipt_long", label: "Lexoffice", disabled: false },
-  { id: "wordpress", icon: "edit_note", label: "WordPress", disabled: false },
-  { id: "toggl", icon: "schedule", label: "Toggl Track", disabled: false },
-  { id: "gocardless", icon: "account_balance", label: "GoCardless", disabled: false },
-];
+const PLATFORM_ICON: Record<string, string> = Object.fromEntries(PLATFORM_CATALOG.map((p) => [p.id, p.icon]));
 
 const TOKEN_AUTH_PLATFORMS = new Set(["shopify", "magento"]);
 // Single-API-key platforms — no store URL, no separate key/secret pair.
@@ -29,7 +20,7 @@ const OAUTH2_PLATFORMS = new Set(["gocardless"]);
 
 export default function Integrations() {
   const { projectId } = useOutletContext<Ctx>();
-  const { t, path } = useI18n();
+  const { t, path, lang } = useI18n();
   const [rows, setRows] = useState<Integration[]>([]);
   const [open, setOpen] = useState(false);
   const [platform, setPlatform] = useState("woocommerce");
@@ -178,27 +169,37 @@ export default function Integrations() {
             <div className="p-gutter overflow-y-auto flex-1 bg-surface-container-lowest">
               <div className="mb-8">
                 <label className="block font-label-caps text-label-caps text-on-surface-variant mb-3">{t("integrations.selectPlatform").toUpperCase()}</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {PLATFORMS.map((p) => (
-                    <button
-                      key={p.id}
-                      disabled={p.disabled}
-                      onClick={() => setPlatform(p.id)}
-                      className={
-                        "flex flex-col items-center justify-center p-4 rounded relative transition-colors " +
-                        (p.disabled
-                          ? "border border-outline-variant/30 bg-surface opacity-50 cursor-not-allowed"
-                          : platform === p.id
-                          ? "border-2 border-primary bg-primary/5"
-                          : "border border-outline-variant bg-surface hover:border-primary")
-                      }
-                    >
-                      <span className={"material-symbols-outlined text-[28px] mb-2 " + (platform === p.id && !p.disabled ? "text-primary" : "text-on-surface-variant")}>{p.icon}</span>
-                      <span className={"font-body-md text-body-md font-semibold " + (platform === p.id && !p.disabled ? "text-primary" : "text-on-surface")}>{p.label}</span>
-                      {p.disabled && <span className="font-label-caps text-label-caps text-on-surface-variant mt-1">{t("integrations.comingSoon").toUpperCase()}</span>}
-                    </button>
+                <div className="flex flex-col gap-5">
+                  {platformsByCategory().map((group) => (
+                    <div key={group.category}>
+                      <span className="block font-label-caps text-label-caps text-on-surface-variant/70 mb-2 tracking-wide">{CATEGORY_LABEL[group.category][lang]}</span>
+                      <div className="grid grid-cols-2 gap-3">
+                        {group.platforms.map((p) => (
+                          <button
+                            key={p.id}
+                            onClick={() => setPlatform(p.id)}
+                            className={
+                              "flex flex-col items-center justify-center p-4 rounded transition-colors " +
+                              (platform === p.id ? "border-2 border-primary bg-primary/5" : "border border-outline-variant bg-surface hover:border-primary")
+                            }
+                          >
+                            <span
+                              className={"material-symbols-outlined text-[28px] mb-2 " + (platform === p.id ? "text-primary" : "")}
+                              style={platform === p.id ? undefined : { color: p.color }}
+                            >
+                              {p.icon}
+                            </span>
+                            <span className={"font-body-md text-body-md font-semibold " + (platform === p.id ? "text-primary" : "text-on-surface")}>{p.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
+                {(() => {
+                  const selected = PLATFORM_CATALOG.find((p) => p.id === platform);
+                  return selected ? <p className="font-body-md text-body-md text-on-surface-variant mt-4">{selected.description[lang]}</p> : null;
+                })()}
               </div>
               <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
                 <div>

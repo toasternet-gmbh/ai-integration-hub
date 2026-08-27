@@ -3,20 +3,10 @@ import { useI18n } from "../lib/i18n";
 import { useSession } from "../lib/useSession";
 import { PublicShell } from "../components/PublicShell";
 import { ProductPreview } from "../components/ProductPreview";
-
-const PLATFORMS = [
-  { icon: "storefront", color: "#7F54B3", name: "WooCommerce", soon: false },
-  { icon: "inventory_2", color: "#189EFF", name: "Shopware 6", soon: false },
-  { icon: "shopping_bag", color: "#95BF47", name: "Shopify", soon: false },
-  { icon: "shopping_cart", color: "#EE672F", name: "Magento", soon: false },
-  { icon: "receipt_long", color: "#6CC24A", name: "Lexoffice", soon: false },
-  { icon: "edit_note", color: "#21759B", name: "WordPress", soon: false },
-  { icon: "schedule", color: "#E01B84", name: "Toggl Track", soon: false },
-  { icon: "account_balance", color: "#191919", name: "GoCardless", soon: false },
-];
+import { CATEGORY_LABEL, platformsByCategory } from "../lib/platformCatalog";
 
 export default function Landing() {
-  const { t, path } = useI18n();
+  const { t, path, lang } = useI18n();
   const signedIn = useSession();
   return (
     <PublicShell>
@@ -145,19 +135,21 @@ export default function Landing() {
           </section>
 
           <section id="platforms" className="border-t border-outline-variant pt-16 flex flex-col items-center scroll-mt-24">
-            <span className="font-label-caps text-on-surface-variant mb-8 text-center bg-surface px-4 -mt-20 inline-block">{t("landing.supportedPlatforms")}</span>
-            <div className="flex flex-wrap justify-center items-center gap-6 md:gap-8">
-              {PLATFORMS.map((p) => (
-                <div key={p.name} className="flex items-center gap-3 relative bg-surface-container-lowest border border-outline-variant rounded-lg px-6 py-4 hover:shadow-card hover:-translate-y-0.5 transition-all">
-                  <div className="w-10 h-10 rounded flex items-center justify-center" style={{ backgroundColor: `${p.color}1a`, color: p.color }}>
-                    <span className="material-symbols-outlined text-[22px]">{p.icon}</span>
+            <span className="font-label-caps text-on-surface-variant mb-10 text-center bg-surface px-4 -mt-20 inline-block">{t("landing.supportedPlatforms")}</span>
+            <div className="flex flex-col gap-8 w-full">
+              {platformsByCategory().map((group) => (
+                <div key={group.category} className="flex flex-col items-center gap-4">
+                  <span className="font-label-caps text-label-caps text-primary tracking-wide">{CATEGORY_LABEL[group.category][lang]}</span>
+                  <div className="flex flex-wrap justify-center items-center gap-4 md:gap-6">
+                    {group.platforms.map((p) => (
+                      <div key={p.id} className="flex items-center gap-3 bg-surface-container-lowest border border-outline-variant rounded-lg px-6 py-4 hover:shadow-card hover:-translate-y-0.5 transition-all">
+                        <div className="w-10 h-10 rounded flex items-center justify-center shrink-0" style={{ backgroundColor: `${p.color}1a`, color: p.color }}>
+                          <span className="material-symbols-outlined text-[22px]">{p.icon}</span>
+                        </div>
+                        <span className="font-headline-sm font-bold tracking-tight text-on-surface-variant">{p.name}</span>
+                      </div>
+                    ))}
                   </div>
-                  <span className="font-headline-sm font-bold tracking-tight text-on-surface-variant">{p.name}</span>
-                  {p.soon && (
-                    <span className="absolute -top-3 -right-3 bg-tertiary-container text-on-tertiary-container font-label-caps px-2 py-1 rounded-full text-[9px]">
-                      {t("integrations.comingSoon").toUpperCase()}
-                    </span>
-                  )}
                 </div>
               ))}
             </div>

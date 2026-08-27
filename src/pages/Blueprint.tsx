@@ -1,6 +1,7 @@
 import { useI18n } from "../lib/i18n";
 import { PublicShell } from "../components/PublicShell";
-import { POLICY_STEPS, ROLES, WORKFLOWS, PLATFORM_CARDS } from "../lib/blueprintContent";
+import { POLICY_STEPS, ROLES, WORKFLOWS } from "../lib/blueprintContent";
+import { CATEGORY_LABEL, platformsByCategory } from "../lib/platformCatalog";
 
 const SECTIONS = [
   { id: "architecture", labelKey: "blueprint.nav.architecture" },
@@ -135,15 +136,22 @@ export default function Blueprint() {
               <h2 className="font-headline-md text-headline-md text-on-surface tracking-tight mt-2 mb-3 max-w-2xl">{t("blueprint.platforms.title")}</h2>
               <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mb-10">{t("blueprint.platforms.subtitle")}</p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {PLATFORM_CARDS.map((p) => (
-                  <div key={p.id} className="flex items-start gap-4 p-6 bg-surface-container-lowest border border-outline-variant rounded-lg hover:border-primary/40 hover:shadow-card transition-all">
-                    <div className="w-11 h-11 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${p.color}1a`, color: p.color }}>
-                      <span className="material-symbols-outlined text-[22px]">{p.icon}</span>
-                    </div>
-                    <div>
-                      <h3 className="font-headline-sm text-headline-sm text-on-surface mb-1">{p.name}</h3>
-                      <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{p.description[lang]}</p>
+              <div className="flex flex-col gap-8">
+                {platformsByCategory().map((group) => (
+                  <div key={group.category}>
+                    <h3 className="font-label-caps text-label-caps text-on-surface-variant mb-3 tracking-wide">{CATEGORY_LABEL[group.category][lang]}</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {group.platforms.map((p) => (
+                        <div key={p.id} className="flex items-start gap-4 p-6 bg-surface-container-lowest border border-outline-variant rounded-lg hover:border-primary/40 hover:shadow-card transition-all">
+                          <div className="w-11 h-11 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${p.color}1a`, color: p.color }}>
+                            <span className="material-symbols-outlined text-[22px]">{p.icon}</span>
+                          </div>
+                          <div>
+                            <h4 className="font-headline-sm text-headline-sm text-on-surface mb-1">{p.name}</h4>
+                            <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{p.description[lang]}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}

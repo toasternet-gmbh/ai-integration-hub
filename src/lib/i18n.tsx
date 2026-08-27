@@ -128,7 +128,6 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "integrations.bankCallbackPending": { en: "Finishing bank connection…", de: "Bankverbindung wird abgeschlossen…" },
   "integrations.bankCallbackOk": { en: "Bank account connected.", de: "Bankkonto verbunden." },
   "integrations.bankCallbackMissingRef": { en: "Missing reference — the bank redirected without the expected parameter.", de: "Referenz fehlt — die Bank hat ohne den erwarteten Parameter weitergeleitet." },
-  "integrations.comingSoon": { en: "Coming soon", de: "Demnächst" },
   "integrations.empty": { en: "No stores connected yet.", de: "Noch keine Shops verbunden." },
   "integrations.disconnectConfirm": { en: "Disconnect \"{name}\"? This permanently deletes its stored credentials and agent permissions for it.", de: "„{name}“ trennen? Dadurch werden gespeicherte Zugangsdaten und Agenten-Rechte dafür dauerhaft gelöscht." },
   // Agents
