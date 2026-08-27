@@ -41,9 +41,11 @@ Deno edge functions (Supabase) on the backend.
 `sdk/` is `@ai-integration/hub`, the official JS/TS client for the `hub-mcp-server` MCP gateway —
 authenticate with a project API key, then `client.tools.orders.refund({...})` /
 `client.tools.cms.pages.search({...})` / any other canonical tool by dot-path. Not yet published
-to the public npm registry; see `sdk/README.md` for install-from-repo instructions and full usage
-(including how to handle a `require_approval` response). This is what the Integrations → API Keys
-page's Quick Start panel and the Help Center's "API keys and the Node.js client" article point to.
+to the public npm registry; install it with `npm install github:toasternet-gmbh/hub-sdk` (a
+single-package mirror repo, kept in sync on release — see `sdk/README.md`). Full usage docs,
+including how to handle a `require_approval` response, are in that package's own README. This is
+what the Integrations → API Keys page's Quick Start panel and the Help Center's "API keys and the
+Node.js client" article point to.
 
 ## What's implemented
 

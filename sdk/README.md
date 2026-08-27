@@ -4,24 +4,23 @@ Official JavaScript/TypeScript client for the [AI Integration Hub](https://githu
 
 ## Install
 
-This package is not yet published to the public npm registry. `npm install github:...#path:sdk`
-does **not** work for a plain npm install — npm has no built-in way to install just a
-subdirectory of a git repo, so that URL fetches the whole monorepo, not this package, and the
-import fails. Until this is published, install it from a local clone instead:
+This package is not yet published to the public npm registry. It's mirrored, on release, to its
+own single-package repo — [toasternet-gmbh/hub-sdk](https://github.com/toasternet-gmbh/hub-sdk) —
+specifically so a plain `npm install github:...` works (npm has no built-in way to install just a
+subdirectory of a git repo, so pointing npm at *this* monorepo directly does not work):
 
 ```bash
-git clone https://github.com/toasternet-gmbh/ai-integration-hub.git
-cd ai-integration-hub/sdk && npm install && npm run build
+npm install github:toasternet-gmbh/hub-sdk
 ```
 
-then, from your own project:
+npm builds it automatically on install (via that repo's `prepare` script). Pin to a release
+instead of tracking its default branch with `#v0.1.0` etc. Both forms are verified working
+end-to-end (installs cleanly from a fresh project, imports, and round-trips a real call against a
+live `hub-mcp-server` gateway).
 
-```bash
-npm install /path/to/ai-integration-hub/sdk
-```
-
-npm follows the symlink it creates in `node_modules`, so edits to `sdk/src` show up after a
-`npm run build` in `sdk/` — no reinstall needed.
+Developing this package itself happens here, in `sdk/` — see **Development** below. To publish a
+new mirror after a change here: copy `sdk/`'s contents (minus `node_modules`/`dist`) into a clone
+of `hub-sdk`, bump `version` in that repo's `package.json`, commit, push, and tag.
 
 ## Requirements
 
