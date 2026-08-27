@@ -19,8 +19,8 @@ export const POLICY_STEPS: Bi[] = [
     de: "Override je Agent — legen Sie für ein Tool bei einem Agenten Erlauben, Freigabe erforderlich oder Verweigern fest, bei Bedarf sogar begrenzt auf eine einzelne Integration.",
   },
   {
-    en: "Approve runs it for real — approving a pending request executes the action immediately against the connected store. There's no separate unlock-and-retry step.",
-    de: "Genehmigen führt es wirklich aus — die Genehmigung einer ausstehenden Anfrage führt die Aktion sofort im verbundenen Shop aus. Es gibt keinen separaten Freischalt-Schritt.",
+    en: "Approve runs it for real — approving a pending request executes the action immediately against the connected integration. There's no separate unlock-and-retry step.",
+    de: "Genehmigen führt es wirklich aus — die Genehmigung einer ausstehenden Anfrage führt die Aktion sofort in der verbundenen Integration aus. Es gibt keinen separaten Freischalt-Schritt.",
   },
 ];
 
@@ -66,11 +66,11 @@ export const WORKFLOWS: Workflow[] = [
     },
   },
   {
-    title: { en: "Connect a store", de: "Einen Shop verbinden" },
+    title: { en: "Connect a system", de: "Ein System verbinden" },
     tag: { en: "Integrations", de: "Integrationen" },
     body: {
-      en: "Pick a platform, enter its store URL and credentials, and the Hub encrypts them, connects, and discovers which canonical tools are actually usable against that store.",
-      de: "Wählen Sie eine Plattform, geben Sie Shop-URL und Zugangsdaten ein — der Hub verschlüsselt sie, stellt die Verbindung her und ermittelt, welche kanonischen Tools für diesen Shop tatsächlich nutzbar sind.",
+      en: "Pick a platform — a store, your bookkeeping, a CMS, time tracking, or a bank connection — enter its credentials (or, for bank connections, authenticate via redirect), and the Hub encrypts them, connects, and discovers which canonical tools are actually usable against it.",
+      de: "Wählen Sie eine Plattform — einen Shop, Ihre Buchhaltung, ein CMS, die Zeiterfassung oder eine Bankverbindung —, geben Sie die Zugangsdaten ein (bei Bankverbindungen erfolgt die Authentifizierung per Weiterleitung) — der Hub verschlüsselt sie, stellt die Verbindung her und ermittelt, welche kanonischen Tools tatsächlich nutzbar sind.",
     },
   },
   {
@@ -160,6 +160,34 @@ export const PLATFORM_CARDS: PlatformCard[] = [
     description: {
       en: "Order search, lookup, and refunds, plus product and inventory tools.",
       de: "Bestellsuche, -abfrage und -erstattungen sowie Produkt- und Lager-Tools.",
+    },
+  },
+  {
+    id: "lexoffice", icon: "receipt_long", color: "#6CC24A", name: "Lexoffice",
+    description: {
+      en: "Invoice and contact search, plus invoice lookup, via Lexoffice's bookkeeping API.",
+      de: "Rechnungs- und Kontaktsuche sowie Rechnungsabfrage über die Buchhaltungs-API von Lexoffice.",
+    },
+  },
+  {
+    id: "wordpress", icon: "edit_note", color: "#21759B", name: "WordPress",
+    description: {
+      en: "Page search and lookup via the WordPress REST API, authenticated with an Application Password.",
+      de: "Seitensuche und -abfrage über die WordPress-REST-API, authentifiziert mit einem Anwendungspasswort.",
+    },
+  },
+  {
+    id: "toggl", icon: "schedule", color: "#E01B84", name: "Toggl Track",
+    description: {
+      en: "Time entry search and lookup against a Toggl Track workspace.",
+      de: "Suche und Abfrage von Zeiteinträgen in einem Toggl-Track-Workspace.",
+    },
+  },
+  {
+    id: "gocardless", icon: "account_balance", color: "#191919", name: "GoCardless",
+    description: {
+      en: "Read-only bank account and transaction access via GoCardless Bank Account Data — connect by authenticating with your bank, no API key needed.",
+      de: "Lesender Zugriff auf Bankkonten und Transaktionen über GoCardless Bank Account Data — Verbindung per Bank-Login, kein API-Schlüssel nötig.",
     },
   },
 ];

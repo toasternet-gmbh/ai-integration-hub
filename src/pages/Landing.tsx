@@ -9,6 +9,10 @@ const PLATFORMS = [
   { icon: "inventory_2", color: "#189EFF", name: "Shopware 6", soon: false },
   { icon: "shopping_bag", color: "#95BF47", name: "Shopify", soon: false },
   { icon: "shopping_cart", color: "#EE672F", name: "Magento", soon: false },
+  { icon: "receipt_long", color: "#6CC24A", name: "Lexoffice", soon: false },
+  { icon: "edit_note", color: "#21759B", name: "WordPress", soon: false },
+  { icon: "schedule", color: "#E01B84", name: "Toggl Track", soon: false },
+  { icon: "account_balance", color: "#191919", name: "GoCardless", soon: false },
 ];
 
 export default function Landing() {

@@ -97,10 +97,13 @@ export default function ApiKeys() {
               <pre className="p-4 font-mono-data text-mono-data text-inverse-on-surface overflow-x-auto">{`import { HubClient } from '@ai-integration/hub';
 
 const client = new HubClient({
-  apiKey: process.env.HUB_API_KEY
+  baseUrl: process.env.HUB_BASE_URL,
+  apiKey: process.env.HUB_API_KEY,
+  agentId: 'my-agent'
 });
 
-const orders = await client.tools.orders.get({
+const orders = await client.tools.orders.search({
+  integration_id: 'int_...',
   status: 'pending_approval',
   limit: 10
 });`}</pre>

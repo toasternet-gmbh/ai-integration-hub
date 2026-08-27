@@ -243,12 +243,12 @@ export const HELP_ARTICLES: HelpArticle[] = [
       en: [
         "API Keys → Create API key, name it for where it'll live (e.g. \"Production Hub Key\"). The full secret is shown exactly once, immediately after creation — copy it now. From then on the page only ever shows a masked suffix; there is no way to recover a lost key, only revoke it and create a new one.",
         "A key is scoped to one project and authenticates as that project, not as any particular agent — pair it with an `X-Agent-Id` header per call to say which agent is acting.",
-        "The Quick Start panel on that page shows a minimal working call against `orders.get` using the official Node.js client — copy it as a starting point for your own integration.",
+        "The Quick Start panel on that page shows a minimal working call using the official JS/TS client, `@ai-integration/hub` — copy it as a starting point for your own integration. It's not on the public npm registry yet; install it straight from the repo (`npm install github:toasternet-gmbh/ai-integration-hub#path:sdk`) until it is. Full usage docs, including the `require_approval` handling pattern, are in the package's own README.",
       ],
       de: [
         "API-Schlüssel → API-Schlüssel erstellen, benennen Sie ihn nach seinem Einsatzort (z. B. „Produktionsschlüssel“). Der vollständige geheime Wert wird nur einmal direkt nach der Erstellung angezeigt — jetzt kopieren. Danach zeigt die Seite nur noch ein maskiertes Suffix; ein verlorener Schlüssel lässt sich nicht wiederherstellen, nur widerrufen und neu erstellen.",
         "Ein Schlüssel ist auf ein Projekt beschränkt und authentifiziert als dieses Projekt, nicht als ein bestimmter Agent — kombinieren Sie ihn pro Aufruf mit einem `X-Agent-Id`-Header, um den handelnden Agenten anzugeben.",
-        "Das Schnellstart-Panel auf dieser Seite zeigt einen minimalen funktionierenden Aufruf gegen `orders.get` mit dem offiziellen Node.js-Client — als Ausgangspunkt für Ihre eigene Integration kopierbar.",
+        "Das Schnellstart-Panel auf dieser Seite zeigt einen minimalen funktionierenden Aufruf mit dem offiziellen JS/TS-Client `@ai-integration/hub` — als Ausgangspunkt für Ihre eigene Integration kopierbar. Er ist noch nicht im öffentlichen npm-Registry; installieren Sie ihn bis dahin direkt aus dem Repo (`npm install github:toasternet-gmbh/ai-integration-hub#path:sdk`). Vollständige Nutzungsdokumentation, einschließlich des Umgangs mit `require_approval`, steht im README des Pakets.",
       ],
     },
   },

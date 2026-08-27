@@ -1,0 +1,47 @@
+{
+  "name": "@ai-integration/hub",
+  "version": "0.1.0",
+  "description": "Official JavaScript/TypeScript client for the AI Integration Hub MCP gateway.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3",
+    "vitest": "^4.1.11"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toasternet-gmbh/ai-integration-hub.git",
+    "directory": "sdk"
+  },
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "ai-agent",
+    "hub",
+    "integration",
+    "model-context-protocol"
+  ]
+}

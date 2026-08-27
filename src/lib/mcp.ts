@@ -1,8 +1,5 @@
 import { supabase } from "./supabase";
 
-// "hub-mcp-server", not "mcp-server" — the Hub's edge function lives inside yogaipilot's own
-// Supabase functions directory (shared-database mode) alongside yogaipilot's own "mcp-server",
-// so it needs a distinct name to avoid colliding with it.
 const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hub-mcp-server`;
 
 /** Calls one MCP tool as the signed-in user. `projectId` omitted for bootstrap tools
