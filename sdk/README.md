@@ -4,18 +4,24 @@ Official JavaScript/TypeScript client for the [AI Integration Hub](https://githu
 
 ## Install
 
-This package is not yet published to the public npm registry. Until it is, install it directly from this repo:
+This package is not yet published to the public npm registry. `npm install github:...#path:sdk`
+does **not** work for a plain npm install — npm has no built-in way to install just a
+subdirectory of a git repo, so that URL fetches the whole monorepo, not this package, and the
+import fails. Until this is published, install it from a local clone instead:
 
 ```bash
-npm install github:toasternet-gmbh/ai-integration-hub#path:sdk
+git clone https://github.com/toasternet-gmbh/ai-integration-hub.git
+cd ai-integration-hub/sdk && npm install && npm run build
 ```
 
-or, working inside a clone of this monorepo:
+then, from your own project:
 
 ```bash
-cd sdk && npm install && npm run build
-npm install ../path/to/ai-integration-hub/sdk   # from your own project
+npm install /path/to/ai-integration-hub/sdk
 ```
+
+npm follows the symlink it creates in `node_modules`, so edits to `sdk/src` show up after a
+`npm run build` in `sdk/` — no reinstall needed.
 
 ## Requirements
 
