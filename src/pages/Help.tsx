@@ -26,7 +26,7 @@ const CATEGORY_META: Record<HelpCategory, { icon: string; tone: string; title: {
 const TONE_BG: Record<string, string> = { secondary: "bg-secondary-container text-on-secondary-container", primary: "bg-primary-container text-on-primary-container", tertiary: "bg-tertiary-container text-on-tertiary-container" };
 
 const FEATURED_SLUG = "getting-started-with-ai-integration-hub";
-const POPULAR_SLUGS = ["how-to-rotate-api-keys", "troubleshooting-a-failed-connection", "policy-engine-basics", "handling-require-approval"];
+const POPULAR_SLUGS = ["using-the-sdk", "how-to-rotate-api-keys", "troubleshooting-a-failed-connection", "policy-engine-basics", "handling-require-approval"];
 
 export default function Help() {
   const { lang, t, path } = useI18n();
