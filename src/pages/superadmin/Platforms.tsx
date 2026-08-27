@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { mcp } from "../../lib/mcp";
 import { useI18n } from "../../lib/i18n";
+import { PLATFORM_CATALOG } from "../../lib/platformCatalog";
 
 type Tool = {
   name: string; domain: string; risk: "low" | "medium" | "high"; description: string | null;
@@ -14,7 +15,7 @@ type PlatformType = {
 
 const RISK_TONE: Record<string, string> = { low: "bg-secondary-container text-on-secondary-container", medium: "bg-tertiary-container text-on-tertiary-container", high: "bg-error-container text-on-error-container" };
 
-const PLATFORM_ICON: Record<string, string> = { woocommerce: "storefront", shopware: "shopping_bag", magento: "shopping_cart", shopify: "storefront" };
+const PLATFORM_ICON: Record<string, string> = Object.fromEntries(PLATFORM_CATALOG.map((p) => [p.id, p.icon]));
 
 export default function SuperAdminPlatforms() {
   const { t } = useI18n();

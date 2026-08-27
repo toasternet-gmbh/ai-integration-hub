@@ -1,6 +1,13 @@
 /** Agent CRUD + per-tool permission management (mirrors yogaipilot's agentAdmin.ts shape). */
 import type { ToolDefinition, ToolModule } from "../lib/types.ts";
 
+// deno-lint-ignore no-explicit-any
+async function requireOwnAgent(admin: any, projectId: string, agentId: string): Promise<void> {
+  const { data, error } = await admin.from("hub_agents").select("id").eq("id", agentId).eq("project_id", projectId).maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error(`Agent ${agentId} not found in this project`);
+}
+
 export const definitions: ToolDefinition[] = [
   {
     name: "create_agent",
@@ -54,6 +61,7 @@ export const handlers: ToolModule["handlers"] = {
     const permission = String(args.permission ?? "");
     const integrationId = args.integration_id ? String(args.integration_id) : null;
     if (!agentId || !toolName || !permission) throw new Error("agent_id, tool_name, and permission are required.");
+    await requireOwnAgent(admin, projectId, agentId);
 
     let q = admin.from("hub_agent_tool_permissions").select("id").eq("project_id", projectId).eq("agent_id", agentId).eq("tool_name", toolName);
     q = integrationId ? q.eq("integration_id", integrationId) : q.is("integration_id", null);
@@ -75,6 +83,8 @@ export const handlers: ToolModule["handlers"] = {
 
   async list_agent_tool_permissions(args, { admin, projectId }) {
     const agentId = String(args.agent_id ?? "");
+    if (!agentId) throw new Error("agent_id is required.");
+    await requireOwnAgent(admin, projectId, agentId);
     const { data, error } = await admin
       .from("hub_agent_tool_permissions").select("id, tool_name, integration_id, permission, created_at")
       .eq("project_id", projectId).eq("agent_id", agentId).order("tool_name");

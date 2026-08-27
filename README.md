@@ -47,7 +47,7 @@ to the public npm registry; install it with `npm install github:toasternet-gmbh/
 single-package mirror repo, kept in sync on release — see `sdk/README.md`). Full usage docs,
 including how to handle a `require_approval` response, are in that package's own README. This is
 what the Integrations → API Keys page's Quick Start panel and the Help Center's "API keys and the
-Node.js client" article point to.
+JS/TS client" article point to.
 
 ## What's implemented
 

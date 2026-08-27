@@ -10,7 +10,11 @@ const SAFE_COLUMNS = "id, project_id, platform, name, status, capabilities, last
 export const definitions: ToolDefinition[] = [
   {
     name: "create_integration",
-    description: "Connect a new external platform (e.g. WooCommerce). Tests the connection immediately.",
+    description:
+      "Connect a new external platform (e.g. WooCommerce). Tests the connection immediately. " +
+      "Does NOT cover 'gocardless' — banking connections start with list_bank_institutions / " +
+      "start_bank_connection instead, since GoCardless uses a consent-redirect flow with no " +
+      "credentials to submit here.",
     inputSchema: {
       type: "object",
       required: ["platform", "name", "credentials"],
