@@ -88,8 +88,15 @@ export const handlers: ToolModule["handlers"] = {
       inviteLink = (invited as { properties?: { action_link?: string } })?.properties?.action_link ?? null;
     }
 
+    // Always "member" at the org level here, regardless of the project-level `role` requested —
+    // this only needs to ensure org membership exists so the invitee can see the org at all.
+    // Org ownership is a separate, more privileged grant (create_organization's creator, or a
+    // platform admin via admin_create_organization) and must never be reachable by inviting
+    // someone into a project, even one the caller owns — a project owner (which any org member
+    // can become via create_project) upserting "owner" here would let them promote an arbitrary
+    // account to org owner, escalating past their own org-member role.
     await admin.from("hub_organization_members").upsert(
-      { organization_id: project.organization_id, user_id: targetUserId, role: role === "owner" ? "owner" : "member" },
+      { organization_id: project.organization_id, user_id: targetUserId, role: "member" },
       { onConflict: "organization_id,user_id", ignoreDuplicates: true },
     );
     const { error: pmErr } = await admin.from("hub_project_members").upsert(

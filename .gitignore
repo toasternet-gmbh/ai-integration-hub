@@ -7,3 +7,5 @@ dist/
 # docs/access-and-accounts.md
 .DS_Store
 supabase/.temp/
+server.txt
+npm_recovery_codes.txt
