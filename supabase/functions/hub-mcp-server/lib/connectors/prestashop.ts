@@ -8,11 +8,17 @@
  * Docs: devdocs.prestashop-project.org/8/webservice/.
  *
  * Base URL/auth/endpoint shape all come from PrestaShop's own official, stable devdocs (not
- * guessed the way JTL's host was) — but unlike sevdesk/personio/lexoffice this hasn't been
- * round-tripped against a real running store yet: no public PrestaShop demo currently has the
- * Webservice API reachable to test against (checked at connector-build time; several guessed demo
- * hostnames returned no PrestaShop response at all). Confirm against a real store's /api/ before
- * enabling.
+ * guessed the way JTL's host was). Round-tripped 2026-08-27 against a real, live local PrestaShop
+ * 8 store (Docker `prestashop/prestashop:8-apache` + MySQL, unattended install, Webservice API
+ * genuinely enabled via `ps_configuration`/`ps_webservice_account`/`ps_webservice_account_shop`
+ * rows and a real generated webservice key) — orders.search/orders.get/products.search/
+ * products.get all returned real demo order/product data through the Hub end-to-end, not mocked.
+ * One gotcha found during that verification: PrestaShop 302-redirects `/api/...` requests whose
+ * Host header doesn't match the shop's configured `ps_shop_url` domain, so the connector's
+ * `storeUrl` credential must resolve to the exact host PrestaShop's shop domain is configured
+ * with (or the redirect silently breaks the request) — this isn't PrestaShop-Docker-specific, it
+ * applies to any store with multiple reachable hostnames. Still short of a real, fully-authorized
+ * customer store — see README.md "Known gaps" before enabling for real customers.
  */
 import type { Connector, ConnectionResult, Capability, ToolResult } from "./types.ts";
 

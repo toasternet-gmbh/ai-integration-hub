@@ -153,13 +153,17 @@ Required env (`.env.supabase`, gitignored — see `.env.example` for the templat
   Supabase stack yet (test-mode Stripe keys only).
 - Resend has no verified sending domain — auth emails only reach the account owner.
 - Most connectors (Shopify, Lexoffice, WordPress, Toggl, GoCardless, sevDesk, Personio,
-  Contentful, Clockify, HubSpot) have been verified to reach their real provider API but not
-  exercised end-to-end against a real, fully-authorized account — confirm that before enabling a
-  platform for real customers.
-- DATEV, JTL, TYPO3, and PrestaShop connectors are unverified and ship `enabled: false`: DATEV
-  requires DATEV Marktplatz partner certification (no public sandbox); JTL's real API host
-  couldn't be found through public research (the guessed one is confirmed wrong); TYPO3 core has
-  no built-in REST API for content, so it only works against a site running a specific community
-  extension (`cundd/rest`); PrestaShop's Webservice API is real and documented but no public demo
-  store with it reachable was found to test against. See each connector file's header comment
-  before touching it.
+  Contentful, Clockify, HubSpot, PrestaShop) have been verified to reach their real provider API
+  but not exercised end-to-end against a real, fully-authorized account — confirm that before
+  enabling a platform for real customers. PrestaShop is further along than the rest of this group:
+  it was round-tripped against a real, live local PrestaShop 8 store (Docker,
+  `prestashop/prestashop:8-apache`, with the Webservice API genuinely enabled and a real
+  webservice key), and `orders.search`/`orders.get`/`products.search`/`products.get` all returned
+  real demo order/product data through the Hub — but that's still Docker demo data, not a real
+  customer's own store, so it's not yet at the "real customer account" bar the others in this
+  group need.
+- DATEV, JTL, and TYPO3 connectors are unverified and ship `enabled: false`: DATEV requires DATEV
+  Marktplatz partner certification (no public sandbox); JTL's real API host couldn't be found
+  through public research (the guessed one is confirmed wrong); TYPO3 core has no built-in REST
+  API for content, so it only works against a site running a specific community extension
+  (`cundd/rest`). See each connector file's header comment before touching it.

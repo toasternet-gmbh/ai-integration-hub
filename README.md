@@ -89,18 +89,22 @@ npm run build
    only the account owner currently receives mail (see `docs/access-and-accounts.md`). The
    intended sending address is `info@innov-ai-tive.de`, once that domain is verified in Resend.
 3. **Most connectors** (Shopify, Lexoffice, WordPress, Toggl Track, GoCardless, sevDesk, Personio,
-   Contentful, Clockify, HubSpot) have each been verified to reach their real provider API (they
-   surface genuine provider error responses on bad/dummy credentials), but none has been exercised
-   end-to-end against a real, fully-authorized account yet — do that before flipping
+   Contentful, Clockify, HubSpot, PrestaShop) have each been verified to reach their real provider
+   API (they surface genuine provider error responses on bad/dummy credentials), but none has been
+   exercised end-to-end against a real, fully-authorized account yet — do that before flipping
    `enabled=true` on those platforms for real customers. Shopify specifically is only
    smoke-tested against a placeholder store; needs a real Partner/dev-store credential set.
-4. **DATEV, JTL, TYPO3, and PrestaShop connectors are unverified**, shipped `enabled: false`:
-   DATEV requires DATEV Marktplatz partner certification (no public sandbox exists to test
-   against); JTL's real API host couldn't be found through public research (the guessed one is
-   confirmed wrong); TYPO3 core has no built-in REST API for content, so it only works against a
-   site running a specific community extension (`cundd/rest`); PrestaShop's Webservice API is
-   real and well-documented (unlike the other three here) but no public demo store with it
-   reachable was found to round-trip test against. See each connector file's header comment in
+   PrestaShop has gone one step further than the others here: it was round-tripped against a real,
+   live local PrestaShop 8 store (Docker, `prestashop/prestashop:8-apache`, with the Webservice API
+   genuinely enabled and a real webservice key) and returned real demo order/product data through
+   `orders.search`/`orders.get`/`products.search`/`products.get` — but that's still Docker demo
+   data, not a real customer's own fully-authorized store, hence its place in this group rather
+   than being treated as fully production-verified.
+4. **DATEV, JTL, and TYPO3 connectors are unverified**, shipped `enabled: false`: DATEV requires
+   DATEV Marktplatz partner certification (no public sandbox exists to test against); JTL's real
+   API host couldn't be found through public research (the guessed one is confirmed wrong); TYPO3
+   core has no built-in REST API for content, so it only works against a site running a specific
+   community extension (`cundd/rest`). See each connector file's header comment in
    `supabase/functions/hub-mcp-server/lib/connectors/` before touching it.
 5. No shared UI component library yet (`src/components/ui/` is a placeholder directory) — pages
    currently hand-roll Tailwind classes directly.
