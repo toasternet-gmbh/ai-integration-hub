@@ -1,9 +1,36 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
 import { PublicShell } from "../components/PublicShell";
 import { DocsSidebar } from "../components/DocsSidebar";
 import { CATEGORY_LABEL, HELP_ARTICLES, findArticle } from "../lib/helpArticles";
+
+/** A copyable, syntax-agnostic code sample — the ` ```lang ... ``` ` fences in an article body
+ *  render as this instead of a plain paragraph. */
+function CodeBlock({ code }: { code: string }) {
+  const { t } = useI18n();
+  const [copied, setCopied] = useState(false);
+
+  return (
+    <div className="relative rounded-lg overflow-hidden bg-inverse-surface">
+      <button
+        onClick={() => {
+          navigator.clipboard.writeText(code).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          }).catch(() => {});
+        }}
+        className="absolute top-2 right-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-white/10 hover:bg-white/20 text-inverse-on-surface/70 hover:text-inverse-on-surface transition-colors border-none font-label-caps text-label-caps"
+      >
+        <span className="material-symbols-outlined text-[16px]">{copied ? "check" : "content_copy"}</span>
+        {copied ? t("action.copied") : t("action.copy")}
+      </button>
+      <pre className="p-4 pr-24 font-mono-data text-mono-data text-inverse-on-surface overflow-x-auto">
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
+}
 
 /**
  * Article bodies write technical tokens as `backtick spans` — render those as inline <code> — and
@@ -33,13 +60,32 @@ function slugifyHeading(text: string) {
  * Groups raw body lines into blocks so a plain string[] can still express structure:
  * - a line starting with "## " becomes a heading
  * - consecutive lines starting with "- " become one bullet list
+ * - a "```" line (optionally followed by a language name) opens a code block, consuming lines
+ *   verbatim (no `code span`/**bold** parsing inside) until the next "```" line
  * - anything else is a paragraph
  */
-type Block = { type: "heading"; text: string } | { type: "list"; items: string[] } | { type: "paragraph"; text: string };
+type Block =
+  | { type: "heading"; text: string }
+  | { type: "list"; items: string[] }
+  | { type: "paragraph"; text: string }
+  | { type: "code"; text: string };
 
 function groupBlocks(lines: string[]): Block[] {
   const blocks: Block[] = [];
-  for (const line of lines) {
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (line.startsWith("```")) {
+      const codeLines: string[] = [];
+      i++;
+      while (i < lines.length && !lines[i].startsWith("```")) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      i++; // skip the closing fence
+      blocks.push({ type: "code", text: codeLines.join("\n") });
+      continue;
+    }
     if (line.startsWith("## ")) {
       blocks.push({ type: "heading", text: line.slice(3) });
     } else if (line.startsWith("- ")) {
@@ -49,6 +95,7 @@ function groupBlocks(lines: string[]): Block[] {
     } else {
       blocks.push({ type: "paragraph", text: line });
     }
+    i++;
   }
   return blocks;
 }
@@ -108,6 +155,9 @@ export default function HelpArticle() {
                     ))}
                   </ul>
                 );
+              }
+              if (block.type === "code") {
+                return <CodeBlock key={i} code={block.text} />;
               }
               return (
                 <p key={i} className="font-body-lg text-body-lg text-on-surface leading-relaxed">

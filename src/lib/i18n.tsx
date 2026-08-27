@@ -41,6 +41,8 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "action.back": { en: "Back", de: "Zurück" },
   "action.previous": { en: "Previous", de: "Zurück" },
   "action.next": { en: "Next", de: "Weiter" },
+  "action.copy": { en: "Copy", de: "Kopieren" },
+  "action.copied": { en: "Copied", de: "Kopiert" },
   "status.allow": { en: "Allow", de: "Erlauben" },
   "status.deny": { en: "Deny", de: "Verweigern" },
   "status.requireApproval": { en: "Require approval", de: "Freigabe nötig" },
