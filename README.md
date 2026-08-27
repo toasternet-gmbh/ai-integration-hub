@@ -3,9 +3,11 @@
 An "AI Integration & Agent Control Platform" — lets AI agents safely call external business
 systems through a normalized set of canonical tools (`orders.refund`, `invoices.search`,
 `transactions.search`, ...), gated by a Policy Engine, a human-approval flow, and an immutable
-audit log. Started as a commerce-only integration point (WooCommerce/Shopware/Shopify/Magento);
-now spans bookkeeping (Lexoffice), CMS (WordPress), time tracking (Toggl Track), and read-only
-banking (GoCardless Bank Account Data) too, via the same connector-factory pattern.
+audit log. Started as a commerce-only integration point (WooCommerce/Shopware/Shopify/Magento/JTL);
+now spans bookkeeping (Lexoffice/sevDesk/DATEV), CMS (WordPress/TYPO3), time tracking (Toggl
+Track/Personio), and read-only banking (GoCardless Bank Account Data) too — 13 platforms across 5
+categories as of this writing, via the same connector-factory pattern (see
+`src/lib/platformCatalog.ts` for the current list, since it will keep growing).
 
 ## Architecture
 
@@ -51,13 +53,13 @@ Node.js client" article point to.
 
 - **Auth & onboarding** (`src/pages/SignIn.tsx`, `src/pages/Onboarding.tsx`): Supabase email/password
   sign-in, password reset, and first-run Organization → Project creation.
-- **Console** (`src/App.tsx`, `src/components/AppShell.tsx`): 8 authenticated sections —
-  Dashboard, Integrations (connect commerce, bookkeeping, CMS, time-tracking, and banking
-  platforms — WooCommerce, Shopware, Shopify, Magento, Lexoffice, WordPress, Toggl Track,
-  GoCardless), Agents (create agents, grant per-tool policy: allow/deny/require-approval),
-  Approvals (pending queue, approve runs the real action), Audit (immutable log, CSV export), API
-  Keys, Billing (Stripe Checkout subscription + Customer Portal), Team (invite via link-copy),
-  Account (GDPR-style data export/delete).
+- **Console** (`src/App.tsx`, `src/components/AppShell.tsx`): 9 authenticated sections —
+  Dashboard, Integrations (connect platforms across 5 categories — commerce, bookkeeping, CMS,
+  time tracking, banking; `src/lib/platformCatalog.ts` is the source of truth for the current
+  list, shared by this page, Landing, and the public Blueprint page), Agents (create agents, grant
+  per-tool policy: allow/deny/require-approval), Approvals (pending queue, approve runs the real
+  action), Audit (immutable log, CSV export), API Keys, Billing (Stripe Checkout subscription +
+  Customer Portal), Team (invite via link-copy), Account (GDPR-style data export/delete).
 - **Marketing/legal pages**: Landing (with in-page Features/Platforms anchors), Help Center with
   static EN/DE articles (`src/lib/helpArticles.ts`), Imprint, Privacy, Terms.
 - **i18n**: hand-rolled EN/DE dictionary (`src/lib/i18n.tsx`), covering every page's copy.
@@ -85,11 +87,17 @@ npm run build
 2. **Resend has no verified sending domain** — password-reset/invite emails to real users fail;
    only the account owner currently receives mail (see `docs/access-and-accounts.md`). The
    intended sending address is `info@innov-ai-tive.de`, once that domain is verified in Resend.
-3. **Shopify connector** is only smoke-tested against a placeholder store; needs a real
-   Partner/dev-store credential set before it can leave "coming soon" status.
-4. **Lexoffice, WordPress, Toggl Track, and GoCardless connectors** have each been verified to
-   reach the real provider API (they surface genuine provider error responses on bad/dummy
-   credentials), but none has been exercised end-to-end against a real, fully-authorized account
-   yet — do that before flipping `enabled=true` on those platforms for real customers.
+3. **Most connectors** (Shopify, Lexoffice, WordPress, Toggl Track, GoCardless, sevDesk, Personio)
+   have each been verified to reach their real provider API (they surface genuine provider error
+   responses on bad/dummy credentials), but none has been exercised end-to-end against a real,
+   fully-authorized account yet — do that before flipping `enabled=true` on those platforms for
+   real customers. Shopify specifically is only smoke-tested against a placeholder store; needs a
+   real Partner/dev-store credential set.
+4. **DATEV, JTL, and TYPO3 connectors are best-effort and unverified**, shipped `enabled: false`:
+   DATEV requires DATEV Marktplatz partner certification (no public sandbox exists to test
+   against); JTL's real API host couldn't be found through public research (the guessed one is
+   confirmed wrong); TYPO3 core has no built-in REST API for content, so it only works against a
+   site running a specific community extension (`cundd/rest`). See each connector file's header
+   comment in `supabase/functions/hub-mcp-server/lib/connectors/` before touching it.
 5. No shared UI component library yet (`src/components/ui/` is a placeholder directory) — pages
    currently hand-roll Tailwind classes directly.
