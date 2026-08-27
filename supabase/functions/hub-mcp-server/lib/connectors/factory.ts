@@ -7,6 +7,11 @@ import { LexofficeConnector } from "./lexoffice.ts";
 import { WordPressConnector } from "./wordpress.ts";
 import { TogglConnector } from "./toggl.ts";
 import { GoCardlessConnector } from "./gocardless.ts";
+import { SevdeskConnector } from "./sevdesk.ts";
+import { PersonioConnector } from "./personio.ts";
+import { DatevConnector } from "./datev.ts";
+import { JtlConnector } from "./jtl.ts";
+import { Typo3Connector } from "./typo3.ts";
 import { decryptCredentials } from "../crypto.ts";
 
 /** Loads an integration row's encrypted credentials and returns the right Connector for its platform. */
@@ -29,6 +34,16 @@ export async function loadConnector(integration: { platform: string; credentials
       return new TogglConnector(creds as { apiToken: string });
     case "gocardless":
       return new GoCardlessConnector(creds as { requisitionId: string; accountIds: string[] });
+    case "sevdesk":
+      return new SevdeskConnector(creds as { apiKey: string });
+    case "personio":
+      return new PersonioConnector(creds as { clientId: string; clientSecret: string });
+    case "datev":
+      return new DatevConnector(creds as { clientId: string; clientSecret: string });
+    case "jtl":
+      return new JtlConnector(creds as { clientId: string; clientSecret: string });
+    case "typo3":
+      return new Typo3Connector(creds as { siteUrl: string; accessToken: string });
     default:
       throw new Error(`No connector implemented for platform '${integration.platform}'.`);
   }

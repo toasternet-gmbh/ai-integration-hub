@@ -91,6 +91,41 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Lesender Zugriff auf Bankkonten und Transaktionen über GoCardless Bank Account Data — Verbindung per Bank-Login, kein API-Schlüssel nötig.",
     },
   },
+  {
+    id: "sevdesk", category: "bookkeeping", name: "sevDesk", icon: "request_quote", color: "#00A88E",
+    description: {
+      en: "Invoice and contact search, plus invoice lookup, via sevDesk's bookkeeping API.",
+      de: "Rechnungs- und Kontaktsuche sowie Rechnungsabfrage über die Buchhaltungs-API von sevDesk.",
+    },
+  },
+  {
+    id: "personio", category: "time_tracking", name: "Personio", icon: "event_available", color: "#FF6B4A",
+    description: {
+      en: "Attendance period search and lookup via Personio's HR platform.",
+      de: "Suche und Abfrage von Anwesenheitszeiträumen über die HR-Plattform Personio.",
+    },
+  },
+  {
+    id: "datev", category: "bookkeeping", name: "DATEV", icon: "calculate", color: "#00854A",
+    description: {
+      en: "Invoice and contact access via DATEV — requires DATEV Marktplatz partner certification; not self-serve like the other bookkeeping platforms.",
+      de: "Rechnungs- und Kontaktzugriff über DATEV — erfordert eine DATEV-Marktplatz-Partnerzertifizierung, nicht selbstständig einrichtbar wie die anderen Buchhaltungsplattformen.",
+    },
+  },
+  {
+    id: "jtl", category: "ecommerce", name: "JTL", icon: "warehouse", color: "#FF6600",
+    description: {
+      en: "Order, product, and inventory tools via JTL's Channel/Platform API — connects a JTL sales channel, not a JTL-Wawi installation directly.",
+      de: "Bestell-, Produkt- und Lager-Tools über die JTL-Channel-/Platform-API — verbindet einen JTL-Vertriebskanal, nicht direkt eine JTL-Wawi-Installation.",
+    },
+  },
+  {
+    id: "typo3", category: "cms", name: "TYPO3", icon: "web", color: "#FF8700",
+    description: {
+      en: "Page search and lookup — requires the target site to have a REST API extension (e.g. cundd/rest) installed; TYPO3 core has none built in.",
+      de: "Seitensuche und -abfrage — erfordert eine installierte REST-API-Extension (z. B. cundd/rest) auf der Zielseite; der TYPO3-Kern bringt keine mit.",
+    },
+  },
 ];
 
 export interface PlatformGroup {

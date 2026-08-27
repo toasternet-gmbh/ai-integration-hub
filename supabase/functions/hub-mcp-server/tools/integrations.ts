@@ -15,7 +15,10 @@ export const definitions: ToolDefinition[] = [
       type: "object",
       required: ["platform", "name", "credentials"],
       properties: {
-        platform: { type: "string", enum: ["woocommerce", "shopware", "shopify", "magento", "wordpress", "lexoffice", "toggl"] },
+        platform: {
+          type: "string",
+          enum: ["woocommerce", "shopware", "shopify", "magento", "wordpress", "lexoffice", "toggl", "sevdesk", "personio", "datev", "jtl", "typo3"],
+        },
         name: { type: "string" },
         credentials: {
           type: "object",
@@ -23,7 +26,9 @@ export const definitions: ToolDefinition[] = [
             "Platform-specific — woocommerce: {storeUrl, consumerKey, consumerSecret}; " +
             "shopware: {storeUrl, clientId, clientSecret}; shopify: {storeUrl, accessToken}; " +
             "magento: {storeUrl, accessToken}; lexoffice: {apiKey}; " +
-            "wordpress: {siteUrl, username, appPassword}; toggl: {apiToken}.",
+            "wordpress: {siteUrl, username, appPassword}; toggl: {apiToken}; sevdesk: {apiKey}; " +
+            "personio: {clientId, clientSecret}; datev: {clientId, clientSecret}; " +
+            "jtl: {clientId, clientSecret}; typo3: {siteUrl, accessToken}.",
         },
       },
     },
