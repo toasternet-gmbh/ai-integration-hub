@@ -134,19 +134,26 @@ export default function Landing() {
             </div>
           </section>
 
-          <section id="platforms" className="border-t border-outline-variant pt-16 flex flex-col items-center scroll-mt-24">
-            <span className="font-label-caps text-on-surface-variant mb-10 text-center bg-surface px-4 -mt-20 inline-block">{t("landing.supportedPlatforms")}</span>
-            <div className="flex flex-col gap-8 w-full">
+          <section id="platforms" className="border-t border-outline-variant pt-16 scroll-mt-24">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <span className="font-label-caps text-label-caps text-primary">{t("landing.supportedPlatforms")}</span>
+              <h2 className="font-headline-md text-headline-md text-on-surface tracking-tight mt-2 mb-3">{t("landing.platforms.title")}</h2>
+              <p className="font-body-lg text-body-lg text-on-surface-variant">{t("landing.platforms.subtitle")}</p>
+            </div>
+            <div className="flex flex-col gap-12">
               {platformsByCategory().map((group) => (
-                <div key={group.category} className="flex flex-col items-center gap-4">
-                  <span className="font-label-caps text-label-caps text-primary tracking-wide">{CATEGORY_LABEL[group.category][lang]}</span>
-                  <div className="flex flex-wrap justify-center items-center gap-4 md:gap-6">
+                <div key={group.category}>
+                  <h3 className="font-label-caps text-label-caps text-on-surface-variant mb-4 tracking-wide">{CATEGORY_LABEL[group.category][lang]}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {group.platforms.map((p) => (
-                      <div key={p.id} className="flex items-center gap-3 bg-surface-container-lowest border border-outline-variant rounded-lg px-6 py-4 hover:shadow-card hover:-translate-y-0.5 transition-all">
-                        <div className="w-10 h-10 rounded flex items-center justify-center shrink-0" style={{ backgroundColor: `${p.color}1a`, color: p.color }}>
+                      <div key={p.id} className="flex items-start gap-4 p-6 bg-surface-container-lowest border border-outline-variant rounded-lg hover:border-primary/40 hover:shadow-card transition-all">
+                        <div className="w-11 h-11 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${p.color}1a`, color: p.color }}>
                           <span className="material-symbols-outlined text-[22px]">{p.icon}</span>
                         </div>
-                        <span className="font-headline-sm font-bold tracking-tight text-on-surface-variant">{p.name}</span>
+                        <div>
+                          <h4 className="font-headline-sm text-headline-sm text-on-surface mb-1">{p.name}</h4>
+                          <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{p.description[lang]}</p>
+                        </div>
                       </div>
                     ))}
                   </div>

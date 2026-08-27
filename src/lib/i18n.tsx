@@ -244,6 +244,11 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "landing.signIn": { en: "Sign in", de: "Anmelden" },
   "landing.goToApp": { en: "Go to app", de: "Zur App" },
   "landing.supportedPlatforms": { en: "Supported Platforms", de: "Unterstützte Plattformen" },
+  "landing.platforms.title": { en: "Every business system, one Hub", de: "Jedes Geschäftssystem, ein Hub" },
+  "landing.platforms.subtitle": {
+    en: "Connect the platforms your business already runs on — online stores, bookkeeping, your CMS, time tracking, and banking — and give your AI agents one consistent, policy-gated way to work with all of them. Every platform below plugs into the same canonical tools, the same approvals, and the same audit log.",
+    de: "Verbinden Sie die Plattformen, auf denen Ihr Unternehmen bereits läuft — Online-Shops, Buchhaltung, Ihr CMS, Zeiterfassung und Banking — und geben Sie Ihren KI-Agenten einen einzigen, richtliniengesteuerten Weg, mit allen zu arbeiten. Jede Plattform unten nutzt dieselben kanonischen Tools, dieselben Freigaben und dasselbe Audit-Log.",
+  },
   "landing.prop1.title": { en: "Connect once.", de: "Einmal verbinden." },
   "landing.prop1.body": { en: "Build your agent against a single, canonical schema. We handle the translation layer to every underlying business API automatically.", de: "Bauen Sie Ihren Agenten gegen ein einheitliches Schema. Wir übersetzen automatisch in jede zugrunde liegende Geschäfts-API." },
   "landing.prop2.title": { en: "Control access.", de: "Zugriff kontrollieren." },
