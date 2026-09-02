@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useSearchParams } from "react-router-dom";
 import { mcp } from "../lib/mcp";
 import { useI18n } from "../lib/i18n";
 import { CATEGORY_LABEL, PLATFORM_CATALOG, platformsByCategory, platformToolList, VERIFICATION_LABEL, VERIFICATION_TONE } from "../lib/platformCatalog";
+import { buildCredentials, OAUTH2_PLATFORMS } from "../lib/platformCredentials";
+import { PlatformCredentialFields } from "../components/PlatformCredentialFields";
 
 type Ctx = { projectId: string };
 type Capability = { domain: string; tools: string[] };
@@ -11,24 +13,23 @@ type Institution = { id: string; name: string };
 
 const PLATFORM_ICON: Record<string, string> = Object.fromEntries(PLATFORM_CATALOG.map((p) => [p.id, p.icon]));
 
-// storeUrl (or, for contentful, a space id shown in that same field) + one secret field.
-const TOKEN_AUTH_PLATFORMS = new Set(["shopify", "magento", "typo3", "prestashop", "contentful"]);
-// Single-API-key platforms — no store URL, no separate key/secret pair.
-const NO_STORE_URL_PLATFORMS = new Set(["lexoffice", "toggl", "sevdesk", "hubspot"]);
-// Key + secret pair, no store URL — either an OAuth2 client-credentials pair (personio/datev/jtl,
-// same posture as Shopware's clientId/clientSecret without a storeUrl since these aren't per-site
-// installs) or, for clockify, a workspace id + API key.
-const CLIENT_CREDENTIALS_PLATFORMS = new Set(["personio", "datev", "jtl", "clockify"]);
-// Consent-redirect platforms — no credentials form at all; the user picks their bank and is sent
-// to GoCardless to authenticate, same auth_type='oauth2' distinction hub_platform_types makes.
-const OAUTH2_PLATFORMS = new Set(["gocardless"]);
-
 export default function Integrations() {
   const { projectId } = useOutletContext<Ctx>();
   const { t, path, lang } = useI18n();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedPlatform = searchParams.get("platform");
   const [rows, setRows] = useState<Integration[]>([]);
-  const [open, setOpen] = useState(false);
-  const [platform, setPlatform] = useState("woocommerce");
+  const [open, setOpen] = useState(!!requestedPlatform);
+  const [platform, setPlatform] = useState(
+    requestedPlatform && PLATFORM_CATALOG.some((p) => p.id === requestedPlatform) ? requestedPlatform : "woocommerce",
+  );
+
+  // Arriving from a marketing/quick-connect link with ?platform=<id> (e.g. after signing up mid
+  // connect flow) — open straight into that platform's form instead of the default picker state.
+  useEffect(() => {
+    if (requestedPlatform) setSearchParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [name, setName] = useState("");
   const [storeUrl, setStoreUrl] = useState("");
   const [key, setKey] = useState("");
@@ -75,18 +76,7 @@ export default function Integrations() {
     setResult(null);
     setBusy(true);
     try {
-      const credentials =
-        platform === "lexoffice" || platform === "sevdesk" ? { apiKey: secret }
-        : platform === "toggl" ? { apiToken: secret }
-        : platform === "hubspot" ? { accessToken: secret }
-        : platform === "wordpress" ? { siteUrl: storeUrl, username: key, appPassword: secret }
-        : platform === "typo3" ? { siteUrl: storeUrl, accessToken: secret }
-        : platform === "contentful" ? { spaceId: storeUrl, accessToken: secret }
-        : platform === "shopware" ? { storeUrl, clientId: key, clientSecret: secret }
-        : platform === "clockify" ? { workspaceId: key, apiKey: secret }
-        : CLIENT_CREDENTIALS_PLATFORMS.has(platform) ? { clientId: key, clientSecret: secret }
-        : TOKEN_AUTH_PLATFORMS.has(platform) ? { storeUrl, accessToken: secret }
-        : { storeUrl, consumerKey: key, consumerSecret: secret };
+      const credentials = buildCredentials(platform, { storeUrl, key, secret });
       await mcp("create_integration", { platform, name, credentials }, { projectId });
       // Re-fetch rather than trust a hardcoded capability list — hub_integrations.capabilities
       // is what create_integration actually populates, and it varies by platform/tool support.
@@ -231,43 +221,9 @@ export default function Integrations() {
                   <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">{t("integrations.name").toUpperCase()}</label>
                   <input value={name} onChange={(e) => setName(e.target.value)} className="w-full px-4 py-2 border border-outline-variant rounded font-body-md text-body-md bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" placeholder="Main Store" />
                 </div>
-                {!OAUTH2_PLATFORMS.has(platform) && !NO_STORE_URL_PLATFORMS.has(platform) && !CLIENT_CREDENTIALS_PLATFORMS.has(platform) && (
-                  <div>
-                    <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">
-                      {(platform === "contentful" ? t("integrations.spaceId") : t("integrations.storeUrl")).toUpperCase()}
-                    </label>
-                    <input value={storeUrl} onChange={(e) => setStoreUrl(e.target.value)} className="w-full px-4 py-2 border border-outline-variant rounded font-body-md text-body-md bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" placeholder={platform === "contentful" ? undefined : "https://your-store.com"} type={platform === "contentful" ? "text" : "url"} />
-                  </div>
-                )}
-                {!TOKEN_AUTH_PLATFORMS.has(platform) && !NO_STORE_URL_PLATFORMS.has(platform) && !OAUTH2_PLATFORMS.has(platform) && (
-                  <div>
-                    <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">
-                      {(
-                        platform === "clockify" ? t("integrations.workspaceId")
-                        : platform === "shopware" || CLIENT_CREDENTIALS_PLATFORMS.has(platform) ? t("integrations.clientId")
-                        : platform === "wordpress" ? t("integrations.username")
-                        : t("integrations.consumerKey")
-                      ).toUpperCase()}
-                    </label>
-                    <input value={key} onChange={(e) => setKey(e.target.value)} className="w-full px-4 py-2 border border-outline-variant rounded font-mono-data text-mono-data bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" />
-                  </div>
-                )}
-                {!OAUTH2_PLATFORMS.has(platform) && (
-                  <div>
-                    <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">
-                      {(
-                        platform === "lexoffice" || platform === "toggl" || platform === "sevdesk" || platform === "clockify" ? t("integrations.apiKey")
-                        : platform === "wordpress" ? t("integrations.applicationPassword")
-                        : platform === "hubspot" ? t("integrations.accessToken")
-                        : platform === "prestashop" ? t("integrations.webserviceKey")
-                        : platform === "shopware" || CLIENT_CREDENTIALS_PLATFORMS.has(platform) ? t("integrations.clientSecret")
-                        : TOKEN_AUTH_PLATFORMS.has(platform) ? t("integrations.accessToken")
-                        : t("integrations.consumerSecret")
-                      ).toUpperCase()}
-                    </label>
-                    <input value={secret} onChange={(e) => setSecret(e.target.value)} type="password" className="w-full px-4 py-2 border border-outline-variant rounded font-mono-data text-mono-data bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" placeholder={platform === "shopify" ? "shpat_..." : undefined} />
-                  </div>
-                )}
+                <PlatformCredentialFields
+                  platform={platform} storeUrl={storeUrl} onStoreUrl={setStoreUrl} keyValue={key} onKey={setKey} secret={secret} onSecret={setSecret}
+                />
                 {OAUTH2_PLATFORMS.has(platform) && (
                   <div className="space-y-5">
                     <div>

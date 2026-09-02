@@ -11,6 +11,7 @@ const Landing = lazy(() => import("./pages/Landing"));
 const SignIn = lazy(() => import("./pages/SignIn"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
+const QuickConnect = lazy(() => import("./pages/QuickConnect"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Integrations = lazy(() => import("./pages/Integrations"));
 const BankCallback = lazy(() => import("./pages/BankCallback"));
@@ -44,7 +45,7 @@ type ProjectSelection = { orgId: string; orgName: string; projectId: string; pro
 /** Scoped per user id — otherwise a second account signing in on the same browser (e.g. a
  * platform admin with no org membership) would inherit the previous account's project selection
  * and immediately hit "Not a member of project ..." trying to load data for it. */
-function storageKey(userId: string) {
+export function storageKey(userId: string) {
   return `hub_project_selection:${userId}`;
 }
 
@@ -118,6 +119,7 @@ function LocalizedApp({ session }: { session: Session }) {
         <Route path="privacy" element={<Privacy />} />
         <Route path="terms" element={<Terms />} />
         <Route path="blueprint" element={<Blueprint />} />
+        <Route path="connect/:platformId" element={<QuickConnect />} />
         <Route path="help" element={<Help />} />
         <Route path="help/:slug" element={<HelpArticle />} />
         <Route path="app/*" element={session ? <AuthedArea session={session} /> : <Navigate to={`/${lang}/signin`} replace />} />

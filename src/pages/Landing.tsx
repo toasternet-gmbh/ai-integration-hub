@@ -165,6 +165,10 @@ export default function Landing() {
                               </span>
                             ))}
                           </div>
+                          <Link to={path(`/connect/${p.id}`)} className="inline-flex items-center gap-1 mt-3 font-label-caps text-label-caps text-primary hover:underline no-underline">
+                            {t("quickConnect.cardCta").toUpperCase()}
+                            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                          </Link>
                         </div>
                       </div>
                     ))}

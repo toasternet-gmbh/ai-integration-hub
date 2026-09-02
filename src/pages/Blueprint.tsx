@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
 import { PublicShell } from "../components/PublicShell";
 import { POLICY_STEPS, ROLES, WORKFLOWS } from "../lib/blueprintContent";
@@ -25,7 +26,7 @@ function SectionNav() {
 }
 
 export default function Blueprint() {
-  const { lang, t } = useI18n();
+  const { lang, t, path } = useI18n();
 
   return (
     <PublicShell>
@@ -161,6 +162,10 @@ export default function Blueprint() {
                                 </span>
                               ))}
                             </div>
+                            <Link to={path(`/connect/${p.id}`)} className="inline-flex items-center gap-1 mt-3 font-label-caps text-label-caps text-primary hover:underline no-underline">
+                              {t("quickConnect.cardCta").toUpperCase()}
+                              <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                            </Link>
                           </div>
                         </div>
                       ))}
