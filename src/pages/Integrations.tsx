@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { mcp } from "../lib/mcp";
 import { useI18n } from "../lib/i18n";
-import { CATEGORY_LABEL, PLATFORM_CATALOG, platformsByCategory } from "../lib/platformCatalog";
+import { CATEGORY_LABEL, PLATFORM_CATALOG, platformsByCategory, platformToolList } from "../lib/platformCatalog";
 
 type Ctx = { projectId: string };
 type Capability = { domain: string; tools: string[] };
@@ -208,7 +208,19 @@ export default function Integrations() {
                 </div>
                 {(() => {
                   const selected = PLATFORM_CATALOG.find((p) => p.id === platform);
-                  return selected ? <p className="font-body-md text-body-md text-on-surface-variant mt-4">{selected.description[lang]}</p> : null;
+                  if (!selected) return null;
+                  return (
+                    <div className="mt-4">
+                      <p className="font-body-md text-body-md text-on-surface-variant">{selected.description[lang]}</p>
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {platformToolList(selected).map(({ tool, description }) => (
+                          <span key={tool} title={description[lang]} className="font-mono-data text-[11px] leading-none px-2 py-1 rounded-full bg-surface-container text-on-surface-variant">
+                            {tool}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
                 })()}
               </div>
               <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
