@@ -91,7 +91,19 @@ serve(async (req: Request) => {
     if (method === "tools/list") {
       const projectId = params?.project_id ? String(params.project_id) : undefined;
       await authenticateMcpRequest(req, admin, supabaseUrl, anonKey, projectId);
-      return json(ok(id, { tools: TOOLS }));
+      // Canonical domain tools (orders.*, invoices.*, ...) have a hub_tool_registry row recording
+      // which connected platforms actually implement them — meta/admin tools (create_integration,
+      // create_agent, ...) don't and are returned as-is. Merging this in here, rather than baking
+      // supported_platforms into each tools/*.ts module's static ToolDefinition, keeps
+      // hub_tool_registry the single place that answers "which platforms support this tool" —
+      // the same table superadmin's Platforms page already edits.
+      const { data: registryRows } = await admin.from("hub_tool_registry").select("name, supported_platforms");
+      const supportedPlatformsByTool = new Map((registryRows ?? []).map((r: { name: string; supported_platforms: string[] }) => [r.name, r.supported_platforms]));
+      const tools = TOOLS.map((t) => {
+        const supportedPlatforms = supportedPlatformsByTool.get(t.name);
+        return supportedPlatforms ? { ...t, supported_platforms: supportedPlatforms } : t;
+      });
+      return json(ok(id, { tools }));
     }
 
     if (method === "tools/call") {
