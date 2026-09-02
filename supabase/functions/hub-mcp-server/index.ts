@@ -89,8 +89,12 @@ serve(async (req: Request) => {
     if (method === "ping") return json(ok(id, {}));
 
     if (method === "tools/list") {
-      const projectId = params?.project_id ? String(params.project_id) : undefined;
-      await authenticateMcpRequest(req, admin, supabaseUrl, anonKey, projectId);
+      // Deliberately unauthenticated — schema discovery (tool names, descriptions, input
+      // schemas, which platforms support each tool) isn't customer data or credentials, it's the
+      // Hub's public API surface. A prospective agent developer should be able to see what's
+      // callable before creating an account or an API key. tools/call (which actually reads/
+      // writes through a connected integration) still requires auth below, unchanged.
+      //
       // Canonical domain tools (orders.*, invoices.*, ...) have a hub_tool_registry row recording
       // which connected platforms actually implement them — meta/admin tools (create_integration,
       // create_agent, ...) don't and are returned as-is. Merging this in here, rather than baking
