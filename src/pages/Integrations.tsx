@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { mcp } from "../lib/mcp";
 import { useI18n } from "../lib/i18n";
-import { CATEGORY_LABEL, PLATFORM_CATALOG, platformsByCategory, platformToolList } from "../lib/platformCatalog";
+import { CATEGORY_LABEL, PLATFORM_CATALOG, platformsByCategory, platformToolList, VERIFICATION_LABEL, VERIFICATION_TONE } from "../lib/platformCatalog";
 
 type Ctx = { projectId: string };
 type Capability = { domain: string; tools: string[] };
@@ -211,6 +211,9 @@ export default function Integrations() {
                   if (!selected) return null;
                   return (
                     <div className="mt-4">
+                      <span className={`inline-block font-label-caps text-[10px] leading-none px-2 py-1 rounded-full whitespace-nowrap mb-2 ${VERIFICATION_TONE[selected.verificationStatus]}`}>
+                        {VERIFICATION_LABEL[selected.verificationStatus][lang]}
+                      </span>
                       <p className="font-body-md text-body-md text-on-surface-variant">{selected.description[lang]}</p>
                       <div className="flex flex-wrap gap-1.5 mt-3">
                         {platformToolList(selected).map(({ tool, description }) => (

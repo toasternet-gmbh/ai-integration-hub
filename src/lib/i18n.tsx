@@ -393,6 +393,11 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "superadmin.platforms.defaultPolicy": { en: "Default policy", de: "Standardrichtlinie" },
   "superadmin.platforms.supportedPlatforms": { en: "Supported platforms", de: "Unterstützte Plattformen" },
   "superadmin.platforms.empty": { en: "No tools registered.", de: "Keine Tools registriert." },
+  "superadmin.platforms.verification.unverified": { en: "Unverified", de: "Ungeprüft" },
+  "superadmin.platforms.verification.api_verified": { en: "API verified", de: "API geprüft" },
+  "superadmin.platforms.verification.real_customer_verified": { en: "Real customer verified", de: "Bei echtem Kunden geprüft" },
+  "superadmin.platforms.editNote": { en: "Edit note", de: "Notiz bearbeiten" },
+  "superadmin.platforms.notePrompt": { en: "Verification note (context on what was tested):", de: "Prüfnotiz (Kontext, was getestet wurde):" },
 
   "superadmin.settings.title": { en: "Settings", de: "Einstellungen" },
   "superadmin.settings.subtitle": { en: "Hub-wide configuration, not tied to any organization.", de: "Hub-weite Konfiguration, nicht an eine Organisation gebunden." },

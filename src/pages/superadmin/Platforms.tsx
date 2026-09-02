@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { mcp } from "../../lib/mcp";
 import { useI18n } from "../../lib/i18n";
-import { PLATFORM_CATALOG } from "../../lib/platformCatalog";
+import { PLATFORM_CATALOG, VerificationStatus, VERIFICATION_TONE } from "../../lib/platformCatalog";
 
 type Tool = {
   name: string; domain: string; risk: "low" | "medium" | "high"; description: string | null;
@@ -10,6 +10,7 @@ type Tool = {
 
 type PlatformType = {
   name: string; label: string; enabled: boolean; created_at: string;
+  verification_status: VerificationStatus; verification_note: string | null;
   integrations_total: number; integrations_connected: number; integrations_error: number; integrations_pending: number;
 };
 
@@ -39,6 +40,24 @@ export default function SuperAdminPlatforms() {
     setBusyPlatform(platform.name);
     setPlatformsErr(null);
     try { await mcp("admin_set_platform_type_enabled", { name: platform.name, enabled: !platform.enabled }); await reloadPlatforms(); }
+    catch (e) { setPlatformsErr((e as Error).message); }
+    finally { setBusyPlatform(null); }
+  }
+
+  async function changeVerification(platform: PlatformType, verification_status: string) {
+    setBusyPlatform(platform.name);
+    setPlatformsErr(null);
+    try { await mcp("admin_set_platform_verification", { name: platform.name, verification_status }); await reloadPlatforms(); }
+    catch (e) { setPlatformsErr((e as Error).message); }
+    finally { setBusyPlatform(null); }
+  }
+
+  async function editVerificationNote(platform: PlatformType) {
+    const note = window.prompt(t("superadmin.platforms.notePrompt"), platform.verification_note ?? "");
+    if (note === null) return;
+    setBusyPlatform(platform.name);
+    setPlatformsErr(null);
+    try { await mcp("admin_set_platform_verification", { name: platform.name, verification_status: platform.verification_status, verification_note: note }); await reloadPlatforms(); }
     catch (e) { setPlatformsErr((e as Error).message); }
     finally { setBusyPlatform(null); }
   }
@@ -85,8 +104,37 @@ export default function SuperAdminPlatforms() {
                 <span className="font-body-md text-body-md font-bold text-on-surface truncate">{platform.label}</span>
               </div>
 
-              {!platform.enabled && (
-                <span className="self-start font-label-caps text-label-caps text-on-error-container bg-error-container px-2 py-0.5 rounded-full whitespace-nowrap">{t("superadmin.platforms.disabled")}</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                {!platform.enabled && (
+                  <span className="font-label-caps text-label-caps text-on-error-container bg-error-container px-2 py-0.5 rounded-full whitespace-nowrap">{t("superadmin.platforms.disabled")}</span>
+                )}
+                <span className={`font-label-caps text-label-caps px-2 py-0.5 rounded-full whitespace-nowrap ${VERIFICATION_TONE[platform.verification_status]}`}>
+                  {t(`superadmin.platforms.verification.${platform.verification_status}`)}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <select
+                  value={platform.verification_status}
+                  disabled={busyPlatform === platform.name}
+                  onChange={(e) => changeVerification(platform, e.target.value)}
+                  className="flex-1 min-w-0 px-2 py-1 border border-outline-variant rounded font-label-caps text-label-caps bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary disabled:opacity-60"
+                >
+                  <option value="unverified">{t("superadmin.platforms.verification.unverified")}</option>
+                  <option value="api_verified">{t("superadmin.platforms.verification.api_verified")}</option>
+                  <option value="real_customer_verified">{t("superadmin.platforms.verification.real_customer_verified")}</option>
+                </select>
+                <button
+                  disabled={busyPlatform === platform.name}
+                  onClick={() => editVerificationNote(platform)}
+                  className="shrink-0 w-8 h-8 flex items-center justify-center border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary rounded transition-colors bg-transparent disabled:opacity-60"
+                  title={t("superadmin.platforms.editNote")}
+                >
+                  <span className="material-symbols-outlined text-[16px]">edit_note</span>
+                </button>
+              </div>
+              {platform.verification_note && (
+                <p className="font-body-md text-[12px] text-on-surface-variant leading-relaxed">{platform.verification_note}</p>
               )}
 
               {platform.integrations_total === 0 ? (

@@ -57,6 +57,14 @@ export const TOOL_INFO: Record<string, Bi> = {
   "deals.get": { en: "Look up a deal", de: "Deal abrufen" },
 };
 
+export type VerificationStatus = "unverified" | "api_verified" | "real_customer_verified";
+
+export const VERIFICATION_LABEL: Record<VerificationStatus, Bi> = {
+  unverified: { en: "Unverified", de: "Ungeprüft" },
+  api_verified: { en: "API verified", de: "API geprüft" },
+  real_customer_verified: { en: "Real customer verified", de: "Bei echtem Kunden geprüft" },
+};
+
 export interface PlatformMeta {
   id: string;
   category: PlatformCategory;
@@ -68,6 +76,12 @@ export interface PlatformMeta {
   color: string;
   /** One-line description of what connecting this platform actually gets you. */
   description: Bi;
+  /** Static mirror of `hub_platform_types.verification_status` (see
+   *  supabase/migrations/20260902000000_hub_platform_types_verification_status.sql) — how
+   *  thoroughly this connector has actually been confirmed to work, for public/marketing display.
+   *  The DB row is the editable source of truth (superadmin's Platforms page changes it); update
+   *  this mirror to match whenever that changes. */
+  verificationStatus: VerificationStatus;
   /** Canonical tools this platform's connector exposes to agents, grouped by domain. Static
    *  mirror of that connector's own `getCapabilities()` in
    *  supabase/functions/hub-mcp-server/lib/connectors/<id>.ts — for pre-connection display
@@ -101,6 +115,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Bestellsuche, -abfrage und -erstattungen sowie Produkt- und Lager-Tools.",
     },
     capabilities: ECOMMERCE_CAPABILITIES,
+    verificationStatus: "api_verified",
   },
   {
     id: "shopware", category: "ecommerce", name: "Shopware 6", icon: "inventory_2", color: "#189EFF",
@@ -109,6 +124,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Bestellsuche, -abfrage und -erstattungen sowie Produkt- und Lager-Tools über die OAuth2-API von Shopware.",
     },
     capabilities: ECOMMERCE_CAPABILITIES,
+    verificationStatus: "api_verified",
   },
   {
     id: "shopify", category: "ecommerce", name: "Shopify", icon: "shopping_bag", color: "#95BF47",
@@ -117,6 +133,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Bestellsuche, -abfrage und -erstattungen sowie Produkt- und Lager-Tools.",
     },
     capabilities: ECOMMERCE_CAPABILITIES,
+    verificationStatus: "api_verified",
   },
   {
     id: "magento", category: "ecommerce", name: "Magento", icon: "shopping_cart", color: "#EE672F",
@@ -125,6 +142,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Bestellsuche, -abfrage und -erstattungen sowie Produkt- und Lager-Tools.",
     },
     capabilities: ECOMMERCE_CAPABILITIES,
+    verificationStatus: "unverified",
   },
   {
     id: "lexoffice", category: "bookkeeping", name: "Lexoffice", icon: "receipt_long", color: "#6CC24A",
@@ -133,6 +151,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Rechnungs- und Kontaktsuche sowie Rechnungsabfrage über die Buchhaltungs-API von Lexoffice.",
     },
     capabilities: BOOKKEEPING_CAPABILITIES,
+    verificationStatus: "api_verified",
   },
   {
     id: "wordpress", category: "cms", name: "WordPress", icon: "edit_note", color: "#21759B",
@@ -141,6 +160,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Seitensuche und -abfrage über die WordPress-REST-API, authentifiziert mit einem Anwendungspasswort.",
     },
     capabilities: CMS_CAPABILITIES,
+    verificationStatus: "api_verified",
   },
   {
     id: "toggl", category: "time_tracking", name: "Toggl Track", icon: "schedule", color: "#E01B84",
@@ -149,6 +169,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Suche und Abfrage von Zeiteinträgen in einem Toggl-Track-Workspace.",
     },
     capabilities: TIME_TRACKING_CAPABILITIES,
+    verificationStatus: "api_verified",
   },
   {
     id: "gocardless", category: "banking", name: "GoCardless", icon: "account_balance", color: "#191919",
@@ -160,6 +181,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       { domain: "accounts", tools: ["accounts.list"] },
       { domain: "transactions", tools: ["transactions.search"] },
     ],
+    verificationStatus: "api_verified",
   },
   {
     id: "sevdesk", category: "bookkeeping", name: "sevDesk", icon: "request_quote", color: "#00A88E",
@@ -168,6 +190,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Rechnungs- und Kontaktsuche sowie Rechnungsabfrage über die Buchhaltungs-API von sevDesk.",
     },
     capabilities: BOOKKEEPING_CAPABILITIES,
+    verificationStatus: "api_verified",
   },
   {
     id: "personio", category: "time_tracking", name: "Personio", icon: "event_available", color: "#FF6B4A",
@@ -176,6 +199,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Suche und Abfrage von Anwesenheitszeiträumen über die HR-Plattform Personio.",
     },
     capabilities: TIME_TRACKING_CAPABILITIES,
+    verificationStatus: "api_verified",
   },
   {
     id: "datev", category: "bookkeeping", name: "DATEV", icon: "calculate", color: "#00854A",
@@ -184,6 +208,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Rechnungs- und Kontaktzugriff über DATEV — erfordert eine DATEV-Marktplatz-Partnerzertifizierung, nicht selbstständig einrichtbar wie die anderen Buchhaltungsplattformen.",
     },
     capabilities: BOOKKEEPING_CAPABILITIES,
+    verificationStatus: "unverified",
   },
   {
     id: "jtl", category: "ecommerce", name: "JTL", icon: "warehouse", color: "#FF6600",
@@ -192,6 +217,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Bestell-, Produkt- und Lager-Tools über die JTL-Channel-/Platform-API — verbindet einen JTL-Vertriebskanal, nicht direkt eine JTL-Wawi-Installation.",
     },
     capabilities: ECOMMERCE_CAPABILITIES,
+    verificationStatus: "unverified",
   },
   {
     id: "typo3", category: "cms", name: "TYPO3", icon: "web", color: "#FF8700",
@@ -200,6 +226,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Seitensuche und -abfrage — erfordert eine installierte REST-API-Extension (z. B. cundd/rest) auf der Zielseite; der TYPO3-Kern bringt keine mit.",
     },
     capabilities: CMS_CAPABILITIES,
+    verificationStatus: "unverified",
   },
   {
     id: "contentful", category: "cms", name: "Contentful", icon: "cloud_queue", color: "#3C8DBC",
@@ -208,6 +235,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Seitensuche und -abfrage über die Content-Delivery-API von Contentful, eine echte REST-Schnittstelle genau dafür.",
     },
     capabilities: CMS_CAPABILITIES,
+    verificationStatus: "api_verified",
   },
   {
     id: "clockify", category: "time_tracking", name: "Clockify", icon: "timer", color: "#03A9F4",
@@ -216,6 +244,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       de: "Suche und Abfrage von Zeiteinträgen in einem Clockify-Workspace.",
     },
     capabilities: TIME_TRACKING_CAPABILITIES,
+    verificationStatus: "api_verified",
   },
   {
     id: "prestashop", category: "ecommerce", name: "PrestaShop", icon: "local_mall", color: "#DF0067",
@@ -227,6 +256,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       { domain: "orders", tools: ["orders.search", "orders.get"] },
       { domain: "products", tools: ["products.search", "products.get"] },
     ],
+    verificationStatus: "api_verified",
   },
   {
     id: "hubspot", category: "crm", name: "HubSpot", icon: "handshake", color: "#FF7A59",
@@ -238,6 +268,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
       { domain: "deals", tools: ["deals.search", "deals.get"] },
     ],
+    verificationStatus: "api_verified",
   },
 ];
 
@@ -259,3 +290,9 @@ export function platformsByCategory(): PlatformGroup[] {
 export function platformToolList(p: PlatformMeta): { tool: string; description: Bi }[] {
   return p.capabilities.flatMap((c) => c.tools.map((tool) => ({ tool, description: TOOL_INFO[tool] ?? { en: tool, de: tool } })));
 }
+
+export const VERIFICATION_TONE: Record<VerificationStatus, string> = {
+  unverified: "bg-error-container text-on-error-container",
+  api_verified: "bg-tertiary-container text-on-tertiary-container",
+  real_customer_verified: "bg-secondary-container text-on-secondary-container",
+};

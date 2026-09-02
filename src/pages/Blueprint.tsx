@@ -1,7 +1,7 @@
 import { useI18n } from "../lib/i18n";
 import { PublicShell } from "../components/PublicShell";
 import { POLICY_STEPS, ROLES, WORKFLOWS } from "../lib/blueprintContent";
-import { CATEGORY_LABEL, platformsByCategory, platformToolList } from "../lib/platformCatalog";
+import { CATEGORY_LABEL, platformsByCategory, platformToolList, VERIFICATION_LABEL, VERIFICATION_TONE } from "../lib/platformCatalog";
 
 const SECTIONS = [
   { id: "architecture", labelKey: "blueprint.nav.architecture" },
@@ -147,7 +147,12 @@ export default function Blueprint() {
                             <span className="material-symbols-outlined text-[22px]">{p.icon}</span>
                           </div>
                           <div>
-                            <h4 className="font-headline-sm text-headline-sm text-on-surface mb-1">{p.name}</h4>
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <h4 className="font-headline-sm text-headline-sm text-on-surface">{p.name}</h4>
+                              <span className={`font-label-caps text-[10px] leading-none px-2 py-1 rounded-full whitespace-nowrap ${VERIFICATION_TONE[p.verificationStatus]}`}>
+                                {VERIFICATION_LABEL[p.verificationStatus][lang]}
+                              </span>
+                            </div>
                             <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{p.description[lang]}</p>
                             <div className="flex flex-wrap gap-1.5 mt-3">
                               {platformToolList(p).map(({ tool, description }) => (

@@ -80,6 +80,22 @@ export const definitions: ToolDefinition[] = [
     inputSchema: { type: "object", required: ["name", "enabled"], properties: { name: { type: "string" }, enabled: { type: "boolean" } } },
   },
   {
+    name: "admin_set_platform_verification",
+    description:
+      "[Platform admin] Record how thoroughly a platform's connector has actually been verified — 'unverified' (never confirmed against the real provider API), " +
+      "'api_verified' (a real round-trip to the provider's API, not yet a real customer account), or 'real_customer_verified' (exercised end-to-end against a " +
+      "real, fully-authorized customer account). Distinct from enabling/disabling the platform — this just records the evidence, it doesn't gate anything.",
+    inputSchema: {
+      type: "object",
+      required: ["name", "verification_status"],
+      properties: {
+        name: { type: "string" },
+        verification_status: { type: "string", enum: ["unverified", "api_verified", "real_customer_verified"] },
+        verification_note: { type: "string", description: "Free-text context, e.g. what was tested and against what." },
+      },
+    },
+  },
+  {
     name: "admin_list_platforms",
     description: "[Platform admin] List the Hub-wide tool/platform catalog (hub_tool_registry) — every tool an agent could be granted, which e-commerce platforms it supports, and whether it's enabled Hub-wide.",
     inputSchema: { type: "object", properties: {} },
@@ -267,7 +283,7 @@ export const handlers: ToolModule["handlers"] = {
   async admin_list_platform_types(_args, { admin, userId }) {
     await assertPlatformAdmin(admin, userId);
     const [{ data: types, error: typesErr }, { data: integrations, error: intErr }] = await Promise.all([
-      admin.from("hub_platform_types").select("name, label, enabled, created_at").order("name"),
+      admin.from("hub_platform_types").select("name, label, enabled, verification_status, verification_note, created_at").order("name"),
       admin.from("hub_integrations").select("platform, status"),
     ]);
     if (typesErr) throw new Error(typesErr.message);
@@ -290,7 +306,24 @@ export const handlers: ToolModule["handlers"] = {
     const name = String(args.name ?? "").trim();
     if (!name) throw new Error("name is required.");
     const { data, error } = await admin
-      .from("hub_platform_types").update({ enabled: !!args.enabled }).eq("name", name).select("name, label, enabled, created_at").maybeSingle();
+      .from("hub_platform_types").update({ enabled: !!args.enabled }).eq("name", name).select("name, label, enabled, verification_status, verification_note, created_at").maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error(`Unknown platform type '${name}'.`);
+    return data;
+  },
+
+  async admin_set_platform_verification(args, { admin, userId }) {
+    await assertPlatformAdmin(admin, userId);
+    const name = String(args.name ?? "").trim();
+    const verificationStatus = String(args.verification_status ?? "");
+    if (!name) throw new Error("name is required.");
+    if (!["unverified", "api_verified", "real_customer_verified"].includes(verificationStatus)) {
+      throw new Error("verification_status must be one of unverified, api_verified, real_customer_verified.");
+    }
+    const row: Record<string, unknown> = { verification_status: verificationStatus };
+    if (args.verification_note !== undefined) row.verification_note = args.verification_note || null;
+    const { data, error } = await admin
+      .from("hub_platform_types").update(row).eq("name", name).select("name, label, enabled, verification_status, verification_note, created_at").maybeSingle();
     if (error) throw new Error(error.message);
     if (!data) throw new Error(`Unknown platform type '${name}'.`);
     return data;
