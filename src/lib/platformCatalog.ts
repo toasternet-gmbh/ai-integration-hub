@@ -97,6 +97,10 @@ export const TOOL_INFO: Record<string, Bi> = {
   "absences.create": { en: "Request an absence", de: "Abwesenheit beantragen" },
   "absences.update": { en: "Update an absence", de: "Abwesenheit aktualisieren" },
   "absences.delete": { en: "Cancel an absence", de: "Abwesenheit stornieren" },
+  "products.images.search": { en: "See product images", de: "Produktbilder einsehen" },
+  "products.images.create": { en: "Upload a product image", de: "Produktbild hochladen" },
+  "contacts.addresses.search": { en: "See a contact's addresses", de: "Adressen eines Kontakts einsehen" },
+  "contacts.addresses.create": { en: "Add an address", de: "Adresse hinzufügen" },
   "products.create": { en: "Create a product", de: "Produkt erstellen" },
   "vouchers.create_from_file": { en: "Book an expense from a receipt", de: "Ausgabe aus Beleg buchen" },
   "orders.cancel": { en: "Cancel an order", de: "Bestellung stornieren" },
@@ -228,19 +232,27 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "shopify", category: "ecommerce", name: "Shopify", icon: "shopping_bag", color: "#95BF47",
     description: {
-      en: "Order search, lookup, refunds, cancellation, and shipment tracking, plus product (including creation), category, inventory, and customer tools.",
-      de: "Bestellsuche, -abfrage, -erstattung, -stornierung und Sendungsverfolgung sowie Produkt- (inkl. Erstellung), Kategorie-, Lager- und Kunden-Tools.",
+      en: "Order search, lookup, refunds, cancellation, and shipment tracking, plus product (including creation and images), category, inventory, and customer (including addresses) tools.",
+      de: "Bestellsuche, -abfrage, -erstattung, -stornierung und Sendungsverfolgung sowie Produkt- (inkl. Erstellung und Bilder), Kategorie-, Lager- und Kunden-Tools (inkl. Adressen).",
     },
-    capabilities: FULL_ECOMMERCE_CAPABILITIES,
+    capabilities: [
+      ...FULL_ECOMMERCE_CAPABILITIES,
+      { domain: "products", tools: ["products.images.search", "products.images.create"] },
+      { domain: "contacts", tools: ["contacts.addresses.search", "contacts.addresses.create"] },
+    ],
     verificationStatus: "api_verified",
   },
   {
     id: "magento", category: "ecommerce", name: "Magento", icon: "shopping_cart", color: "#EE672F",
     description: {
-      en: "Order search, lookup, refunds, cancellation, and shipment tracking, plus product (including creation), category, inventory, and customer tools.",
-      de: "Bestellsuche, -abfrage, -erstattung, -stornierung und Sendungsverfolgung sowie Produkt- (inkl. Erstellung), Kategorie-, Lager- und Kunden-Tools.",
+      en: "Order search, lookup, refunds, cancellation, and shipment tracking, plus product (including creation and images), category, inventory, and customer (including addresses) tools.",
+      de: "Bestellsuche, -abfrage, -erstattung, -stornierung und Sendungsverfolgung sowie Produkt- (inkl. Erstellung und Bilder), Kategorie-, Lager- und Kunden-Tools (inkl. Adressen).",
     },
-    capabilities: FULL_ECOMMERCE_CAPABILITIES,
+    capabilities: [
+      ...FULL_ECOMMERCE_CAPABILITIES,
+      { domain: "products", tools: ["products.images.search", "products.images.create"] },
+      { domain: "contacts", tools: ["contacts.addresses.search", "contacts.addresses.create"] },
+    ],
     verificationStatus: "unverified",
   },
   {
@@ -379,15 +391,17 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "prestashop", category: "ecommerce", name: "PrestaShop", icon: "local_mall", color: "#DF0067",
     description: {
-      en: "Order search, lookup, refunds, and cancellation, plus product (including creation), category, inventory, and customer tools, via PrestaShop's Webservice API.",
-      de: "Bestellsuche, -abfrage, -erstattung und -stornierung sowie Produkt- (inkl. Erstellung), Kategorie-, Lager- und Kunden-Tools über die Webservice-API von PrestaShop.",
+      en: "Order search, lookup, refunds, and cancellation, plus product (including creation and images), category, inventory, and customer (including addresses) tools, via PrestaShop's Webservice API.",
+      de: "Bestellsuche, -abfrage, -erstattung und -stornierung sowie Produkt- (inkl. Erstellung und Bilder), Kategorie-, Lager- und Kunden-Tools (inkl. Adressen) über die Webservice-API von PrestaShop.",
     },
     capabilities: [
       { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel"] },
       { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
       { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
+      { domain: "products", tools: ["products.images.search", "products.images.create"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
+      { domain: "contacts", tools: ["contacts.addresses.search", "contacts.addresses.create"] },
     ],
     verificationStatus: "api_verified",
   },
