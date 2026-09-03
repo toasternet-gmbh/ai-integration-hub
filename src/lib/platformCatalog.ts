@@ -100,7 +100,7 @@ const ECOMMERCE_CAPABILITIES: PlatformCapability[] = [
 
 const BOOKKEEPING_CAPABILITIES: PlatformCapability[] = [
   { domain: "invoices", tools: ["invoices.search", "invoices.get"] },
-  { domain: "contacts", tools: ["contacts.search"] },
+  { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
 ];
 
 const CMS_CAPABILITIES: PlatformCapability[] = [{ domain: "cms", tools: ["cms.pages.search", "cms.pages.get"] }];

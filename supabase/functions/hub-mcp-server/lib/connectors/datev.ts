@@ -71,7 +71,7 @@ export class DatevConnector implements Connector {
   async getCapabilities(): Promise<Capability[]> {
     return [
       { domain: "invoices", tools: ["invoices.search", "invoices.get"] },
-      { domain: "contacts", tools: ["contacts.search"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
   }
 
@@ -91,6 +91,12 @@ export class DatevConnector implements Connector {
       }
       case "contacts.search": {
         const data = await this.request("/contacts");
+        return { data };
+      }
+      case "contacts.get": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        const data = await this.request(`/contacts/${encodeURIComponent(contactId)}`);
         return { data };
       }
       default:

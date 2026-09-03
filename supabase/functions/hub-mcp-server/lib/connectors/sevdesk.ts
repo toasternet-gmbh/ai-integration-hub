@@ -40,7 +40,7 @@ export class SevdeskConnector implements Connector {
   async getCapabilities(): Promise<Capability[]> {
     return [
       { domain: "invoices", tools: ["invoices.search", "invoices.get"] },
-      { domain: "contacts", tools: ["contacts.search"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
   }
 
@@ -71,6 +71,12 @@ export class SevdeskConnector implements Connector {
           ? data.objects.filter((c) => String(c.name ?? "").toLowerCase().includes(name) || String(c.surename ?? "").toLowerCase().includes(name))
           : data.objects;
         return { data: { objects } };
+      }
+      case "contacts.get": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        const data = await this.request(`/Contact/${encodeURIComponent(contactId)}`);
+        return { data };
       }
       default:
         throw new Error(`sevDesk connector does not support tool '${tool}'.`);
