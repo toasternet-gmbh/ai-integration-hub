@@ -115,6 +115,7 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "integrations.name": { en: "Integration name", de: "Name der Integration" },
   "integrations.consumerKey": { en: "Consumer key", de: "Consumer Key" },
   "integrations.consumerSecret": { en: "Consumer secret", de: "Consumer Secret" },
+  "integrations.whereToFind": { en: "Where to find this:", de: "Wo Sie das finden:" },
   "integrations.clientId": { en: "Client ID", de: "Client-ID" },
   "integrations.clientSecret": { en: "Client secret", de: "Client-Secret" },
   "integrations.accessToken": { en: "Admin API access token", de: "Admin-API-Zugriffstoken" },

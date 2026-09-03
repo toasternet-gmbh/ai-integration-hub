@@ -1,5 +1,6 @@
 import { useI18n } from "../lib/i18n";
 import { CLIENT_CREDENTIALS_PLATFORMS, NO_STORE_URL_PLATFORMS, OAUTH2_PLATFORMS, TOKEN_AUTH_PLATFORMS } from "../lib/platformCredentials";
+import { CREDENTIAL_HELP } from "../lib/credentialHelp";
 
 /** The credentials half of a "connect a platform" form — which fields to show and how to label
  *  them, shared between the in-app Integrations connect picker and the public quick-connect page
@@ -13,11 +14,20 @@ export function PlatformCredentialFields({
   keyValue: string; onKey: (v: string) => void;
   secret: string; onSecret: (v: string) => void;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   if (OAUTH2_PLATFORMS.has(platform)) return null;
+  const help = CREDENTIAL_HELP[platform];
 
   return (
     <>
+      {help && (
+        <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
+          <span className="material-symbols-outlined text-[16px] text-primary shrink-0 mt-0.5">help</span>
+          <p className="font-body-md text-[12px] text-on-surface-variant leading-relaxed">
+            <span className="font-medium text-on-surface">{t("integrations.whereToFind")}</span> {help[lang]}
+          </p>
+        </div>
+      )}
       {!NO_STORE_URL_PLATFORMS.has(platform) && !CLIENT_CREDENTIALS_PLATFORMS.has(platform) && (
         <div>
           <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">
