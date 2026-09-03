@@ -43,6 +43,8 @@ export class SevdeskConnector implements Connector {
       { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
       { domain: "reports", tools: ["reports.profit_and_loss"] },
+      { domain: "products", tools: ["products.create"] },
+      { domain: "vouchers", tools: ["vouchers.create_from_file"] },
     ];
   }
 
@@ -140,6 +142,65 @@ export class SevdeskConnector implements Connector {
           endDate: String(input.end_date ?? ""),
         });
         const data = await this.request(`/Report/profitAndLoss?${params.toString()}`);
+        return { data };
+      }
+      // Best-effort — POST /Part is a real, confirmed endpoint (api.sevdesk.de), but the exact body
+      // shape (beyond name/partNumber/stock/unity/taxRate) is inferred, not confirmed against a
+      // live account. `unity.id: 1` is sevDesk's fixed system unit for "Stück" (piece).
+      case "products.create": {
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        const body = {
+          name,
+          stock: 0,
+          unity: { id: 1, objectName: "Unity" },
+          taxRate: Number(input.tax_rate ?? 19),
+          price: Number(input.price ?? 0),
+          ...(input.sku ? { partNumber: String(input.sku) } : {}),
+        };
+        const data = await this.request("/Part", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        return { data };
+      }
+      // Two real, confirmed endpoints (api.sevdesk.de): upload the file to get a temp document
+      // reference, then create the voucher record pointing at it. Best-effort on the exact
+      // saveVoucher body shape beyond the fields multiple independent sources agree on
+      // (voucherType/description/status/supplier/voucherDate/taxType/creditDebit +
+      // voucherPosSave[].{accountingType,taxRate,sum}) — not confirmed against a live account, and
+      // in particular how the uploaded file's reference is threaded into that body is inferred, not
+      // documented anywhere this session could reach.
+      case "vouchers.create_from_file": {
+        const fileBase64 = String(input.file_base64 ?? "");
+        const fileName = String(input.file_name ?? "");
+        if (!fileBase64 || !fileName) throw new Error("file_base64 and file_name are required.");
+        const bytes = Uint8Array.from(atob(fileBase64), (c) => c.charCodeAt(0));
+        const form = new FormData();
+        form.set("file", new Blob([bytes], { type: String(input.mime_type ?? "image/jpeg") }), fileName);
+        const uploaded = (await this.request("/Voucher/Factory/uploadTempFile", { method: "POST", body: form })) as {
+          objects?: { filename?: string };
+        };
+        const body = {
+          voucher: {
+            objectName: "Voucher", mapAll: true,
+            voucherType: "VOU",
+            creditDebit: "C",
+            status: 50, // 50 = draft, sevDesk's status enum
+            taxType: "default",
+            voucherDate: new Date().toISOString(),
+            description: input.description ? String(input.description) : fileName,
+          },
+          voucherPosSave: [],
+          voucherPosDelete: null,
+          filename: uploaded.objects?.filename,
+        };
+        const data = await this.request("/Voucher/Factory/saveVoucher", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
         return { data };
       }
       default:

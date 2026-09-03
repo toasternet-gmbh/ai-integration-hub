@@ -39,6 +39,7 @@ export class LexofficeConnector implements Connector {
     return [
       { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
+      { domain: "products", tools: ["products.create"] },
     ];
   }
 
@@ -118,6 +119,26 @@ export class LexofficeConnector implements Connector {
           ...(input.title ? { title: String(input.title) } : {}),
         };
         const data = await this.request("/invoices?finalize=false", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        return { data };
+      }
+      // POST /v1/articles is a real, confirmed endpoint (developers.lexware.io) with a confirmed
+      // required-field list (title, type, unitName, price.{netPrice|grossPrice, leadingPrice,
+      // taxRate}) — this is a billable article/item for invoicing, not a storefront product.
+      case "products.create": {
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        const body = {
+          title: name,
+          type: "PRODUCT",
+          unitName: "Stück",
+          price: { netPrice: Number(input.price ?? 0), leadingPrice: "NET", taxRate: Number(input.tax_rate ?? 19) },
+          ...(input.sku ? { articleNumber: String(input.sku) } : {}),
+        };
+        const data = await this.request("/articles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),

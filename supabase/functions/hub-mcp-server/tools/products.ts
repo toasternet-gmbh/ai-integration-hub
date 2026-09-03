@@ -43,6 +43,21 @@ export const definitions: ToolDefinition[] = [
       properties: { integration_id: { type: "string" }, product_id: { type: "string" }, price: { type: "number" } },
     },
   },
+  {
+    name: "products.create",
+    description: "Create a new product on an integration — on a bookkeeping platform, this creates a billable article/item, not a storefront listing.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "name", "price"],
+      properties: {
+        integration_id: { type: "string" },
+        name: { type: "string" },
+        price: { type: "number", description: "Net price." },
+        tax_rate: { type: "number", description: "Percentage, e.g. 19. Defaults to 19." },
+        sku: { type: "string" },
+      },
+    },
+  },
 ];
 
 export const handlers: ToolModule["handlers"] = {
@@ -62,5 +77,11 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("products.update_price", args)).data;
+  },
+
+  async "products.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("products.create", args)).data;
   },
 };

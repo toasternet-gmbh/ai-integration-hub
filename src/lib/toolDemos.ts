@@ -154,6 +154,23 @@ export const TOOL_DEMOS: Record<string, ToolDemo> = {
     agentAsks: { en: "How did we do financially last quarter?", de: "Wie standen wir finanziell im letzten Quartal da?" },
     hubReplies: { en: "Q2: €84,200 revenue, €61,900 expenses, €22,300 profit.", de: "Q2: 84.200 € Umsatz, 61.900 € Ausgaben, 22.300 € Gewinn." },
   },
+  "products.create": {
+    icon: "inventory_2",
+    label: { en: "Create a product (with your approval)", de: "Produkt erstellen (mit Ihrer Freigabe)" },
+    benefit: { en: "Add a new billable item the moment you start offering it — no manual catalog entry later.", de: "Fügen Sie einen neuen abrechenbaren Artikel hinzu, sobald Sie ihn anbieten — keine spätere manuelle Erfassung." },
+    agentAsks: { en: "Add a new item: \"Onboarding package\", €450 net.", de: "Lege einen neuen Artikel an: „Onboarding-Paket“, 450 € netto." },
+    hubReplies: { en: "A new item \"Onboarding package\" (€450.00) is waiting in your Approvals inbox.", de: "Ein neuer Artikel „Onboarding-Paket“ (450,00 €) wartet in Ihrem Freigabe-Postfach." },
+  },
+  "vouchers.create_from_file": {
+    icon: "receipt",
+    label: { en: "Book an expense from a receipt (with your approval)", de: "Ausgabe aus Beleg buchen (mit Ihrer Freigabe)" },
+    benefit: {
+      en: "Snap a photo of a receipt and let an agent book it as an expense — nothing is recorded until you approve it.",
+      de: "Machen Sie ein Foto von einem Beleg und lassen Sie einen Agenten ihn als Ausgabe buchen — gebucht wird erst nach Ihrer Freigabe.",
+    },
+    agentAsks: { en: "Book this taxi receipt as a business expense.", de: "Buche diesen Taxi-Beleg als Geschäftsausgabe." },
+    hubReplies: { en: "A new expense voucher from \"taxi-receipt.jpg\" is waiting in your Approvals inbox.", de: "Ein neuer Ausgabenbeleg aus „taxi-receipt.jpg“ wartet in Ihrem Freigabe-Postfach." },
+  },
   "cms.pages.search": {
     icon: "article",
     label: { en: "See your website pages", de: "Website-Seiten einsehen" },

@@ -109,6 +109,21 @@ export const definitions: ToolDefinition[] = [
       },
     },
   },
+  {
+    name: "vouchers.create_from_file",
+    description: "Book an expense by uploading a receipt or bill (image or PDF) as a voucher on a bookkeeping integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "file_base64", "file_name"],
+      properties: {
+        integration_id: { type: "string" },
+        file_base64: { type: "string", description: "Base64-encoded file content (image or PDF)." },
+        file_name: { type: "string", description: "e.g. receipt.jpg" },
+        mime_type: { type: "string", description: "e.g. image/jpeg, application/pdf. Defaults to image/jpeg." },
+        description: { type: "string" },
+      },
+    },
+  },
 ];
 
 export const handlers: ToolModule["handlers"] = {
@@ -152,5 +167,11 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("reports.profit_and_loss", args)).data;
+  },
+
+  async "vouchers.create_from_file"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("vouchers.create_from_file", args)).data;
   },
 };
