@@ -99,6 +99,7 @@ export const TOOL_INFO: Record<string, Bi> = {
   "absences.delete": { en: "Cancel an absence", de: "Abwesenheit stornieren" },
   "products.images.search": { en: "See product images", de: "Produktbilder einsehen" },
   "products.images.create": { en: "Upload a product image", de: "Produktbild hochladen" },
+  "products.variants.search": { en: "See product variants", de: "Produktvarianten einsehen" },
   "contacts.addresses.search": { en: "See a contact's addresses", de: "Adressen eines Kontakts einsehen" },
   "contacts.addresses.create": { en: "Add an address", de: "Adresse hinzufügen" },
   "products.create": { en: "Create a product", de: "Produkt erstellen" },
@@ -186,6 +187,7 @@ const WOOCOMMERCE_CAPABILITIES: PlatformCapability[] = [
   { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel"] },
   { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
   { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
+  { domain: "products", tools: ["products.variants.search"] },
   { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
   { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
 ];
@@ -226,7 +228,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       en: "Order search, lookup, refunds, cancellation, and shipment tracking, plus product (including creation), category, inventory, and customer tools, via Shopware's OAuth2 API.",
       de: "Bestellsuche, -abfrage, -erstattung, -stornierung und Sendungsverfolgung sowie Produkt- (inkl. Erstellung), Kategorie-, Lager- und Kunden-Tools über die OAuth2-API von Shopware.",
     },
-    capabilities: FULL_ECOMMERCE_CAPABILITIES,
+    capabilities: [...FULL_ECOMMERCE_CAPABILITIES, { domain: "products", tools: ["products.variants.search"] }],
     verificationStatus: "api_verified",
   },
   {
@@ -251,6 +253,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
     capabilities: [
       ...FULL_ECOMMERCE_CAPABILITIES,
       { domain: "products", tools: ["products.images.search", "products.images.create"] },
+      { domain: "products", tools: ["products.variants.search"] },
       { domain: "contacts", tools: ["contacts.addresses.search", "contacts.addresses.create"] },
     ],
     verificationStatus: "unverified",
@@ -399,6 +402,7 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
       { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
       { domain: "products", tools: ["products.images.search", "products.images.create"] },
+      { domain: "products", tools: ["products.variants.search"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
       { domain: "contacts", tools: ["contacts.addresses.search", "contacts.addresses.create"] },

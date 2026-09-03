@@ -635,6 +635,13 @@ export const TOOL_DEMOS: Record<string, ToolDemo> = {
     agentAsks: { en: "Add a shipping address for Müller GmbH: Hauptstraße 1, 10115 Berlin.", de: "Füge eine Lieferadresse für Müller GmbH hinzu: Hauptstraße 1, 10115 Berlin." },
     hubReplies: { en: "Address added to Müller GmbH's record.", de: "Adresse zum Datensatz von Müller GmbH hinzugefügt." },
   },
+  "products.variants.search": {
+    icon: "style",
+    label: { en: "See product variants", de: "Produktvarianten einsehen" },
+    benefit: { en: "Check which sizes or colors of a product exist before quoting stock.", de: "Prüfen Sie, welche Größen oder Farben eines Produkts existieren, bevor Sie den Bestand nennen." },
+    agentAsks: { en: "What variants does the Blue T-Shirt have?", de: "Welche Varianten hat das blaue T-Shirt?" },
+    hubReplies: { en: "3 variants: S, M, L — all in stock.", de: "3 Varianten: S, M, L — alle vorrätig." },
+  },
   "accounts.list": {
     icon: "account_balance_wallet",
     label: { en: "See your bank accounts", de: "Bankkonten einsehen" },
