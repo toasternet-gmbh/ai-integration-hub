@@ -58,6 +58,22 @@ export const definitions: ToolDefinition[] = [
       },
     },
   },
+  {
+    name: "products.update",
+    description: "Update a product's name, price, tax rate, or SKU (broader than products.update_price).",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "product_id"],
+      properties: {
+        integration_id: { type: "string" },
+        product_id: { type: "string" },
+        name: { type: "string" },
+        price: { type: "number" },
+        tax_rate: { type: "number" },
+        sku: { type: "string" },
+      },
+    },
+  },
 ];
 
 export const handlers: ToolModule["handlers"] = {
@@ -83,5 +99,11 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("products.create", args)).data;
+  },
+
+  async "products.update"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("products.update", args)).data;
   },
 };

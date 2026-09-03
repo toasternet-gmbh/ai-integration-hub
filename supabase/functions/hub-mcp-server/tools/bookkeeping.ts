@@ -97,6 +97,53 @@ export const definitions: ToolDefinition[] = [
     },
   },
   {
+    name: "invoices.finalize",
+    description: "Finalize a draft invoice, assigning it a real invoice number (sevDesk only — Lexoffice has no API to change an invoice's status after creation).",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "invoice_id"],
+      properties: {
+        integration_id: { type: "string" }, invoice_id: { type: "string" },
+        send_type: { type: "string", description: "How the invoice was delivered: VPR (print), VP (post), VM (mail), or VPDF (downloaded PDF). Defaults to VPR." },
+      },
+    },
+  },
+  {
+    name: "invoices.record_payment",
+    description: "Record a payment against an invoice (sevDesk only).",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "invoice_id", "amount", "check_account_id"],
+      properties: {
+        integration_id: { type: "string" }, invoice_id: { type: "string" },
+        amount: { type: "number" },
+        check_account_id: { type: "string", description: "The sevDesk bank/cash account (CheckAccount) the payment was received into." },
+        date: { type: "string", description: "ISO 8601 date. Defaults to now." },
+      },
+    },
+  },
+  {
+    name: "invoices.void",
+    description: "Cancel an invoice, creating a reversing cancellation invoice (sevDesk only).",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "invoice_id"],
+      properties: { integration_id: { type: "string" }, invoice_id: { type: "string" } },
+    },
+  },
+  {
+    name: "contacts.update",
+    description: "Update an existing contact (customer or vendor) on a bookkeeping integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "contact_id"],
+      properties: {
+        integration_id: { type: "string" }, contact_id: { type: "string" },
+        name: { type: "string" }, email: { type: "string" },
+      },
+    },
+  },
+  {
     name: "reports.profit_and_loss",
     description: "Get a profit and loss summary for a date range on a bookkeeping integration.",
     inputSchema: {
@@ -161,6 +208,30 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("invoices.create", args)).data;
+  },
+
+  async "invoices.finalize"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("invoices.finalize", args)).data;
+  },
+
+  async "invoices.record_payment"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("invoices.record_payment", args)).data;
+  },
+
+  async "invoices.void"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("invoices.void", args)).data;
+  },
+
+  async "contacts.update"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("contacts.update", args)).data;
   },
 
   async "reports.profit_and_loss"(args, { admin, projectId }) {

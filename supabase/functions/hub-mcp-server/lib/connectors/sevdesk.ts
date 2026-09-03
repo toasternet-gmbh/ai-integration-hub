@@ -40,10 +40,10 @@ export class SevdeskConnector implements Connector {
 
   async getCapabilities(): Promise<Capability[]> {
     return [
-      { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create"] },
-      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
+      { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create", "invoices.finalize", "invoices.record_payment", "invoices.void"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create", "contacts.update"] },
       { domain: "reports", tools: ["reports.profit_and_loss"] },
-      { domain: "products", tools: ["products.create"] },
+      { domain: "products", tools: ["products.create", "products.update"] },
       { domain: "vouchers", tools: ["vouchers.create_from_file"] },
     ];
   }
@@ -160,6 +160,89 @@ export class SevdeskConnector implements Connector {
         };
         const data = await this.request("/Part", {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        return { data };
+      }
+      // PUT /Invoice/{id}/sendBy is real, confirmed against sevDesk's own OpenAPI spec
+      // (api.sevdesk.de/openapi.yaml) -- `sendType` is required by that spec; VPR ("printed") is
+      // used as the default since it marks the invoice sent/finalized without actually emailing
+      // the customer, the least surprising default for an agent-triggered action.
+      // `sendDraft: false` is what actually assigns the real invoice number -- true would create an
+      // internal-use draft PDF without changing status, which defeats the point of this tool.
+      case "invoices.finalize": {
+        const invoiceId = String(input.invoice_id ?? "");
+        if (!invoiceId) throw new Error("invoice_id is required.");
+        const allowedSendTypes = new Set(["VPR", "VP", "VM", "VPDF"]);
+        const sendType = input.send_type && allowedSendTypes.has(String(input.send_type)) ? String(input.send_type) : "VPR";
+        const data = await this.request(`/Invoice/${encodeURIComponent(invoiceId)}/sendBy`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sendType, sendDraft: false }),
+        });
+        return { data };
+      }
+      // PUT /Invoice/{id}/bookAmount is real, confirmed against the OpenAPI spec. `type:
+      // FULL_PAYMENT` is sevDesk's normal-booking enum value; `date` is documented as an integer
+      // (epoch seconds), not an ISO string, unlike every date field elsewhere in this connector.
+      case "invoices.record_payment": {
+        const invoiceId = String(input.invoice_id ?? "");
+        const checkAccountId = String(input.check_account_id ?? "");
+        if (!invoiceId) throw new Error("invoice_id is required.");
+        if (!checkAccountId) throw new Error("check_account_id is required.");
+        if (input.amount == null) throw new Error("amount is required.");
+        const dateEpoch = Math.floor((input.date ? Date.parse(String(input.date)) : Date.now()) / 1000);
+        const body = {
+          amount: Number(input.amount),
+          date: dateEpoch,
+          type: "FULL_PAYMENT",
+          checkAccount: { id: checkAccountId, objectName: "CheckAccount" },
+        };
+        const data = await this.request(`/Invoice/${encodeURIComponent(invoiceId)}/bookAmount`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        return { data };
+      }
+      // POST /Invoice/{id}/cancelInvoice is real, confirmed against the OpenAPI spec -- no request
+      // body. sevDesk creates and auto-pays a reversing cancellation invoice and flips the source
+      // invoice's status to "cancelled".
+      case "invoices.void": {
+        const invoiceId = String(input.invoice_id ?? "");
+        if (!invoiceId) throw new Error("invoice_id is required.");
+        const data = await this.request(`/Invoice/${encodeURIComponent(invoiceId)}/cancelInvoice`, { method: "POST" });
+        return { data };
+      }
+      // PUT /Contact/{id} is real, confirmed against the OpenAPI spec. Same email limitation as
+      // contacts.create -- sevDesk associates email via a separate CommunicationWay resource, not
+      // a Contact field, so an `email` input is silently not applied here (matching create's
+      // documented behavior) rather than erroring on a field this resource has no place for.
+      case "contacts.update": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        const body: Record<string, unknown> = {};
+        if (input.name != null) body.name = String(input.name);
+        const data = await this.request(`/Contact/${encodeURIComponent(contactId)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        return { data };
+      }
+      // PUT /Part/{id} is real, confirmed against the OpenAPI spec -- same field set products.create
+      // already writes.
+      case "products.update": {
+        const productId = String(input.product_id ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        const body: Record<string, unknown> = {};
+        if (input.name != null) body.name = String(input.name);
+        if (input.price != null) body.price = Number(input.price);
+        if (input.tax_rate != null) body.taxRate = Number(input.tax_rate);
+        if (input.sku != null) body.partNumber = String(input.sku);
+        const data = await this.request(`/Part/${encodeURIComponent(productId)}`, {
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });

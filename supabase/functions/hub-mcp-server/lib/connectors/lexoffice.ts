@@ -38,8 +38,9 @@ export class LexofficeConnector implements Connector {
   async getCapabilities(): Promise<Capability[]> {
     return [
       { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create"] },
-      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
-      { domain: "products", tools: ["products.create"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create", "contacts.update"] },
+      { domain: "products", tools: ["products.create", "products.update"] },
+      { domain: "vouchers", tools: ["vouchers.create_from_file"] },
     ];
   }
 
@@ -88,6 +89,76 @@ export class LexofficeConnector implements Connector {
         const body: Record<string, unknown> = { roles: { customer: {} }, company: { name } };
         if (input.email) body.emailAddresses = { business: [String(input.email)] };
         const data = await this.request("/contacts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        return { data };
+      }
+      // Best-effort — PUT /v1/contacts/{id} is a real, confirmed endpoint. Lexware Office resources
+      // use optimistic locking (a `version` field that must match the server's current value), so
+      // the existing contact is fetched first and merged rather than sending a bare partial body.
+      case "contacts.update": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        const existing = (await this.request(`/contacts/${encodeURIComponent(contactId)}`)) as Record<string, unknown>;
+        const company = (existing.company as Record<string, unknown>) ?? {};
+        if (input.name != null) company.name = String(input.name);
+        const body: Record<string, unknown> = { ...existing, company };
+        if (input.email != null) body.emailAddresses = { business: [String(input.email)] };
+        const data = await this.request(`/contacts/${encodeURIComponent(contactId)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        return { data };
+      }
+      // Best-effort — PUT /v1/articles/{id} is a real, confirmed endpoint, same optimistic-locking
+      // posture as contacts.update above.
+      case "products.update": {
+        const productId = String(input.product_id ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        const existing = (await this.request(`/articles/${encodeURIComponent(productId)}`)) as Record<string, unknown>;
+        const price = (existing.price as Record<string, unknown>) ?? {};
+        if (input.price != null) price.netPrice = Number(input.price);
+        if (input.tax_rate != null) price.taxRate = Number(input.tax_rate);
+        const body: Record<string, unknown> = { ...existing, price };
+        if (input.name != null) body.title = String(input.name);
+        if (input.sku != null) body.articleNumber = String(input.sku);
+        const data = await this.request(`/articles/${encodeURIComponent(productId)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        return { data };
+      }
+      // Best-effort — POST /v1/files (multipart, field "file" + "type"="voucher") is a real,
+      // confirmed endpoint, and the returned file id is referenced from POST /v1/vouchers'
+      // `files` array to attach the receipt/image to an expense record (type "purchaseinvoice").
+      // This is more uncertain than sevDesk's equivalent flow: the exact shape of the `files` array
+      // entry (a bare id string vs. an object) could not be pinned down to spec-level confidence
+      // from Lexware's docs, only corroborated third-party integration writeups -- verify against
+      // a live account before relying on it. `voucherStatus: "unchecked"` is Lexware's own
+      // "not yet booked" state, the only one where most other fields become optional, matching the
+      // conservative "draft first" posture used elsewhere in this connector.
+      case "vouchers.create_from_file": {
+        const fileBase64 = String(input.file_base64 ?? "");
+        const fileName = String(input.file_name ?? "");
+        if (!fileBase64 || !fileName) throw new Error("file_base64 and file_name are required.");
+        const bytes = Uint8Array.from(atob(fileBase64), (c) => c.charCodeAt(0));
+        const form = new FormData();
+        form.set("file", new Blob([bytes], { type: String(input.mime_type ?? "image/jpeg") }), fileName);
+        form.set("type", "voucher");
+        const uploaded = (await this.request("/files", { method: "POST", body: form })) as { id?: string };
+        if (!uploaded.id) throw new Error("Lexoffice did not return a file id for the uploaded voucher.");
+        const body = {
+          type: "purchaseinvoice",
+          voucherStatus: "unchecked",
+          voucherDate: new Date().toISOString(),
+          remark: input.description ? String(input.description) : fileName,
+          files: [uploaded.id],
+        };
+        const data = await this.request("/vouchers", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
