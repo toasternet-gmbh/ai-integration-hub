@@ -127,6 +127,33 @@ export const TOOL_DEMOS: Record<string, ToolDemo> = {
     agentAsks: { en: "What do we have on file for Müller GmbH?", de: "Was haben wir zu Müller GmbH gespeichert?" },
     hubReplies: { en: "Müller GmbH — customer since 2024, 3 invoices, last contact 2 weeks ago.", de: "Müller GmbH — Kunde seit 2024, 3 Rechnungen, letzter Kontakt vor 2 Wochen." },
   },
+  "contacts.create": {
+    icon: "group",
+    label: { en: "Create a contact", de: "Kontakt erstellen" },
+    benefit: { en: "Register a new customer or vendor the moment you meet one — no separate data entry later.", de: "Erfassen Sie einen neuen Kunden oder Lieferanten, sobald Sie ihn kennenlernen — keine spätere Nacherfassung nötig." },
+    agentAsks: { en: "Add a new customer: Schmidt Consulting, schmidt@example.com.", de: "Lege einen neuen Kunden an: Schmidt Consulting, schmidt@example.com." },
+    hubReplies: { en: "Contact created: Schmidt Consulting.", de: "Kontakt erstellt: Schmidt Consulting." },
+  },
+  "invoices.create": {
+    icon: "receipt_long",
+    label: { en: "Create an invoice (with your approval)", de: "Rechnung erstellen (mit Ihrer Freigabe)" },
+    benefit: {
+      en: "Let an agent draft an invoice from a conversation — but nothing is finalized until you personally approve it.",
+      de: "Lassen Sie einen Agenten eine Rechnung aus einem Gespräch heraus vorbereiten — final wird sie erst, wenn Sie persönlich zustimmen.",
+    },
+    agentAsks: { en: "Invoice Schmidt Consulting for 5 hours of consulting at €120/hour.", de: "Stelle Schmidt Consulting 5 Stunden Beratung zu 120 €/Stunde in Rechnung." },
+    hubReplies: {
+      en: "A draft invoice for €600.00 is waiting in your Approvals inbox — nothing is sent until you approve it.",
+      de: "Ein Rechnungsentwurf über 600,00 € wartet in Ihrem Freigabe-Postfach — es wird nichts versendet, bevor Sie zustimmen.",
+    },
+  },
+  "reports.profit_and_loss": {
+    icon: "trending_up",
+    label: { en: "Get a profit & loss report", de: "Gewinn-und-Verlust-Bericht abrufen" },
+    benefit: { en: "Ask how the business is doing this quarter without waiting for your accountant.", de: "Fragen Sie, wie das Geschäft dieses Quartal läuft, ohne auf Ihren Steuerberater zu warten." },
+    agentAsks: { en: "How did we do financially last quarter?", de: "Wie standen wir finanziell im letzten Quartal da?" },
+    hubReplies: { en: "Q2: €84,200 revenue, €61,900 expenses, €22,300 profit.", de: "Q2: 84.200 € Umsatz, 61.900 € Ausgaben, 22.300 € Gewinn." },
+  },
   "cms.pages.search": {
     icon: "article",
     label: { en: "See your website pages", de: "Website-Seiten einsehen" },

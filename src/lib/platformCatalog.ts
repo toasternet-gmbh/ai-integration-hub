@@ -47,6 +47,9 @@ export const TOOL_INFO: Record<string, Bi> = {
   "invoices.get": { en: "Look up an invoice", de: "Rechnung abrufen" },
   "contacts.search": { en: "Search contacts", de: "Kontakte durchsuchen" },
   "contacts.get": { en: "Look up a contact", de: "Kontakt abrufen" },
+  "contacts.create": { en: "Create a contact", de: "Kontakt erstellen" },
+  "invoices.create": { en: "Create an invoice", de: "Rechnung erstellen" },
+  "reports.profit_and_loss": { en: "Get a profit & loss report", de: "Gewinn-und-Verlust-Bericht abrufen" },
   "cms.pages.search": { en: "Search pages", de: "Seiten durchsuchen" },
   "cms.pages.get": { en: "Look up a page", de: "Seite abrufen" },
   "time_entries.search": { en: "Search time entries", de: "Zeiteinträge durchsuchen" },
@@ -147,10 +150,13 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "lexoffice", category: "bookkeeping", name: "Lexoffice", icon: "receipt_long", color: "#6CC24A",
     description: {
-      en: "Invoice and contact search, plus invoice lookup, via Lexoffice's bookkeeping API.",
-      de: "Rechnungs- und Kontaktsuche sowie Rechnungsabfrage über die Buchhaltungs-API von Lexoffice.",
+      en: "Invoice and contact search, lookup, and creation via Lexoffice's bookkeeping API.",
+      de: "Rechnungs- und Kontaktsuche, -abfrage und -erstellung über die Buchhaltungs-API von Lexoffice.",
     },
-    capabilities: BOOKKEEPING_CAPABILITIES,
+    capabilities: [
+      { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
+    ],
     verificationStatus: "api_verified",
   },
   {
@@ -186,10 +192,14 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "sevdesk", category: "bookkeeping", name: "sevDesk", icon: "request_quote", color: "#00A88E",
     description: {
-      en: "Invoice and contact search, plus invoice lookup, via sevDesk's bookkeeping API.",
-      de: "Rechnungs- und Kontaktsuche sowie Rechnungsabfrage über die Buchhaltungs-API von sevDesk.",
+      en: "Invoice and contact search, lookup, and creation, plus a profit-and-loss report, via sevDesk's bookkeeping API.",
+      de: "Rechnungs- und Kontaktsuche, -abfrage und -erstellung sowie ein Gewinn-und-Verlust-Bericht über die Buchhaltungs-API von sevDesk.",
     },
-    capabilities: BOOKKEEPING_CAPABILITIES,
+    capabilities: [
+      { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
+      { domain: "reports", tools: ["reports.profit_and_loss"] },
+    ],
     verificationStatus: "api_verified",
   },
   {

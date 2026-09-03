@@ -29,7 +29,7 @@ export const HANDLERS: Record<string, ToolHandler> = Object.fromEntries(
  *  the Policy Engine (agent_tool_permissions, approvals, audit log). Everything else (admin/meta
  *  tools like create_integration, create_agent, list_approvals, ...) is always allowed for an
  *  agent, no gating. New domain added by a new connector? Add its prefix here too. */
-const GATED_DOMAIN_PREFIXES = ["orders.", "products.", "inventory.", "invoices.", "contacts.", "cms.", "time_entries.", "accounts.", "transactions.", "deals."];
+const GATED_DOMAIN_PREFIXES = ["orders.", "products.", "inventory.", "invoices.", "contacts.", "cms.", "time_entries.", "accounts.", "transactions.", "deals.", "reports."];
 
 export function isGatedTool(name: string): boolean {
   return GATED_DOMAIN_PREFIXES.some((prefix) => name.startsWith(prefix));

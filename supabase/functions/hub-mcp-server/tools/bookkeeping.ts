@@ -57,6 +57,58 @@ export const definitions: ToolDefinition[] = [
       properties: { integration_id: { type: "string" }, contact_id: { type: "string" } },
     },
   },
+  {
+    name: "contacts.create",
+    description: "Create a new contact (customer or vendor) on a bookkeeping integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "name"],
+      properties: {
+        integration_id: { type: "string" },
+        name: { type: "string", description: "Company name, or full person name." },
+        email: { type: "string" },
+      },
+    },
+  },
+  {
+    name: "invoices.create",
+    description: "Create a new invoice on a bookkeeping integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "contact_id", "line_items"],
+      properties: {
+        integration_id: { type: "string" },
+        contact_id: { type: "string" },
+        title: { type: "string" },
+        line_items: {
+          type: "array",
+          items: {
+            type: "object",
+            required: ["name", "quantity", "unit_price"],
+            properties: {
+              name: { type: "string" },
+              quantity: { type: "number" },
+              unit_price: { type: "number", description: "Net unit price." },
+              tax_rate: { type: "number", description: "Percentage, e.g. 19. Defaults to 19." },
+            },
+          },
+        },
+      },
+    },
+  },
+  {
+    name: "reports.profit_and_loss",
+    description: "Get a profit and loss summary for a date range on a bookkeeping integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "start_date", "end_date"],
+      properties: {
+        integration_id: { type: "string" },
+        start_date: { type: "string", description: "ISO 8601 date, e.g. 2026-01-01" },
+        end_date: { type: "string", description: "ISO 8601 date, e.g. 2026-12-31" },
+      },
+    },
+  },
 ];
 
 export const handlers: ToolModule["handlers"] = {
@@ -82,5 +134,23 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("contacts.get", args)).data;
+  },
+
+  async "contacts.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("contacts.create", args)).data;
+  },
+
+  async "invoices.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("invoices.create", args)).data;
+  },
+
+  async "reports.profit_and_loss"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("reports.profit_and_loss", args)).data;
   },
 };
