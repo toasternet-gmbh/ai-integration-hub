@@ -38,6 +38,43 @@ export const definitions: ToolDefinition[] = [
       properties: { integration_id: { type: "string" }, time_entry_id: { type: "string" } },
     },
   },
+  {
+    name: "time_entries.create",
+    description: "Log a new time entry. Omit end_time to start a running timer (Toggl/Clockify only — Personio has no running-timer concept and requires an end_time).",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "start_time"],
+      properties: {
+        integration_id: { type: "string" },
+        description: { type: "string" },
+        start_time: { type: "string", description: "ISO 8601 datetime." },
+        end_time: { type: "string", description: "ISO 8601 datetime. Omit to start a running timer." },
+        project_id: { type: "string", description: "Toggl/Clockify only." },
+        employee_id: { type: "string", description: "Personio only — required there, since attendance is logged per employee, not per API token." },
+      },
+    },
+  },
+  {
+    name: "time_entries.update",
+    description: "Update an existing time entry.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "time_entry_id"],
+      properties: {
+        integration_id: { type: "string" }, time_entry_id: { type: "string" },
+        description: { type: "string" }, start_time: { type: "string" }, end_time: { type: "string" }, project_id: { type: "string" },
+      },
+    },
+  },
+  {
+    name: "time_entries.delete",
+    description: "Delete an existing time entry.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "time_entry_id"],
+      properties: { integration_id: { type: "string" }, time_entry_id: { type: "string" } },
+    },
+  },
 ];
 
 export const handlers: ToolModule["handlers"] = {
@@ -51,5 +88,23 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("time_entries.get", args)).data;
+  },
+
+  async "time_entries.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("time_entries.create", args)).data;
+  },
+
+  async "time_entries.update"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("time_entries.update", args)).data;
+  },
+
+  async "time_entries.delete"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("time_entries.delete", args)).data;
   },
 };

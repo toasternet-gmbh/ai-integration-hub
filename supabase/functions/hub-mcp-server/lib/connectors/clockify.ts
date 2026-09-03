@@ -18,10 +18,15 @@ export class ClockifyConnector implements Connector {
 
   constructor(private creds: ClockifyCredentials) {}
 
-  private async request(path: string): Promise<unknown> {
+  private async request(path: string, init: RequestInit = {}): Promise<unknown> {
     const res = await fetch(`${BASE}${path}`, {
-      headers: { "X-Api-Key": this.creds.apiKey, Accept: "application/json" },
+      ...init,
+      headers: { ...init.headers, "X-Api-Key": this.creds.apiKey, "Content-Type": "application/json", Accept: "application/json" },
     });
+    if (res.status === 204) {
+      if (!res.ok) throw new Error(`Clockify HTTP ${res.status}`);
+      return null;
+    }
     const body = await res.json().catch(() => null);
     if (!res.ok) {
       const message = (body as { message?: string })?.message ?? `Clockify HTTP ${res.status}`;
@@ -51,7 +56,7 @@ export class ClockifyConnector implements Connector {
   }
 
   async getCapabilities(): Promise<Capability[]> {
-    return [{ domain: "time_entries", tools: ["time_entries.search", "time_entries.get"] }];
+    return [{ domain: "time_entries", tools: ["time_entries.search", "time_entries.get", "time_entries.create", "time_entries.update", "time_entries.delete"] }];
   }
 
   async execute(tool: string, input: Record<string, unknown>): Promise<ToolResult> {
@@ -70,6 +75,46 @@ export class ClockifyConnector implements Connector {
         if (!entryId) throw new Error("time_entry_id is required.");
         const data = await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/time-entries/${encodeURIComponent(entryId)}`);
         return { data };
+      }
+      // POST /workspaces/{id}/time-entries is real and confirmed (docs.clockify.me). Omitting
+      // `end` creates a running (in-progress) entry -- Clockify has no separate "start timer"
+      // endpoint either, same posture as Toggl.
+      case "time_entries.create": {
+        const startTime = String(input.start_time ?? "");
+        if (!startTime) throw new Error("start_time is required.");
+        const body: Record<string, unknown> = {
+          start: new Date(Date.parse(startTime)).toISOString(),
+          description: input.description ? String(input.description) : undefined,
+          projectId: input.project_id ? String(input.project_id) : undefined,
+        };
+        if (input.end_time) body.end = new Date(Date.parse(String(input.end_time))).toISOString();
+        const data = await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/time-entries`, { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      // PUT replaces the entry rather than patching it (per Clockify's docs) -- the existing entry
+      // is fetched first and merged so fields the caller didn't mention aren't wiped out. Setting
+      // `end` on an entry that was created running is how a running timer gets stopped -- there's
+      // no separate stop endpoint needed either.
+      case "time_entries.update": {
+        const entryId = String(input.time_entry_id ?? "");
+        if (!entryId) throw new Error("time_entry_id is required.");
+        const existing = (await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/time-entries/${encodeURIComponent(entryId)}`)) as {
+          timeInterval?: { start?: string; end?: string }; description?: string; projectId?: string;
+        };
+        const body: Record<string, unknown> = {
+          start: input.start_time ? new Date(Date.parse(String(input.start_time))).toISOString() : existing.timeInterval?.start,
+          end: input.end_time ? new Date(Date.parse(String(input.end_time))).toISOString() : existing.timeInterval?.end,
+          description: input.description != null ? String(input.description) : existing.description,
+          projectId: input.project_id != null ? String(input.project_id) : existing.projectId,
+        };
+        const data = await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/time-entries/${encodeURIComponent(entryId)}`, { method: "PUT", body: JSON.stringify(body) });
+        return { data };
+      }
+      case "time_entries.delete": {
+        const entryId = String(input.time_entry_id ?? "");
+        if (!entryId) throw new Error("time_entry_id is required.");
+        await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/time-entries/${encodeURIComponent(entryId)}`, { method: "DELETE" });
+        return { data: { time_entry_id: entryId, deleted: true } };
       }
       default:
         throw new Error(`Clockify connector does not support tool '${tool}'.`);
