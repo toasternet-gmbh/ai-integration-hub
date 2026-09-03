@@ -8,6 +8,13 @@
  * exports (invoicelist/orderlist/contactlist/voucherlist), and the Gewinn-und-Verlustrechnung
  * (P&L) is a web-UI-only feature with no documented API. The tool as shipped would have 404'd on
  * every real call. See 20260903000009_sevdesk_reports_pnl_bugfix.sql.
+ *
+ * quotes/order_confirmations/delivery_notes (search+get only, all backed by the unified /Order
+ * resource) and credit_notes (search/get/create, backed by /CreditNote) were added 2026-09-03,
+ * confirmed against the same OpenAPI spec. Deliberately read-only for the Order trio (and
+ * createFromInvoice-only for credit notes): standalone creation of any of these requires
+ * `addressCountry`/`contactPerson` references (StaticCountry/SevUser) that the spec has no
+ * listable endpoint for -- no safe way to resolve a real id without guessing.
  */
 import type { Connector, ConnectionResult, Capability, ToolResult } from "./types.ts";
 
@@ -51,7 +58,29 @@ export class SevdeskConnector implements Connector {
       { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create", "contacts.update"] },
       { domain: "products", tools: ["products.create", "products.update"] },
       { domain: "vouchers", tools: ["vouchers.create_from_file"] },
+      { domain: "quotes", tools: ["quotes.search", "quotes.get"] },
+      { domain: "order_confirmations", tools: ["order_confirmations.search", "order_confirmations.get"] },
+      { domain: "delivery_notes", tools: ["delivery_notes.search", "delivery_notes.get"] },
+      { domain: "credit_notes", tools: ["credit_notes.search", "credit_notes.get", "credit_notes.create"] },
     ];
+  }
+
+  /** Shared by quotes/order_confirmations/delivery_notes — sevDesk unifies all three into one
+   *  /Order resource distinguished by `orderType` (AN=Angebot/quote, AB=Auftrag/order
+   *  confirmation, LI=Lieferschein/delivery note — confirmed in the OpenAPI spec's Model_Order).
+   *  `orderType` is a real, documented GET filter (spec's Order-filter list, not shown in the
+   *  formal `parameters` array but present in the endpoint's own description). No free-text search
+   *  param exists, so "search" narrows client-side by order number/header, same posture as
+   *  invoices.search. Deliberately read-only — see execute()'s default case comment for why create
+   *  isn't implemented for this trio. */
+  private async searchOrders(orderType: "AN" | "AB" | "LI", input: Record<string, unknown>): Promise<unknown> {
+    const params = new URLSearchParams({ orderType, limit: "100" });
+    const data = (await this.request(`/Order?${params.toString()}`)) as SevdeskListResponse<Record<string, unknown>>;
+    const search = input.search ? String(input.search).toLowerCase() : "";
+    const objects = search
+      ? data.objects.filter((o) => String(o.orderNumber ?? "").toLowerCase().includes(search) || String(o.header ?? "").toLowerCase().includes(search))
+      : data.objects;
+    return { objects };
   }
 
   async execute(tool: string, input: Record<string, unknown>): Promise<ToolResult> {
@@ -278,6 +307,71 @@ export class SevdeskConnector implements Connector {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
+        });
+        return { data };
+      }
+      case "quotes.search": {
+        const data = await this.searchOrders("AN", input);
+        return { data };
+      }
+      case "quotes.get": {
+        const id = String(input.quote_id ?? "");
+        if (!id) throw new Error("quote_id is required.");
+        const data = await this.request(`/Order/${encodeURIComponent(id)}`);
+        return { data };
+      }
+      case "order_confirmations.search": {
+        const data = await this.searchOrders("AB", input);
+        return { data };
+      }
+      case "order_confirmations.get": {
+        const id = String(input.order_confirmation_id ?? "");
+        if (!id) throw new Error("order_confirmation_id is required.");
+        const data = await this.request(`/Order/${encodeURIComponent(id)}`);
+        return { data };
+      }
+      case "delivery_notes.search": {
+        const data = await this.searchOrders("LI", input);
+        return { data };
+      }
+      case "delivery_notes.get": {
+        const id = String(input.delivery_note_id ?? "");
+        if (!id) throw new Error("delivery_note_id is required.");
+        const data = await this.request(`/Order/${encodeURIComponent(id)}`);
+        return { data };
+      }
+      case "credit_notes.search": {
+        const params = new URLSearchParams({ limit: "100" });
+        const data = (await this.request(`/CreditNote?${params.toString()}`)) as SevdeskListResponse<Record<string, unknown>>;
+        const search = input.search ? String(input.search).toLowerCase() : "";
+        const objects = search
+          ? data.objects.filter((c) => String(c.creditNoteNumber ?? "").toLowerCase().includes(search))
+          : data.objects;
+        return { data: { objects } };
+      }
+      case "credit_notes.get": {
+        const id = String(input.credit_note_id ?? "");
+        if (!id) throw new Error("credit_note_id is required.");
+        const data = await this.request(`/CreditNote/${encodeURIComponent(id)}`);
+        return { data };
+      }
+      // POST /CreditNote/Factory/createFromInvoice is real, confirmed, and simple ({invoice: {id,
+      // objectName}}) -- this is the ONLY credit_notes.create path implemented for sevDesk.
+      // Standalone credit note creation (sevDesk's saveCreditNote, and likewise Order/Factory/
+      // saveOrder for quotes/order_confirmations/delivery_notes above) requires addressCountry
+      // (a StaticCountry reference) and contactPerson (a SevUser reference) as hard-required
+      // fields, and the OpenAPI spec has no listable endpoint for either resource -- there's no
+      // safe way to resolve a real id for them without guessing, so standalone creation for all
+      // four of these document types is deliberately not implemented here. preceding_invoice_id
+      // is therefore effectively required for sevDesk even though the canonical tool schema
+      // doesn't enforce that (Lexoffice supports both paths).
+      case "credit_notes.create": {
+        const precedingInvoiceId = input.preceding_invoice_id ? String(input.preceding_invoice_id) : "";
+        if (!precedingInvoiceId) throw new Error("preceding_invoice_id is required on sevDesk -- standalone credit notes aren't supported (see connector source comment).");
+        const data = await this.request("/CreditNote/Factory/createFromInvoice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ invoice: { id: precedingInvoiceId, objectName: "Invoice" } }),
         });
         return { data };
       }

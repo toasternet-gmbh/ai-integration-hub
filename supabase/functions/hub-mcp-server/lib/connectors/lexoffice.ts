@@ -25,6 +25,46 @@ export class LexofficeConnector implements Connector {
     return body;
   }
 
+  /** Shared by invoices.create and the new quotes/order_confirmations/delivery_notes/credit_notes
+   *  create tools — all of Lexware's sales-voucher resources are built from the same line-items
+   *  shape (confirmed for invoices; assumed consistent for the others per Lexware's own
+   *  documented "sales voucher" resource family, not independently re-verified per type). */
+  private buildSalesVoucherBody(input: Record<string, unknown>): Record<string, unknown> {
+    const contactId = String(input.contact_id ?? "");
+    if (!contactId) throw new Error("contact_id is required.");
+    const lineItemsInput = Array.isArray(input.line_items) ? (input.line_items as Array<Record<string, unknown>>) : [];
+    if (lineItemsInput.length === 0) throw new Error("line_items is required.");
+    const lineItems = lineItemsInput.map((li) => ({
+      type: "custom",
+      name: String(li.name ?? ""),
+      quantity: Number(li.quantity ?? 1),
+      unitName: "Stück",
+      unitPrice: { currency: "EUR", netAmount: Number(li.unit_price ?? 0), taxRatePercentage: Number(li.tax_rate ?? 19) },
+    }));
+    return {
+      voucherDate: new Date().toISOString(),
+      address: { contactId },
+      lineItems,
+      totalPrice: { currency: "EUR" },
+      taxConditions: { taxType: "net" },
+      ...(input.title ? { title: String(input.title) } : {}),
+    };
+  }
+
+  /** Shared list/search across every sales-voucher type — /v1/voucherlist has no free-text search
+   *  param, so "search" narrows client-side by contact/voucher-number in the returned page, same
+   *  posture as invoices.search. */
+  private async searchVoucherList(voucherType: string, input: Record<string, unknown>): Promise<unknown> {
+    const params = new URLSearchParams({ voucherType });
+    params.set("page", String(input.page ?? 0));
+    const data = (await this.request(`/voucherlist?${params.toString()}`)) as { content?: Array<Record<string, unknown>> };
+    const search = input.search ? String(input.search).toLowerCase() : "";
+    const content = search
+      ? (data.content ?? []).filter((v) => String(v.contactName ?? "").toLowerCase().includes(search) || String(v.voucherNumber ?? "").toLowerCase().includes(search))
+      : data.content;
+    return { ...data, content };
+  }
+
   async testConnection(): Promise<ConnectionResult> {
     try {
       // /countries needs only a valid API key and has no side effects — cheapest possible probe.
@@ -41,6 +81,10 @@ export class LexofficeConnector implements Connector {
       { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create", "contacts.update"] },
       { domain: "products", tools: ["products.create", "products.update"] },
       { domain: "vouchers", tools: ["vouchers.create_from_file"] },
+      { domain: "quotes", tools: ["quotes.search", "quotes.get", "quotes.create"] },
+      { domain: "order_confirmations", tools: ["order_confirmations.search", "order_confirmations.get", "order_confirmations.create"] },
+      { domain: "delivery_notes", tools: ["delivery_notes.search", "delivery_notes.get", "delivery_notes.create"] },
+      { domain: "credit_notes", tools: ["credit_notes.search", "credit_notes.get", "credit_notes.create"] },
     ];
   }
 
@@ -214,6 +258,88 @@ export class LexofficeConnector implements Connector {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
+        return { data };
+      }
+      // Confirmed real endpoints: POST/GET /v1/quotations, and voucherType "quotation" on
+      // /v1/voucherlist. Draft by default (no finalize param sent), matching invoices.create's
+      // conservative posture.
+      case "quotes.search": {
+        const data = await this.searchVoucherList("quotation", input);
+        return { data };
+      }
+      case "quotes.get": {
+        const quoteId = String(input.quote_id ?? "");
+        if (!quoteId) throw new Error("quote_id is required.");
+        const data = await this.request(`/quotations/${encodeURIComponent(quoteId)}`);
+        return { data };
+      }
+      case "quotes.create": {
+        const data = await this.request("/quotations", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(this.buildSalesVoucherBody(input)),
+        });
+        return { data };
+      }
+      // Confirmed real endpoints: POST/GET /v1/order-confirmations, voucherType "orderconfirmation".
+      case "order_confirmations.search": {
+        const data = await this.searchVoucherList("orderconfirmation", input);
+        return { data };
+      }
+      case "order_confirmations.get": {
+        const id = String(input.order_confirmation_id ?? "");
+        if (!id) throw new Error("order_confirmation_id is required.");
+        const data = await this.request(`/order-confirmations/${encodeURIComponent(id)}`);
+        return { data };
+      }
+      case "order_confirmations.create": {
+        const data = await this.request("/order-confirmations", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(this.buildSalesVoucherBody(input)),
+        });
+        return { data };
+      }
+      // POST/GET /v1/delivery-notes are real, confirmed endpoints -- API-created delivery notes
+      // are draft-only per Lexware's own docs (no finalize option exists for this resource at
+      // all, unlike quotations/order-confirmations/invoices). The voucherType value used for
+      // /voucherlist search ("deliverynote") is inferred by naming-convention analogy with the
+      // other three confirmed values, not independently confirmed -- lowest confidence of the
+      // four new document types.
+      case "delivery_notes.search": {
+        const data = await this.searchVoucherList("deliverynote", input);
+        return { data };
+      }
+      case "delivery_notes.get": {
+        const id = String(input.delivery_note_id ?? "");
+        if (!id) throw new Error("delivery_note_id is required.");
+        const data = await this.request(`/delivery-notes/${encodeURIComponent(id)}`);
+        return { data };
+      }
+      case "delivery_notes.create": {
+        const data = await this.request("/delivery-notes", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(this.buildSalesVoucherBody(input)),
+        });
+        return { data };
+      }
+      // Confirmed real endpoints: POST/GET /v1/credit-notes, voucherType "creditnote". This is
+      // Lexoffice's only real way to correct/reverse an invoice (Lexoffice invoices have no
+      // void/cancel API at all, unlike sevDesk) -- when preceding_invoice_id is given, the credit
+      // note is created "pursued" from that invoice via ?precedingSalesVoucherId=, which per
+      // Lexware's docs copies that invoice's line items rather than requiring them again.
+      case "credit_notes.search": {
+        const data = await this.searchVoucherList("creditnote", input);
+        return { data };
+      }
+      case "credit_notes.get": {
+        const id = String(input.credit_note_id ?? "");
+        if (!id) throw new Error("credit_note_id is required.");
+        const data = await this.request(`/credit-notes/${encodeURIComponent(id)}`);
+        return { data };
+      }
+      case "credit_notes.create": {
+        const precedingInvoiceId = input.preceding_invoice_id ? String(input.preceding_invoice_id) : "";
+        const path = precedingInvoiceId ? `/credit-notes?precedingSalesVoucherId=${encodeURIComponent(precedingInvoiceId)}` : "/credit-notes";
+        const body = precedingInvoiceId
+          ? { voucherDate: new Date().toISOString(), ...(input.title ? { title: String(input.title) } : {}) }
+          : this.buildSalesVoucherBody(input);
+        const data = await this.request(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
         return { data };
       }
       default:

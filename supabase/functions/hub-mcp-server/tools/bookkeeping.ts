@@ -15,6 +15,87 @@ async function requireIntegration(admin: SupabaseAdmin, projectId: string, integ
   return data;
 }
 
+/** invoices.create/quotes.create/order_confirmations.create/delivery_notes.create/
+ *  credit_notes.create all share this exact line-item shape (Lexoffice and sevDesk's sales-voucher
+ *  resources are all built from the same underlying "line items with a name/qty/price/tax" model). */
+const lineItemsSchema = {
+  type: "array",
+  items: {
+    type: "object",
+    required: ["name", "quantity", "unit_price"],
+    properties: {
+      name: { type: "string" },
+      quantity: { type: "number" },
+      unit_price: { type: "number", description: "Net unit price." },
+      tax_rate: { type: "number", description: "Percentage, e.g. 19. Defaults to 19." },
+    },
+  },
+} as const;
+
+/** Generates the definitions+handlers for one "sales document" domain (quotes/
+ *  order_confirmations/delivery_notes) — all three are create/search/get with the exact same
+ *  shape, just a different tool-name prefix and description. */
+function salesDocumentModule(domain: string, docLabel: string): { definitions: ToolDefinition[]; handlers: ToolModule["handlers"] } {
+  const idField = `${domain.replace(/s$/, "")}_id`;
+  return {
+    definitions: [
+      {
+        name: `${domain}.search`,
+        description: `Search ${docLabel}s on a bookkeeping integration.`,
+        inputSchema: {
+          type: "object",
+          required: ["integration_id"],
+          properties: { integration_id: { type: "string" }, search: { type: "string" }, page: { type: "number" } },
+        },
+      },
+      {
+        name: `${domain}.get`,
+        description: `Get one ${docLabel} by id.`,
+        inputSchema: {
+          type: "object",
+          required: ["integration_id", idField],
+          properties: { integration_id: { type: "string" }, [idField]: { type: "string" } },
+        },
+      },
+      {
+        name: `${domain}.create`,
+        description: `Create a new ${docLabel} on a bookkeeping integration.`,
+        inputSchema: {
+          type: "object",
+          required: ["integration_id", "contact_id", "line_items"],
+          properties: {
+            integration_id: { type: "string" },
+            contact_id: { type: "string" },
+            title: { type: "string" },
+            line_items: lineItemsSchema,
+          },
+        },
+      },
+    ],
+    handlers: {
+      [`${domain}.search`]: async (args, { admin, projectId }) => {
+        const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+        const connector = await loadConnector(integration);
+        return (await connector.execute(`${domain}.search`, args)).data;
+      },
+      [`${domain}.get`]: async (args, { admin, projectId }) => {
+        const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+        const connector = await loadConnector(integration);
+        return (await connector.execute(`${domain}.get`, args)).data;
+      },
+      [`${domain}.create`]: async (args, { admin, projectId }) => {
+        const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+        const connector = await loadConnector(integration);
+        return (await connector.execute(`${domain}.create`, args)).data;
+      },
+    },
+  };
+}
+
+const quotesModule = salesDocumentModule("quotes", "quotation");
+const orderConfirmationsModule = salesDocumentModule("order_confirmations", "order confirmation");
+const deliveryNotesModule = salesDocumentModule("delivery_notes", "delivery note");
+
 export const definitions: ToolDefinition[] = [
   {
     name: "invoices.search",
@@ -158,6 +239,42 @@ export const definitions: ToolDefinition[] = [
       },
     },
   },
+  ...quotesModule.definitions,
+  ...orderConfirmationsModule.definitions,
+  ...deliveryNotesModule.definitions,
+  {
+    name: "credit_notes.search",
+    description: "Search credit notes on a bookkeeping integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id"],
+      properties: { integration_id: { type: "string" }, search: { type: "string" }, page: { type: "number" } },
+    },
+  },
+  {
+    name: "credit_notes.get",
+    description: "Get one credit note by id.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "credit_note_id"],
+      properties: { integration_id: { type: "string" }, credit_note_id: { type: "string" } },
+    },
+  },
+  {
+    name: "credit_notes.create",
+    description: "Create a credit note — either reversing a specific invoice (preceding_invoice_id) or standalone from line items.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "contact_id"],
+      properties: {
+        integration_id: { type: "string" },
+        contact_id: { type: "string" },
+        title: { type: "string" },
+        preceding_invoice_id: { type: "string", description: "Reverses this invoice's line items instead of using line_items." },
+        line_items: lineItemsSchema,
+      },
+    },
+  },
 ];
 
 export const handlers: ToolModule["handlers"] = {
@@ -225,5 +342,27 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("vouchers.create_from_file", args)).data;
+  },
+
+  ...quotesModule.handlers,
+  ...orderConfirmationsModule.handlers,
+  ...deliveryNotesModule.handlers,
+
+  async "credit_notes.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("credit_notes.search", args)).data;
+  },
+
+  async "credit_notes.get"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("credit_notes.get", args)).data;
+  },
+
+  async "credit_notes.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("credit_notes.create", args)).data;
   },
 };
