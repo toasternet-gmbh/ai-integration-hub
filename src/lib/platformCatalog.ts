@@ -72,6 +72,8 @@ export const TOOL_INFO: Record<string, Bi> = {
   "deals.create": { en: "Create a deal", de: "Deal erstellen" },
   "companies.search": { en: "Search companies", de: "Unternehmen durchsuchen" },
   "companies.get": { en: "Look up a company", de: "Unternehmen abrufen" },
+  "associations.list": { en: "See linked records", de: "Verknüpfte Datensätze einsehen" },
+  "associations.create": { en: "Link two records", de: "Zwei Datensätze verknüpfen" },
   "cms.posts.search": { en: "Search blog posts", de: "Blogbeiträge durchsuchen" },
   "cms.posts.get": { en: "Look up a blog post", de: "Blogbeitrag abrufen" },
   "cms.posts.create": { en: "Create a blog post", de: "Blogbeitrag erstellen" },
@@ -318,13 +320,14 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "hubspot", category: "crm", name: "HubSpot", icon: "handshake", color: "#FF7A59",
     description: {
-      en: "Contact, deal, and company search, lookup, and creation via HubSpot's CRM API — the Hub's first CRM platform.",
-      de: "Kontakt-, Deal- und Unternehmenssuche, -abfrage und -erstellung über die CRM-API von HubSpot — die erste CRM-Plattform des Hubs.",
+      en: "Contact, deal, and company search, lookup, and creation, plus linking records together, via HubSpot's CRM API — the Hub's first CRM platform.",
+      de: "Kontakt-, Deal- und Unternehmenssuche, -abfrage und -erstellung sowie das Verknüpfen von Datensätzen über die CRM-API von HubSpot — die erste CRM-Plattform des Hubs.",
     },
     capabilities: [
       { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
       { domain: "deals", tools: ["deals.search", "deals.get", "deals.create"] },
       { domain: "companies", tools: ["companies.search", "companies.get"] },
+      { domain: "associations", tools: ["associations.list", "associations.create"] },
     ],
     verificationStatus: "api_verified",
   },

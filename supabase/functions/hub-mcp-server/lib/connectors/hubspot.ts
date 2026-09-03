@@ -42,6 +42,7 @@ export class HubSpotConnector implements Connector {
       { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
       { domain: "deals", tools: ["deals.search", "deals.get", "deals.create"] },
       { domain: "companies", tools: ["companies.search", "companies.get"] },
+      { domain: "associations", tools: ["associations.list", "associations.create"] },
     ];
   }
 
@@ -134,6 +135,36 @@ export class HubSpotConnector implements Connector {
         const companyId = String(input.company_id ?? "");
         if (!companyId) throw new Error("company_id is required.");
         const data = await this.request(`/crm/v3/objects/companies/${encodeURIComponent(companyId)}`);
+        return { data };
+      }
+      // GET .../associations/{toObjectType} is real and confirmed. Uses HubSpot's newer
+      // date-versioned API path (2026-03) rather than the /crm/v4/ alias -- HubSpot's own
+      // migration guidance is that v4 is being phased out in favor of dated versions for anything
+      // built from here on (developers.hubspot.com/changelog/deprecating-support-for-hubspot-v4-apis).
+      // object_type/to_object_type are passed straight through (contacts/companies/deals) -- these
+      // already match HubSpot's own object-type slugs, no translation needed.
+      case "associations.list": {
+        const objectType = String(input.object_type ?? "");
+        const objectId = String(input.object_id ?? "");
+        const toObjectType = String(input.to_object_type ?? "");
+        if (!objectType || !objectId || !toObjectType) throw new Error("object_type, object_id, and to_object_type are required.");
+        const data = await this.request(`/crm/objects/2026-03/${encodeURIComponent(objectType)}/${encodeURIComponent(objectId)}/associations/${encodeURIComponent(toObjectType)}`);
+        return { data };
+      }
+      // PUT .../associations/default/{toObjectType}/{toObjectId} is HubSpot's own "unlabeled
+      // default association" shortcut -- deliberately used instead of the general labeled-
+      // association endpoint, which requires knowing a specific associationTypeId that varies per
+      // object-type pair and per account (no universal constant to default to).
+      case "associations.create": {
+        const objectType = String(input.object_type ?? "");
+        const objectId = String(input.object_id ?? "");
+        const toObjectType = String(input.to_object_type ?? "");
+        const toObjectId = String(input.to_object_id ?? "");
+        if (!objectType || !objectId || !toObjectType || !toObjectId) throw new Error("object_type, object_id, to_object_type, and to_object_id are required.");
+        const data = await this.request(
+          `/crm/objects/2026-03/${encodeURIComponent(objectType)}/${encodeURIComponent(objectId)}/associations/default/${encodeURIComponent(toObjectType)}/${encodeURIComponent(toObjectId)}`,
+          { method: "PUT" },
+        );
         return { data };
       }
       default:

@@ -364,4 +364,18 @@ export const TOOL_DEMOS: Record<string, ToolDemo> = {
     agentAsks: { en: "What do we have on file for Acme Corp?", de: "Was haben wir zu Acme Corp gespeichert?" },
     hubReplies: { en: "Acme Corp — acme.com, customer since 2024, 2 open deals worth €20,000 total.", de: "Acme Corp — acme.com, Kunde seit 2024, 2 offene Deals im Gesamtwert von 20.000 €." },
   },
+  "associations.list": {
+    icon: "link",
+    label: { en: "See linked records", de: "Verknüpfte Datensätze einsehen" },
+    benefit: { en: "See everything connected to a record — every deal for a contact, every contact for a company — in one look.", de: "Sehen Sie alles, was mit einem Datensatz verknüpft ist — jeden Deal eines Kontakts, jeden Kontakt eines Unternehmens — auf einen Blick." },
+    agentAsks: { en: "What deals is Jane Doe linked to?", de: "Mit welchen Deals ist Jane Doe verknüpft?" },
+    hubReplies: { en: "Jane Doe is linked to 2 deals: Acme Corp (€12,000), Beta LLC (€4,500).", de: "Jane Doe ist mit 2 Deals verknüpft: Acme Corp (12.000 €), Beta LLC (4.500 €)." },
+  },
+  "associations.create": {
+    icon: "link",
+    label: { en: "Link two records", de: "Zwei Datensätze verknüpfen" },
+    benefit: { en: "Connect a contact to the right deal or company the moment you learn how they're related.", de: "Verknüpfen Sie einen Kontakt mit dem richtigen Deal oder Unternehmen, sobald Sie den Zusammenhang kennen." },
+    agentAsks: { en: "Link Jane Doe to the Acme Corp deal.", de: "Verknüpfe Jane Doe mit dem Acme-Corp-Deal." },
+    hubReplies: { en: "Jane Doe linked to the Acme Corp deal.", de: "Jane Doe mit dem Acme-Corp-Deal verknüpft." },
+  },
 };

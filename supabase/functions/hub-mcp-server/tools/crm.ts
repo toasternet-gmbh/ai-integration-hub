@@ -67,6 +67,35 @@ export const definitions: ToolDefinition[] = [
       properties: { integration_id: { type: "string" }, company_id: { type: "string" } },
     },
   },
+  {
+    name: "associations.list",
+    description: "List the records of one object type associated with a CRM record (e.g. the deals linked to a contact).",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "object_type", "object_id", "to_object_type"],
+      properties: {
+        integration_id: { type: "string" },
+        object_type: { type: "string", description: "e.g. contacts, companies, deals" },
+        object_id: { type: "string" },
+        to_object_type: { type: "string", description: "e.g. contacts, companies, deals" },
+      },
+    },
+  },
+  {
+    name: "associations.create",
+    description: "Link two CRM records together (e.g. attach a contact to a deal).",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "object_type", "object_id", "to_object_type", "to_object_id"],
+      properties: {
+        integration_id: { type: "string" },
+        object_type: { type: "string", description: "e.g. contacts, companies, deals" },
+        object_id: { type: "string" },
+        to_object_type: { type: "string", description: "e.g. contacts, companies, deals" },
+        to_object_id: { type: "string" },
+      },
+    },
+  },
 ];
 
 export const handlers: ToolModule["handlers"] = {
@@ -98,5 +127,17 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("companies.get", args)).data;
+  },
+
+  async "associations.list"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("associations.list", args)).data;
+  },
+
+  async "associations.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("associations.create", args)).data;
   },
 };
