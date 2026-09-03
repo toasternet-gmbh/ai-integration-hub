@@ -275,6 +275,35 @@ export const definitions: ToolDefinition[] = [
       },
     },
   },
+  {
+    name: "contacts.addresses.search",
+    description: "List the addresses on file for a contact (e-commerce customer).",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "contact_id"],
+      properties: { integration_id: { type: "string" }, contact_id: { type: "string" } },
+    },
+  },
+  {
+    name: "contacts.addresses.create",
+    description: "Add a new address to a contact (e-commerce customer).",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "contact_id", "address1", "city", "zip", "country"],
+      properties: {
+        integration_id: { type: "string" },
+        contact_id: { type: "string" },
+        first_name: { type: "string" },
+        last_name: { type: "string" },
+        company: { type: "string" },
+        address1: { type: "string" },
+        city: { type: "string" },
+        zip: { type: "string" },
+        country: { type: "string", description: "ISO 3166-1 alpha-2 country code, e.g. DE." },
+        phone: { type: "string" },
+      },
+    },
+  },
 ];
 
 export const handlers: ToolModule["handlers"] = {
@@ -364,5 +393,17 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("credit_notes.create", args)).data;
+  },
+
+  async "contacts.addresses.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("contacts.addresses.search", args)).data;
+  },
+
+  async "contacts.addresses.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("contacts.addresses.create", args)).data;
   },
 };

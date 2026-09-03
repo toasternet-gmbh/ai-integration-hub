@@ -132,8 +132,10 @@ export class PrestaShopConnector implements Connector {
       { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel"] },
       { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
       { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
+      { domain: "products", tools: ["products.images.search", "products.images.create"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
+      { domain: "contacts", tools: ["contacts.addresses.search", "contacts.addresses.create"] },
     ];
   }
 
@@ -229,6 +231,67 @@ export class PrestaShopConnector implements Connector {
         if (!categoryId) throw new Error("category_id is required.");
         const data = await this.request(`/categories/${encodeURIComponent(categoryId)}`);
         return { data };
+      }
+      // Best-effort, not live-verified this round (unlike the products/orders/stock writes
+      // above): POST images/products/{id} is a real, documented endpoint that -- uniquely among
+      // PrestaShop's writes -- takes a genuine multipart upload rather than XML. Field name "image"
+      // matches PrestaShop's own devdocs example; not round-tripped against a live store.
+      case "products.images.search": {
+        const productId = String(input.product_id ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        const data = await this.request(`/images/products/${encodeURIComponent(productId)}`);
+        return { data };
+      }
+      case "products.images.create": {
+        const productId = String(input.product_id ?? "");
+        const fileBase64 = String(input.file_base64 ?? "");
+        const fileName = String(input.file_name ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        if (!fileBase64 || !fileName) throw new Error("file_base64 and file_name are required.");
+        const bytes = Uint8Array.from(atob(fileBase64), (c) => c.charCodeAt(0));
+        const form = new FormData();
+        form.set("image", new Blob([bytes], { type: String(input.mime_type ?? "image/jpeg") }), fileName);
+        const res = await fetch(`${this.baseUrl()}/images/products/${encodeURIComponent(productId)}`, {
+          method: "POST",
+          headers: { Authorization: this.authHeader() },
+          body: form,
+        });
+        const text = await res.text();
+        if (!res.ok) throw new Error(/<message>(.*?)<\/message>/s.exec(text)?.[1] ?? `PrestaShop HTTP ${res.status}`);
+        return { data: { product_id: productId } };
+      }
+      // Best-effort, not live-verified this round: GET/POST /addresses is a real, documented
+      // resource. Create follows the same blank-schema pattern already verified live for
+      // products.create -- fetch the blank XML, fill in the required fields, POST it.
+      // CAVEAT: the shared contacts.addresses.create tool schema documents `country` as an ISO-2
+      // code (matches Shopify/Magento), but PrestaShop's `id_country` field is that store's own
+      // internal numeric country id (e.g. 21 = Germany on a default install), not an ISO code --
+      // passed straight through here rather than translated, since there's no live-verified lookup
+      // in this connector. Callers targeting PrestaShop need to pass that numeric id in `country`.
+      case "contacts.addresses.search": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        const params = new URLSearchParams({ "filter[id_customer]": contactId });
+        const data = await this.request("/addresses", params);
+        return { data };
+      }
+      case "contacts.addresses.create": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        if (!input.address1 || !input.city || !input.zip || !input.country) throw new Error("address1, city, zip, and country are required.");
+        let xml = await this.requestXml("/addresses?schema=blank");
+        xml = this.setXmlField(xml, "id_customer", contactId);
+        xml = this.setXmlField(xml, "firstname", input.first_name ? String(input.first_name) : "N/A");
+        xml = this.setXmlField(xml, "lastname", input.last_name ? String(input.last_name) : "N/A");
+        xml = this.setXmlField(xml, "address1", String(input.address1));
+        xml = this.setXmlField(xml, "city", String(input.city));
+        xml = this.setXmlField(xml, "postcode", String(input.zip));
+        xml = this.setXmlField(xml, "id_country", String(input.country));
+        if (input.phone) xml = this.setXmlField(xml, "phone", String(input.phone));
+        xml = this.setXmlField(xml, "alias", "Address");
+        const response = await this.requestXml("/addresses", { method: "POST", headers: { "Content-Type": "text/xml" }, body: xml });
+        const addressId = this.getXmlField(response, "id");
+        return { data: { address_id: addressId } };
       }
       // stock_availables is a plain, uncomplicated resource (verified live) — no field-stripping
       // needed the way products/orders need. A simple (non-combination) product's own stock lives

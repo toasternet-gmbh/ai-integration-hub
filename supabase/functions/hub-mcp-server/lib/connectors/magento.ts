@@ -44,8 +44,10 @@ export class MagentoConnector implements Connector {
       { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel", "orders.fulfill"] },
       { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
       { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
+      { domain: "products", tools: ["products.images.search", "products.images.create"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
+      { domain: "contacts", tools: ["contacts.addresses.search", "contacts.addresses.create"] },
     ];
   }
 
@@ -123,6 +125,61 @@ export class MagentoConnector implements Connector {
         const categoryId = String(input.category_id ?? "");
         if (!categoryId) throw new Error("category_id is required.");
         const data = await this.request(`/categories/${encodeURIComponent(categoryId)}`);
+        return { data };
+      }
+      // GET/POST /V1/products/{sku}/media are real, confirmed endpoints. Upload embeds the file as
+      // base64 in `entry.content.base64_encoded_data` -- Magento's own convention, no multipart.
+      case "products.images.search": {
+        const sku = String(input.product_id ?? "");
+        if (!sku) throw new Error("product_id (SKU) is required.");
+        const data = await this.request(`/products/${encodeURIComponent(sku)}/media`);
+        return { data };
+      }
+      case "products.images.create": {
+        const sku = String(input.product_id ?? "");
+        const fileBase64 = String(input.file_base64 ?? "");
+        const fileName = String(input.file_name ?? "");
+        if (!sku) throw new Error("product_id (SKU) is required.");
+        if (!fileBase64 || !fileName) throw new Error("file_base64 and file_name are required.");
+        const body = {
+          entry: {
+            media_type: "image",
+            label: fileName,
+            position: 1,
+            disabled: false,
+            types: ["image"],
+            content: { base64_encoded_data: fileBase64, type: String(input.mime_type ?? "image/jpeg"), name: fileName },
+          },
+        };
+        const data = await this.request(`/products/${encodeURIComponent(sku)}/media`, { method: "POST", body: JSON.stringify(body) });
+        return { data: { media_id: data } };
+      }
+      // Magento's customer object already embeds an `addresses` array (surfaced via
+      // contacts.get) -- this reads the same field for a dedicated "just the addresses" view.
+      // POST /V1/addresses is the real, confirmed endpoint for adding a new one.
+      case "contacts.addresses.search": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        const customer = (await this.request(`/customers/${encodeURIComponent(contactId)}`)) as { addresses?: unknown };
+        return { data: customer.addresses ?? [] };
+      }
+      case "contacts.addresses.create": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        if (!input.address1 || !input.city || !input.zip || !input.country) throw new Error("address1, city, zip, and country are required.");
+        const body = {
+          address: {
+            customerId: Number(contactId),
+            firstname: input.first_name ? String(input.first_name) : "",
+            lastname: input.last_name ? String(input.last_name) : "",
+            street: [String(input.address1)],
+            city: String(input.city),
+            postcode: String(input.zip),
+            countryId: String(input.country),
+            telephone: input.phone ? String(input.phone) : "",
+          },
+        };
+        const data = await this.request("/addresses", { method: "POST", body: JSON.stringify(body) });
         return { data };
       }
       case "inventory.get_stock": {

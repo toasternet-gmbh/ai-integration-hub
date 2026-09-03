@@ -92,6 +92,30 @@ export const definitions: ToolDefinition[] = [
       properties: { integration_id: { type: "string" }, category_id: { type: "string" } },
     },
   },
+  {
+    name: "products.images.search",
+    description: "List the images on a product.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "product_id"],
+      properties: { integration_id: { type: "string" }, product_id: { type: "string" } },
+    },
+  },
+  {
+    name: "products.images.create",
+    description: "Upload a new image to a product.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "product_id", "file_base64", "file_name"],
+      properties: {
+        integration_id: { type: "string" },
+        product_id: { type: "string" },
+        file_base64: { type: "string", description: "Base64-encoded image content." },
+        file_name: { type: "string", description: "e.g. photo.jpg" },
+        mime_type: { type: "string", description: "e.g. image/jpeg. Defaults to image/jpeg." },
+      },
+    },
+  },
 ];
 
 export const handlers: ToolModule["handlers"] = {
@@ -135,5 +159,17 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("products.categories.get", args)).data;
+  },
+
+  async "products.images.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("products.images.search", args)).data;
+  },
+
+  async "products.images.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("products.images.create", args)).data;
   },
 };

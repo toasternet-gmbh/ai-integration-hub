@@ -59,8 +59,10 @@ export class ShopifyConnector implements Connector {
       { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel", "orders.fulfill"] },
       { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
       { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
+      { domain: "products", tools: ["products.images.search", "products.images.create"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
+      { domain: "contacts", tools: ["contacts.addresses.search", "contacts.addresses.create"] },
     ];
   }
 
@@ -149,6 +151,50 @@ export class ShopifyConnector implements Connector {
         const categoryId = String(input.category_id ?? "");
         if (!categoryId) throw new Error("category_id is required.");
         const data = await this.request(`/custom_collections/${encodeURIComponent(categoryId)}.json`);
+        return { data };
+      }
+      // GET/POST /products/{id}/images.json are real, confirmed endpoints. Upload takes the file
+      // as base64 directly in the JSON body's `attachment` field -- Shopify's own convention,
+      // unlike the multipart pattern most other upload tools in this codebase use.
+      case "products.images.search": {
+        const productId = String(input.product_id ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        const data = await this.request(`/products/${encodeURIComponent(productId)}/images.json`);
+        return { data };
+      }
+      case "products.images.create": {
+        const productId = String(input.product_id ?? "");
+        const fileBase64 = String(input.file_base64 ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        if (!fileBase64) throw new Error("file_base64 is required.");
+        const body = { image: { attachment: fileBase64, filename: input.file_name ? String(input.file_name) : undefined } };
+        const data = await this.request(`/products/${encodeURIComponent(productId)}/images.json`, { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      // GET/POST /customers/{id}/addresses.json are real, confirmed endpoints.
+      case "contacts.addresses.search": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        const data = await this.request(`/customers/${encodeURIComponent(contactId)}/addresses.json`);
+        return { data };
+      }
+      case "contacts.addresses.create": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        if (!input.address1 || !input.city || !input.zip || !input.country) throw new Error("address1, city, zip, and country are required.");
+        const body = {
+          address: {
+            first_name: input.first_name ? String(input.first_name) : undefined,
+            last_name: input.last_name ? String(input.last_name) : undefined,
+            company: input.company ? String(input.company) : undefined,
+            address1: String(input.address1),
+            city: String(input.city),
+            zip: String(input.zip),
+            country_code: String(input.country),
+            phone: input.phone ? String(input.phone) : undefined,
+          },
+        };
+        const data = await this.request(`/customers/${encodeURIComponent(contactId)}/addresses.json`, { method: "POST", body: JSON.stringify(body) });
         return { data };
       }
       case "inventory.get_stock": {
