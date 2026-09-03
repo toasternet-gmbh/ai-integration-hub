@@ -89,6 +89,14 @@ export const TOOL_INFO: Record<string, Bi> = {
   "clients.create": { en: "Create a client", de: "Kunde erstellen" },
   "tags.search": { en: "Search tags", de: "Tags durchsuchen" },
   "tags.create": { en: "Create a tag", de: "Tag erstellen" },
+  "employees.search": { en: "Search employees", de: "Mitarbeiter durchsuchen" },
+  "employees.get": { en: "Look up an employee", de: "Mitarbeiter abrufen" },
+  "absence_types.search": { en: "See absence types", de: "Abwesenheitsarten einsehen" },
+  "absences.search": { en: "Search absences", de: "Abwesenheiten durchsuchen" },
+  "absences.get": { en: "Look up an absence", de: "Abwesenheit abrufen" },
+  "absences.create": { en: "Request an absence", de: "Abwesenheit beantragen" },
+  "absences.update": { en: "Update an absence", de: "Abwesenheit aktualisieren" },
+  "absences.delete": { en: "Cancel an absence", de: "Abwesenheit stornieren" },
   "products.create": { en: "Create a product", de: "Produkt erstellen" },
   "vouchers.create_from_file": { en: "Book an expense from a receipt", de: "Ausgabe aus Beleg buchen" },
   "orders.cancel": { en: "Cancel an order", de: "Bestellung stornieren" },
@@ -308,10 +316,14 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "personio", category: "time_tracking", name: "Personio", icon: "event_available", color: "#FF6B4A",
     description: {
-      en: "Attendance period search, lookup, logging, editing, and deletion via Personio's HR platform.",
-      de: "Suche, Abfrage, Erfassung, Bearbeitung und Löschung von Anwesenheitszeiträumen über die HR-Plattform Personio.",
+      en: "Attendance period search, lookup, logging, editing, and deletion, plus employee lookup and absence/time-off management, via Personio's HR platform.",
+      de: "Suche, Abfrage, Erfassung, Bearbeitung und Löschung von Anwesenheitszeiträumen sowie Mitarbeiterabfrage und Abwesenheits-/Urlaubsverwaltung über die HR-Plattform Personio.",
     },
-    capabilities: TIME_TRACKING_CAPABILITIES,
+    capabilities: [
+      ...TIME_TRACKING_CAPABILITIES,
+      { domain: "employees", tools: ["employees.search", "employees.get"] },
+      { domain: "absences", tools: ["absence_types.search", "absences.search", "absences.get", "absences.create", "absences.update", "absences.delete"] },
+    ],
     verificationStatus: "api_verified",
   },
   {
