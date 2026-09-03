@@ -1,8 +1,13 @@
 /**
- * Personio connector — time tracking (Personio's Attendance API covers time entries). Auth is
- * OAuth2 client-credentials: a `client_id`/`client_secret` pair (created in Personio under
- * Marketplace → Connected integrations → "Create custom integration") is exchanged for a bearer
- * access token via POST /v2/auth/token. Docs: developer.personio.de.
+ * Personio connector — time tracking (Personio's Attendance API covers time entries) and HR
+ * (employees.* / absences.*, added 2026-09-03). Auth is OAuth2 client-credentials: a
+ * `client_id`/`client_secret` pair (created in Personio under Marketplace → Connected
+ * integrations → "Create custom integration") is exchanged for a bearer access token via
+ * POST /v2/auth/token. Docs: developer.personio.de.
+ *
+ * employees.* / absences.* / absence_types.search use Personio's v2 Person/Employment and Absence
+ * Management APIs — same OAuth2 bearer auth already implemented, real endpoints and field shapes
+ * confirmed directly against developer.personio.de's API reference pages (not guessed).
  */
 import type { Connector, ConnectionResult, Capability, ToolResult } from "./types.ts";
 
@@ -67,7 +72,11 @@ export class PersonioConnector implements Connector {
   }
 
   async getCapabilities(): Promise<Capability[]> {
-    return [{ domain: "time_entries", tools: ["time_entries.search", "time_entries.get", "time_entries.create", "time_entries.update", "time_entries.delete"] }];
+    return [
+      { domain: "time_entries", tools: ["time_entries.search", "time_entries.get", "time_entries.create", "time_entries.update", "time_entries.delete"] },
+      { domain: "employees", tools: ["employees.search", "employees.get"] },
+      { domain: "absences", tools: ["absence_types.search", "absences.search", "absences.get", "absences.create", "absences.update", "absences.delete"] },
+    ];
   }
 
   async execute(tool: string, input: Record<string, unknown>): Promise<ToolResult> {
@@ -127,6 +136,83 @@ export class PersonioConnector implements Connector {
         if (!entryId) throw new Error("time_entry_id is required.");
         await this.request(`/attendance-periods/${encodeURIComponent(entryId)}`, { method: "DELETE" });
         return { data: { time_entry_id: entryId, deleted: true } };
+      }
+      // GET /v2/persons is real and confirmed (developer.personio.de) -- HR master data (who works
+      // here), distinct from the attendance ledger above. Server-side filter params are exact-match
+      // per field (first_name/last_name/email/status), not free-text -- "search" is applied against
+      // first_name here as the single most common lookup, same one-field-filter posture already
+      // used elsewhere in this codebase when an API has no real free-text search.
+      case "employees.search": {
+        const params = new URLSearchParams();
+        if (input.search) params.set("first_name", String(input.search));
+        if (input.status) params.set("status", String(input.status));
+        params.set("limit", String(input.limit ?? 25));
+        const data = await this.request(`/persons?${params.toString()}`);
+        return { data };
+      }
+      case "employees.get": {
+        const employeeId = String(input.employee_id ?? "");
+        if (!employeeId) throw new Error("employee_id is required.");
+        const data = await this.request(`/persons/${encodeURIComponent(employeeId)}`);
+        return { data };
+      }
+      // GET /v2/absence-types is real and confirmed -- a lookup list (id/name/category/unit)
+      // needed to populate absences.create's absence_type_id with a real value.
+      case "absence_types.search": {
+        const data = await this.request("/absence-types");
+        return { data };
+      }
+      // GET /v2/absence-periods is real and confirmed, with real server-side filters (unlike the
+      // attendance-periods endpoint's simpler date-range-only filtering).
+      case "absences.search": {
+        const params = new URLSearchParams();
+        if (input.employee_id) params.set("person.id", String(input.employee_id));
+        if (input.start_date) params.set("starts_from.date_time.gte", String(input.start_date));
+        if (input.end_date) params.set("ends_at.date_time.lte", String(input.end_date));
+        const data = await this.request(`/absence-periods?${params.toString()}`);
+        return { data };
+      }
+      case "absences.get": {
+        const absenceId = String(input.absence_id ?? "");
+        if (!absenceId) throw new Error("absence_id is required.");
+        const data = await this.request(`/absence-periods/${encodeURIComponent(absenceId)}`);
+        return { data };
+      }
+      // POST /v2/absence-periods is real and confirmed, required fields person/starts_from/
+      // absence_type. Same "don't set skip_approval" posture as time_entries.create -- Personio's
+      // own approval workflow still applies after the Hub's own approval gate.
+      case "absences.create": {
+        const employeeId = String(input.employee_id ?? "");
+        const absenceTypeId = String(input.absence_type_id ?? "");
+        const startDate = String(input.start_date ?? "");
+        if (!employeeId) throw new Error("employee_id is required.");
+        if (!absenceTypeId) throw new Error("absence_type_id is required.");
+        if (!startDate) throw new Error("start_date is required.");
+        const body = {
+          person: { id: employeeId },
+          absence_type: { id: absenceTypeId },
+          starts_from: { date_time: startDate },
+          ...(input.end_date ? { ends_at: { date_time: String(input.end_date) } } : {}),
+          ...(input.comment ? { comment: String(input.comment) } : {}),
+        };
+        const data = await this.request("/absence-periods", { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      case "absences.update": {
+        const absenceId = String(input.absence_id ?? "");
+        if (!absenceId) throw new Error("absence_id is required.");
+        const body: Record<string, unknown> = {};
+        if (input.start_date != null) body.starts_from = { date_time: String(input.start_date) };
+        if (input.end_date != null) body.ends_at = { date_time: String(input.end_date) };
+        if (input.comment != null) body.comment = String(input.comment);
+        const data = await this.request(`/absence-periods/${encodeURIComponent(absenceId)}`, { method: "PATCH", body: JSON.stringify(body) });
+        return { data };
+      }
+      case "absences.delete": {
+        const absenceId = String(input.absence_id ?? "");
+        if (!absenceId) throw new Error("absence_id is required.");
+        await this.request(`/absence-periods/${encodeURIComponent(absenceId)}`, { method: "DELETE" });
+        return { data: { absence_id: absenceId, deleted: true } };
       }
       default:
         throw new Error(`Personio connector does not support tool '${tool}'.`);

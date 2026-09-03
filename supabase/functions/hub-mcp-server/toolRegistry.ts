@@ -5,6 +5,7 @@ import * as inventory from "./tools/inventory.ts";
 import * as bookkeeping from "./tools/bookkeeping.ts";
 import * as cms from "./tools/cms.ts";
 import * as timeEntries from "./tools/timeEntries.ts";
+import * as hr from "./tools/hr.ts";
 import * as banking from "./tools/banking.ts";
 import * as crm from "./tools/crm.ts";
 import * as integrations from "./tools/integrations.ts";
@@ -17,7 +18,7 @@ import * as account from "./tools/account.ts";
 import * as platformAdmin from "./tools/platformAdmin.ts";
 import type { ToolDefinition, ToolHandler, ToolModule } from "./lib/types.ts";
 
-const MODULES: ToolModule[] = [orders, products, inventory, bookkeeping, cms, timeEntries, banking, crm, integrations, agents, approvals, organizations, apiKeys, members, account, platformAdmin];
+const MODULES: ToolModule[] = [orders, products, inventory, bookkeeping, cms, timeEntries, hr, banking, crm, integrations, agents, approvals, organizations, apiKeys, members, account, platformAdmin];
 
 export const TOOLS: ToolDefinition[] = MODULES.flatMap((m) => m.definitions);
 
@@ -29,7 +30,7 @@ export const HANDLERS: Record<string, ToolHandler> = Object.fromEntries(
  *  the Policy Engine (agent_tool_permissions, approvals, audit log). Everything else (admin/meta
  *  tools like create_integration, create_agent, list_approvals, ...) is always allowed for an
  *  agent, no gating. New domain added by a new connector? Add its prefix here too. */
-const GATED_DOMAIN_PREFIXES = ["orders.", "products.", "inventory.", "invoices.", "contacts.", "cms.", "time_entries.", "accounts.", "transactions.", "deals.", "vouchers.", "companies.", "associations.", "quotes.", "order_confirmations.", "delivery_notes.", "credit_notes.", "tickets.", "owners.", "projects.", "clients.", "tags."];
+const GATED_DOMAIN_PREFIXES = ["orders.", "products.", "inventory.", "invoices.", "contacts.", "cms.", "time_entries.", "accounts.", "transactions.", "deals.", "vouchers.", "companies.", "associations.", "quotes.", "order_confirmations.", "delivery_notes.", "credit_notes.", "tickets.", "owners.", "projects.", "clients.", "tags.", "employees.", "absences.", "absence_types."];
 
 export function isGatedTool(name: string): boolean {
   return GATED_DOMAIN_PREFIXES.some((prefix) => name.startsWith(prefix));
