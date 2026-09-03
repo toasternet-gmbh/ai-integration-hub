@@ -35,6 +35,38 @@ export const definitions: ToolDefinition[] = [
       properties: { integration_id: { type: "string" }, deal_id: { type: "string" } },
     },
   },
+  {
+    name: "deals.create",
+    description: "Create a new deal/opportunity on a CRM integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "name"],
+      properties: {
+        integration_id: { type: "string" },
+        name: { type: "string" },
+        amount: { type: "number" },
+        stage: { type: "string", description: "Omit to use the CRM's default pipeline's first stage." },
+      },
+    },
+  },
+  {
+    name: "companies.search",
+    description: "Search companies/organizations on a CRM integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id"],
+      properties: { integration_id: { type: "string" }, name: { type: "string" }, limit: { type: "number" } },
+    },
+  },
+  {
+    name: "companies.get",
+    description: "Get one company by id.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "company_id"],
+      properties: { integration_id: { type: "string" }, company_id: { type: "string" } },
+    },
+  },
 ];
 
 export const handlers: ToolModule["handlers"] = {
@@ -48,5 +80,23 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("deals.get", args)).data;
+  },
+
+  async "deals.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("deals.create", args)).data;
+  },
+
+  async "companies.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("companies.search", args)).data;
+  },
+
+  async "companies.get"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("companies.get", args)).data;
   },
 };

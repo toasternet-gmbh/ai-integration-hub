@@ -68,7 +68,7 @@ export async function loadConnector(integration: { platform: string; credentials
       return new Typo3Connector(c);
     }
     case "contentful":
-      return new ContentfulConnector(creds as { spaceId: string; accessToken: string; environmentId?: string });
+      return new ContentfulConnector(creds as { spaceId: string; accessToken: string; environmentId?: string; managementToken?: string });
     case "clockify":
       return new ClockifyConnector(creds as { workspaceId: string; apiKey: string });
     case "prestashop": {

@@ -39,8 +39,9 @@ export class HubSpotConnector implements Connector {
 
   async getCapabilities(): Promise<Capability[]> {
     return [
-      { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
-      { domain: "deals", tools: ["deals.search", "deals.get"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
+      { domain: "deals", tools: ["deals.search", "deals.get", "deals.create"] },
+      { domain: "companies", tools: ["companies.search", "companies.get"] },
     ];
   }
 
@@ -78,6 +79,61 @@ export class HubSpotConnector implements Connector {
         const dealId = String(input.deal_id ?? "");
         if (!dealId) throw new Error("deal_id is required.");
         const data = await this.request(`/crm/v3/objects/deals/${encodeURIComponent(dealId)}`);
+        return { data };
+      }
+      // POST /crm/v3/objects/contacts is a real, confirmed endpoint (developers.hubspot.com).
+      case "contacts.create": {
+        const email = input.email ? String(input.email) : undefined;
+        const name = input.name ? String(input.name) : "";
+        const [firstname, ...rest] = name.split(" ");
+        const properties: Record<string, string> = {};
+        if (email) properties.email = email;
+        if (firstname) properties.firstname = firstname;
+        if (rest.length > 0) properties.lastname = rest.join(" ");
+        const data = await this.request("/crm/v3/objects/contacts", { method: "POST", body: JSON.stringify({ properties }) });
+        return { data };
+      }
+      // POST /crm/v3/objects/deals is real and confirmed, but requires a valid `dealstage` id from
+      // the account's own pipeline -- there's no universal default id across accounts. If the
+      // caller doesn't supply one, this looks up the account's pipelines (GET
+      // /crm/v3/pipelines/deals, also real and confirmed) and uses the first stage of whichever
+      // pipeline has the lowest displayOrder (HubSpot's own "default pipeline" convention).
+      case "deals.create": {
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        let stage = input.stage ? String(input.stage) : "";
+        if (!stage) {
+          const pipelines = (await this.request("/crm/v3/pipelines/deals")) as {
+            results?: { displayOrder: number; stages?: { id: string; displayOrder: number }[] }[];
+          };
+          const sorted = (pipelines.results ?? []).slice().sort((a, b) => a.displayOrder - b.displayOrder);
+          const firstStage = sorted[0]?.stages?.slice().sort((a, b) => a.displayOrder - b.displayOrder)[0];
+          if (!firstStage) throw new Error("Could not resolve a default deal stage -- pass 'stage' explicitly.");
+          stage = firstStage.id;
+        }
+        const properties: Record<string, unknown> = { dealname: name, dealstage: stage };
+        if (input.amount != null) properties.amount = input.amount;
+        const data = await this.request("/crm/v3/objects/deals", { method: "POST", body: JSON.stringify({ properties }) });
+        return { data };
+      }
+      // Companies are a real, distinct third CRM object alongside contacts/deals -- same
+      // /crm/v3/objects/{type} shape (developers.hubspot.com).
+      case "companies.search": {
+        const name = input.name ? String(input.name) : "";
+        if (name) {
+          const data = await this.request("/crm/v3/objects/companies/search", {
+            method: "POST",
+            body: JSON.stringify({ filterGroups: [{ filters: [{ propertyName: "name", operator: "CONTAINS_TOKEN", value: name }] }], properties: ["name", "domain"], limit: 25 }),
+          });
+          return { data };
+        }
+        const data = await this.request(`/crm/v3/objects/companies?limit=${Number(input.limit ?? 25)}`);
+        return { data };
+      }
+      case "companies.get": {
+        const companyId = String(input.company_id ?? "");
+        if (!companyId) throw new Error("company_id is required.");
+        const data = await this.request(`/crm/v3/objects/companies/${encodeURIComponent(companyId)}`);
         return { data };
       }
       default:
