@@ -15,6 +15,10 @@
  * createFromInvoice-only for credit notes): standalone creation of any of these requires
  * `addressCountry`/`contactPerson` references (StaticCountry/SevUser) that the spec has no
  * listable endpoint for -- no safe way to resolve a real id without guessing.
+ *
+ * contacts.create/contacts.update's `email` field is now wired up (2026-09-03) via the
+ * /CommunicationWay resource (see createOrUpdateEmail()) -- previously documented as unsupported,
+ * now confirmed spec-verified and implemented.
  */
 import type { Connector, ConnectionResult, Capability, ToolResult } from "./types.ts";
 
@@ -83,6 +87,34 @@ export class SevdeskConnector implements Connector {
     return { objects };
   }
 
+  /** POST/PUT /CommunicationWay is real, spec-verified (Model_CommunicationWay: required type/
+   *  value/key). `key.id: 2` is sevDesk's own documented fixed system value for "Arbeit" (work) --
+   *  the full stable list is embedded directly in the OpenAPI spec's CommunicationWayKey schema
+   *  description (1=Privat, 2=Arbeit, 3=Fax, 4=Mobil, 6=Autobox, 7=Newsletter, 8=Rechnungsadresse),
+   *  the same kind of well-known system-id convention already used for Contact's `category.id`.
+   *  If the contact already has an EMAIL communication way, that one is updated in place (PUT)
+   *  rather than adding a duplicate second email entry -- otherwise a new one is created (POST). */
+  private async createOrUpdateEmail(contactId: string, email: string): Promise<void> {
+    const params = new URLSearchParams({ "contact[id]": contactId, "contact[objectName]": "Contact", type: "EMAIL" });
+    const existing = (await this.request(`/CommunicationWay?${params.toString()}`)) as SevdeskListResponse<{ id: string }>;
+    const existingId = existing.objects?.[0]?.id;
+    const body = {
+      contact: { id: contactId, objectName: "Contact" },
+      type: "EMAIL",
+      value: email,
+      key: { id: 2, objectName: "CommunicationWayKey" },
+    };
+    if (existingId) {
+      await this.request(`/CommunicationWay/${encodeURIComponent(existingId)}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+      });
+    } else {
+      await this.request("/CommunicationWay", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+      });
+    }
+  }
+
   async execute(tool: string, input: Record<string, unknown>): Promise<ToolResult> {
     switch (tool) {
       case "invoices.search": {
@@ -122,16 +154,19 @@ export class SevdeskConnector implements Connector {
       // well-known fixed system category for "Kunde" (customer) — the other stable ids are
       // 2=Lieferant/vendor, 4=Partner, 28=Interessent/prospect, none of which this tool exposes yet.
       // sevDesk associates an email address via a separate CommunicationWay resource, not a Contact
-      // field, so `email` isn't wired up here — the contact is created without one.
+      // field -- confirmed real, spec-verified (POST /CommunicationWay, required: contact/type/
+      // value/key) as of 2026-09-03, so `email` is now wired up via createOrUpdateEmail() below.
       case "contacts.create": {
         const name = String(input.name ?? "");
         if (!name) throw new Error("name is required.");
         const body = { name, category: { id: 3, objectName: "Category" } };
-        const data = await this.request("/Contact", {
+        const data = (await this.request("/Contact", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
-        });
+        })) as { objects?: { id?: string } };
+        const contactId = data.objects?.id;
+        if (input.email && contactId) await this.createOrUpdateEmail(contactId, String(input.email));
         return { data };
       }
       // Best-effort — POST /Invoice/Factory/saveInvoice is a real, confirmed endpoint, but this
@@ -239,10 +274,8 @@ export class SevdeskConnector implements Connector {
         const data = await this.request(`/Invoice/${encodeURIComponent(invoiceId)}/cancelInvoice`, { method: "POST" });
         return { data };
       }
-      // PUT /Contact/{id} is real, confirmed against the OpenAPI spec. Same email limitation as
-      // contacts.create -- sevDesk associates email via a separate CommunicationWay resource, not
-      // a Contact field, so an `email` input is silently not applied here (matching create's
-      // documented behavior) rather than erroring on a field this resource has no place for.
+      // PUT /Contact/{id} is real, confirmed against the OpenAPI spec. Email now goes through
+      // createOrUpdateEmail() (see contacts.create's comment) instead of being silently dropped.
       case "contacts.update": {
         const contactId = String(input.contact_id ?? "");
         if (!contactId) throw new Error("contact_id is required.");
@@ -253,6 +286,7 @@ export class SevdeskConnector implements Connector {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
+        if (input.email != null) await this.createOrUpdateEmail(contactId, String(input.email));
         return { data };
       }
       // PUT /Part/{id} is real, confirmed against the OpenAPI spec -- same field set products.create
