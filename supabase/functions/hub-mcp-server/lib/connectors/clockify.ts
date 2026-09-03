@@ -43,6 +43,21 @@ export class ClockifyConnector implements Connector {
     return user.id;
   }
 
+  /** The Reports API is a genuinely separate host from the core v1 API (docs.clockify.me) -- same
+   *  API key, different base URL. */
+  private async requestReports(path: string, init: RequestInit = {}): Promise<unknown> {
+    const res = await fetch(`https://reports.api.clockify.me/v1${path}`, {
+      ...init,
+      headers: { ...init.headers, "X-Api-Key": this.creds.apiKey, "Content-Type": "application/json", Accept: "application/json" },
+    });
+    const body = await res.json().catch(() => null);
+    if (!res.ok) {
+      const message = (body as { message?: string })?.message ?? `Clockify Reports API HTTP ${res.status}`;
+      throw new Error(message);
+    }
+    return body;
+  }
+
   async testConnection(): Promise<ConnectionResult> {
     try {
       const workspaces = (await this.request("/workspaces")) as Array<{ id: string }>;
@@ -56,7 +71,12 @@ export class ClockifyConnector implements Connector {
   }
 
   async getCapabilities(): Promise<Capability[]> {
-    return [{ domain: "time_entries", tools: ["time_entries.search", "time_entries.get", "time_entries.create", "time_entries.update", "time_entries.delete"] }];
+    return [
+      { domain: "time_entries", tools: ["time_entries.search", "time_entries.get", "time_entries.create", "time_entries.update", "time_entries.delete", "time_entries.report"] },
+      { domain: "projects", tools: ["projects.search", "projects.get", "projects.create"] },
+      { domain: "clients", tools: ["clients.search", "clients.create"] },
+      { domain: "tags", tools: ["tags.search", "tags.create"] },
+    ];
   }
 
   async execute(tool: string, input: Record<string, unknown>): Promise<ToolResult> {
@@ -115,6 +135,62 @@ export class ClockifyConnector implements Connector {
         if (!entryId) throw new Error("time_entry_id is required.");
         await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/time-entries/${encodeURIComponent(entryId)}`, { method: "DELETE" });
         return { data: { time_entry_id: entryId, deleted: true } };
+      }
+      // Best-effort — POST /workspaces/{id}/reports/summary on the separate reports.api.clockify.me
+      // host is real and confirmed to exist, but the exact request body shape (dateRangeStart/End +
+      // summaryFilter grouping) is inferred from secondary sources, not spec-verified the way
+      // sevDesk's endpoints were this session -- verify against a live account before relying on it.
+      case "time_entries.report": {
+        const body = {
+          dateRangeStart: new Date(Date.parse(String(input.start_date ?? ""))).toISOString(),
+          dateRangeEnd: new Date(Date.parse(String(input.end_date ?? ""))).toISOString(),
+          summaryFilter: { groups: ["PROJECT"] },
+        };
+        const data = await this.requestReports(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/reports/summary`, { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      case "projects.search": {
+        const params = new URLSearchParams();
+        if (input.search) params.set("name", String(input.search));
+        params.set("page-size", String(input.limit ?? 25));
+        const data = await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/projects?${params.toString()}`);
+        return { data };
+      }
+      case "projects.get": {
+        const projId = String(input.project_id ?? "");
+        if (!projId) throw new Error("project_id is required.");
+        const data = await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/projects/${encodeURIComponent(projId)}`);
+        return { data };
+      }
+      case "projects.create": {
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        const body: Record<string, unknown> = { name };
+        if (input.client_id) body.clientId = String(input.client_id);
+        const data = await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/projects`, { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      case "clients.search": {
+        const params = new URLSearchParams();
+        if (input.search) params.set("name", String(input.search));
+        const data = await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/clients?${params.toString()}`);
+        return { data };
+      }
+      case "clients.create": {
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        const data = await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/clients`, { method: "POST", body: JSON.stringify({ name }) });
+        return { data };
+      }
+      case "tags.search": {
+        const data = await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/tags`);
+        return { data };
+      }
+      case "tags.create": {
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        const data = await this.request(`/workspaces/${encodeURIComponent(this.creds.workspaceId)}/tags`, { method: "POST", body: JSON.stringify({ name }) });
+        return { data };
       }
       default:
         throw new Error(`Clockify connector does not support tool '${tool}'.`);

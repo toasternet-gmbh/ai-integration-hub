@@ -75,6 +75,82 @@ export const definitions: ToolDefinition[] = [
       properties: { integration_id: { type: "string" }, time_entry_id: { type: "string" } },
     },
   },
+  {
+    name: "time_entries.report",
+    description: "Get an aggregated time report (totals by project) for a date range — richer than time_entries.search, which only lists raw entries.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "start_date", "end_date"],
+      properties: {
+        integration_id: { type: "string" },
+        start_date: { type: "string", description: "ISO 8601 date" },
+        end_date: { type: "string", description: "ISO 8601 date" },
+      },
+    },
+  },
+  {
+    name: "projects.search",
+    description: "Search projects on a time-tracking integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id"],
+      properties: { integration_id: { type: "string" }, search: { type: "string" }, limit: { type: "number" } },
+    },
+  },
+  {
+    name: "projects.get",
+    description: "Get one project by id.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "project_id"],
+      properties: { integration_id: { type: "string" }, project_id: { type: "string" } },
+    },
+  },
+  {
+    name: "projects.create",
+    description: "Create a new project on a time-tracking integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "name"],
+      properties: { integration_id: { type: "string" }, name: { type: "string" }, client_id: { type: "string" } },
+    },
+  },
+  {
+    name: "clients.search",
+    description: "Search clients on a time-tracking integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id"],
+      properties: { integration_id: { type: "string" }, search: { type: "string" }, limit: { type: "number" } },
+    },
+  },
+  {
+    name: "clients.create",
+    description: "Create a new client on a time-tracking integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "name"],
+      properties: { integration_id: { type: "string" }, name: { type: "string" } },
+    },
+  },
+  {
+    name: "tags.search",
+    description: "Search tags on a time-tracking integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id"],
+      properties: { integration_id: { type: "string" } },
+    },
+  },
+  {
+    name: "tags.create",
+    description: "Create a new tag on a time-tracking integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "name"],
+      properties: { integration_id: { type: "string" }, name: { type: "string" } },
+    },
+  },
 ];
 
 export const handlers: ToolModule["handlers"] = {
@@ -106,5 +182,53 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("time_entries.delete", args)).data;
+  },
+
+  async "time_entries.report"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("time_entries.report", args)).data;
+  },
+
+  async "projects.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("projects.search", args)).data;
+  },
+
+  async "projects.get"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("projects.get", args)).data;
+  },
+
+  async "projects.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("projects.create", args)).data;
+  },
+
+  async "clients.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("clients.search", args)).data;
+  },
+
+  async "clients.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("clients.create", args)).data;
+  },
+
+  async "tags.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("tags.search", args)).data;
+  },
+
+  async "tags.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("tags.create", args)).data;
   },
 };

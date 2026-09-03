@@ -46,6 +46,21 @@ export class TogglConnector implements Connector {
     return me.default_workspace_id;
   }
 
+  /** The Reports API is a genuinely separate host from the core v9 API (confirmed via Toggl's own
+   *  community API reference) -- same token/auth, different base URL. */
+  private async requestReports(path: string, init: RequestInit = {}): Promise<unknown> {
+    const res = await fetch(`https://api.track.toggl.com/reports/api/v3${path}`, {
+      ...init,
+      headers: { ...init.headers, Authorization: this.authHeader(), "Content-Type": "application/json", Accept: "application/json" },
+    });
+    const body = await res.json().catch(() => null);
+    if (!res.ok) {
+      const message = (body as { message?: string })?.message ?? `Toggl Reports API HTTP ${res.status}`;
+      throw new Error(message);
+    }
+    return body;
+  }
+
   async testConnection(): Promise<ConnectionResult> {
     try {
       // /me needs only a valid token and has no side effects — cheapest possible probe.
@@ -57,7 +72,12 @@ export class TogglConnector implements Connector {
   }
 
   async getCapabilities(): Promise<Capability[]> {
-    return [{ domain: "time_entries", tools: ["time_entries.search", "time_entries.get", "time_entries.create", "time_entries.update", "time_entries.delete"] }];
+    return [
+      { domain: "time_entries", tools: ["time_entries.search", "time_entries.get", "time_entries.create", "time_entries.update", "time_entries.delete", "time_entries.report"] },
+      { domain: "projects", tools: ["projects.search", "projects.get", "projects.create"] },
+      { domain: "clients", tools: ["clients.search", "clients.create"] },
+      { domain: "tags", tools: ["tags.search", "tags.create"] },
+    ];
   }
 
   async execute(tool: string, input: Record<string, unknown>): Promise<ToolResult> {
@@ -126,6 +146,60 @@ export class TogglConnector implements Connector {
         const workspaceId = await this.findEntryWorkspaceId(entryId);
         await this.request(`/workspaces/${workspaceId}/time_entries/${encodeURIComponent(entryId)}`, { method: "DELETE" });
         return { data: { time_entry_id: entryId, deleted: true } };
+      }
+      // POST .../reports/api/v3/workspace/{id}/summary/time_entries is real and confirmed
+      // (Toggl's own community API reference) -- a genuinely separate, richer aggregation than
+      // time_entries.search, which only returns raw entries.
+      case "time_entries.report": {
+        const workspaceId = await this.defaultWorkspaceId();
+        const body = { start_date: String(input.start_date ?? ""), end_date: String(input.end_date ?? "") };
+        const data = await this.requestReports(`/workspace/${workspaceId}/summary/time_entries`, { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      case "projects.search": {
+        const workspaceId = await this.defaultWorkspaceId();
+        const data = await this.request(`/workspaces/${workspaceId}/projects`);
+        return { data };
+      }
+      case "projects.get": {
+        const workspaceId = await this.defaultWorkspaceId();
+        const projectId = String(input.project_id ?? "");
+        if (!projectId) throw new Error("project_id is required.");
+        const data = await this.request(`/workspaces/${workspaceId}/projects/${encodeURIComponent(projectId)}`);
+        return { data };
+      }
+      case "projects.create": {
+        const workspaceId = await this.defaultWorkspaceId();
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        const body: Record<string, unknown> = { name };
+        if (input.client_id) body.client_id = Number(input.client_id);
+        const data = await this.request(`/workspaces/${workspaceId}/projects`, { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      case "clients.search": {
+        const workspaceId = await this.defaultWorkspaceId();
+        const data = await this.request(`/workspaces/${workspaceId}/clients`);
+        return { data };
+      }
+      case "clients.create": {
+        const workspaceId = await this.defaultWorkspaceId();
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        const data = await this.request(`/workspaces/${workspaceId}/clients`, { method: "POST", body: JSON.stringify({ name }) });
+        return { data };
+      }
+      case "tags.search": {
+        const workspaceId = await this.defaultWorkspaceId();
+        const data = await this.request(`/workspaces/${workspaceId}/tags`);
+        return { data };
+      }
+      case "tags.create": {
+        const workspaceId = await this.defaultWorkspaceId();
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        const data = await this.request(`/workspaces/${workspaceId}/tags`, { method: "POST", body: JSON.stringify({ name }) });
+        return { data };
       }
       default:
         throw new Error(`Toggl connector does not support tool '${tool}'.`);
