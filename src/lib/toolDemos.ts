@@ -209,6 +209,20 @@ export const TOOL_DEMOS: Record<string, ToolDemo> = {
     agentAsks: { en: "The \"Onboarding package\" price should be €500, not €450.", de: "Der Preis für „Onboarding-Paket“ sollte 500 € sein, nicht 450 €." },
     hubReplies: { en: "\"Onboarding package\" updated: €450.00 → €500.00.", de: "„Onboarding-Paket“ aktualisiert: 450,00 € → 500,00 €." },
   },
+  "products.categories.search": {
+    icon: "category",
+    label: { en: "Search categories", de: "Kategorien durchsuchen" },
+    benefit: { en: "See what categories or collections exist before assigning a new product to one.", de: "Sehen Sie, welche Kategorien oder Kollektionen es gibt, bevor Sie ein neues Produkt zuordnen." },
+    agentAsks: { en: "What product categories do we have?", de: "Welche Produktkategorien haben wir?" },
+    hubReplies: { en: "5 categories: T-Shirts, Sweaters, Accessories, Sale, New Arrivals.", de: "5 Kategorien: T-Shirts, Pullover, Accessoires, Sale, Neuheiten." },
+  },
+  "products.categories.get": {
+    icon: "category",
+    label: { en: "Look up one category", de: "Eine Kategorie nachschlagen" },
+    benefit: { en: "Pull the details of one category on demand.", de: "Rufen Sie bei Bedarf die Details einer Kategorie ab." },
+    agentAsks: { en: "How many products are in the \"Sale\" category?", de: "Wie viele Produkte sind in der Kategorie „Sale“?" },
+    hubReplies: { en: "\"Sale\" — 14 products.", de: "„Sale“ — 14 Produkte." },
+  },
   "vouchers.create_from_file": {
     icon: "receipt",
     label: { en: "Book an expense from a receipt (with your approval)", de: "Ausgabe aus Beleg buchen (mit Ihrer Freigabe)" },
