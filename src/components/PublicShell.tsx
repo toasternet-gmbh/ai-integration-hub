@@ -18,7 +18,6 @@ export function PublicShell({ children }: { children: ReactNode }) {
           <a href={`${path("/")}#how-it-works`} className="hidden lg:inline text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">{t("nav.howItWorks")}</a>
           <a href={`${path("/")}#preview`} className="hidden lg:inline text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">{t("nav.preview")}</a>
           <a href={`${path("/")}#platforms`} className="hidden lg:inline text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">{t("nav.platforms")}</a>
-          <Link to={path("/blueprint")} className="hidden sm:inline text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">{t("nav.blueprint")}</Link>
           <Link to={path("/help")} className="hidden sm:inline text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">{t("nav.docs")}</Link>
           <div className="flex border border-outline-variant rounded-full overflow-hidden p-0.5">
             <button onClick={() => setLang("en")} className={"px-2.5 py-1 rounded-full text-label-caps font-label-caps transition-colors " + (lang === "en" ? "bg-primary text-on-primary" : "text-on-surface-variant hover:bg-surface-container")}>EN</button>

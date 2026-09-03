@@ -271,7 +271,6 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "nav.preview": { en: "Preview", de: "Vorschau" },
   "nav.platforms": { en: "Platforms", de: "Plattformen" },
   "nav.docs": { en: "Docs", de: "Doku" },
-  "nav.blueprint": { en: "Blueprint", de: "Blueprint" },
   "landing.eyebrow": { en: "No code, no engineers — just connect", de: "Kein Code, keine Entwickler — einfach verbinden" },
   "landing.headline1": { en: "Give your AI assistant", de: "Geben Sie Ihrem KI-Assistenten" },
   "landing.headline2": { en: "real access to your business.", de: "echten Zugriff auf Ihr Geschäft." },
