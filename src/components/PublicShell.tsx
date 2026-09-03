@@ -24,11 +24,16 @@ export function PublicShell({ children }: { children: ReactNode }) {
             <button onClick={() => setLang("en")} className={"px-2.5 py-1 rounded-full text-label-caps font-label-caps transition-colors " + (lang === "en" ? "bg-primary text-on-primary" : "text-on-surface-variant hover:bg-surface-container")}>EN</button>
             <button onClick={() => setLang("de")} className={"px-2.5 py-1 rounded-full text-label-caps font-label-caps transition-colors " + (lang === "de" ? "bg-primary text-on-primary" : "text-on-surface-variant hover:bg-surface-container")}>DE</button>
           </div>
+          {!signedIn && (
+            <Link to={path("/signin")} className="hidden sm:inline text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">
+              {t("landing.signIn")}
+            </Link>
+          )}
           <Link
-            to={path(signedIn ? "/app" : "/signin")}
+            to={path(signedIn ? "/app" : "/connect")}
             className="text-body-md font-medium text-on-primary bg-primary hover:bg-on-primary-container transition-colors no-underline px-4 py-2 rounded-full shadow-soft"
           >
-            {signedIn ? t("landing.goToApp") : t("landing.signIn")}
+            {signedIn ? t("landing.goToApp") : t("landing.connectCta")}
           </Link>
         </nav>
       </header>

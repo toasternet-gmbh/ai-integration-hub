@@ -3,11 +3,10 @@ import { useI18n } from "../lib/i18n";
 import { useSession } from "../lib/useSession";
 import { PublicShell } from "../components/PublicShell";
 import { ProductPreview } from "../components/ProductPreview";
-import { CATEGORY_LABEL, platformsByCategory, platformToolList, VERIFICATION_LABEL, VERIFICATION_TONE } from "../lib/platformCatalog";
-import { TOOL_DEMOS } from "../lib/toolDemos";
+import { PlatformPicker } from "../components/PlatformPicker";
 
 export default function Landing() {
-  const { t, path, lang } = useI18n();
+  const { t, path } = useI18n();
   const signedIn = useSession();
   return (
     <PublicShell>
@@ -30,8 +29,8 @@ export default function Landing() {
               </h1>
               <p className="font-body-lg text-body-lg text-on-surface-variant max-w-md">{t("landing.subhead")}</p>
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                <Link to={path(signedIn ? "/app" : "/signin")} className="bg-primary text-on-primary px-8 py-3 rounded hover:bg-on-primary-container hover:-translate-y-0.5 transition-all shadow-elevated flex items-center justify-center font-headline-sm gap-2 no-underline whitespace-nowrap">
-                  {signedIn ? t("landing.goToApp") : t("landing.getStarted")}
+                <Link to={path(signedIn ? "/app" : "/connect")} className="bg-primary text-on-primary px-8 py-3 rounded hover:bg-on-primary-container hover:-translate-y-0.5 transition-all shadow-elevated flex items-center justify-center font-headline-sm gap-2 no-underline whitespace-nowrap">
+                  {signedIn ? t("landing.goToApp") : t("landing.connectCta")}
                   <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                 </Link>
                 <Link to={path("/help")} className="bg-transparent text-primary border border-outline-variant px-8 py-3 rounded hover:border-primary hover:bg-primary/5 transition-colors flex items-center justify-center font-headline-sm no-underline whitespace-nowrap">
@@ -89,7 +88,16 @@ export default function Landing() {
             </div>
           </section>
 
-          <section id="features" className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32 scroll-mt-24">
+          <section id="platforms" className="scroll-mt-24 mb-32">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <span className="font-label-caps text-label-caps text-primary">{t("landing.supportedPlatforms")}</span>
+              <h2 className="font-headline-md text-headline-md text-on-surface tracking-tight mt-2 mb-3">{t("landing.platforms.title")}</h2>
+              <p className="font-body-lg text-body-lg text-on-surface-variant">{t("landing.platforms.subtitle")}</p>
+            </div>
+            <PlatformPicker />
+          </section>
+
+          <section id="features" className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32 scroll-mt-24 border-t border-outline-variant pt-16">
             {[
               { icon: "integration_instructions", title: t("landing.prop1.title"), body: t("landing.prop1.body"), iconBox: "bg-primary/10 text-primary" },
               { icon: "security", title: t("landing.prop2.title"), body: t("landing.prop2.body"), iconBox: "bg-secondary/10 text-secondary" },
@@ -124,7 +132,7 @@ export default function Landing() {
             </div>
           </section>
 
-          <section id="preview" className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center mb-32 scroll-mt-24">
+          <section id="preview" className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center scroll-mt-24">
             <div className="lg:col-span-5 flex flex-col gap-4">
               <span className="font-label-caps text-label-caps text-primary">{t("landing.preview.eyebrow")}</span>
               <h2 className="font-headline-md text-headline-md text-on-surface tracking-tight">{t("landing.preview.title")}</h2>
@@ -132,54 +140,6 @@ export default function Landing() {
             </div>
             <div className="lg:col-span-7">
               <ProductPreview />
-            </div>
-          </section>
-
-          <section id="platforms" className="border-t border-outline-variant pt-16 scroll-mt-24">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="font-label-caps text-label-caps text-primary">{t("landing.supportedPlatforms")}</span>
-              <h2 className="font-headline-md text-headline-md text-on-surface tracking-tight mt-2 mb-3">{t("landing.platforms.title")}</h2>
-              <p className="font-body-lg text-body-lg text-on-surface-variant">{t("landing.platforms.subtitle")}</p>
-            </div>
-            <div className="flex flex-col gap-12">
-              {platformsByCategory().map((group) => (
-                <div key={group.category}>
-                  <h3 className="font-label-caps text-label-caps text-on-surface-variant mb-4 tracking-wide">{CATEGORY_LABEL[group.category][lang]}</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {group.platforms.map((p) => (
-                      <div key={p.id} className="flex items-start gap-4 p-6 bg-surface-container-lowest border border-outline-variant rounded-lg hover:border-primary/40 hover:shadow-card transition-all">
-                        <div className="w-11 h-11 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${p.color}1a`, color: p.color }}>
-                          <span className="material-symbols-outlined text-[22px]">{p.icon}</span>
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <h4 className="font-headline-sm text-headline-sm text-on-surface">{p.name}</h4>
-                            <span className={`font-label-caps text-[10px] leading-none px-2 py-1 rounded-full whitespace-nowrap ${VERIFICATION_TONE[p.verificationStatus]}`}>
-                              {VERIFICATION_LABEL[p.verificationStatus][lang]}
-                            </span>
-                          </div>
-                          <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{p.description[lang]}</p>
-                          <div className="flex flex-wrap gap-1.5 mt-3">
-                            {platformToolList(p).map(({ tool }) => (
-                              <span
-                                key={tool}
-                                title={TOOL_DEMOS[tool]?.benefit[lang]}
-                                className="font-body-md text-[11px] leading-none px-2 py-1 rounded-full bg-surface-container text-on-surface-variant"
-                              >
-                                {TOOL_DEMOS[tool]?.label[lang] ?? tool}
-                              </span>
-                            ))}
-                          </div>
-                          <Link to={path(`/connect/${p.id}`)} className="inline-flex items-center gap-1 mt-3 font-label-caps text-label-caps text-primary hover:underline no-underline">
-                            {t("quickConnect.cardCta").toUpperCase()}
-                            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                          </Link>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
             </div>
           </section>
         </div>

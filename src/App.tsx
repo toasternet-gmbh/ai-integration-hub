@@ -11,6 +11,7 @@ const Landing = lazy(() => import("./pages/Landing"));
 const SignIn = lazy(() => import("./pages/SignIn"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
+const Connect = lazy(() => import("./pages/Connect"));
 const QuickConnect = lazy(() => import("./pages/QuickConnect"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Integrations = lazy(() => import("./pages/Integrations"));
@@ -119,6 +120,7 @@ function LocalizedApp({ session }: { session: Session }) {
         <Route path="privacy" element={<Privacy />} />
         <Route path="terms" element={<Terms />} />
         <Route path="blueprint" element={<Blueprint />} />
+        <Route path="connect" element={<Connect />} />
         <Route path="connect/:platformId" element={<QuickConnect />} />
         <Route path="help" element={<Help />} />
         <Route path="help/:slug" element={<HelpArticle />} />

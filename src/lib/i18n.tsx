@@ -137,6 +137,13 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "integrations.empty": { en: "No stores connected yet.", de: "Noch keine Shops verbunden." },
   "integrations.disconnectConfirm": { en: "Disconnect \"{name}\"? This permanently deletes its stored credentials and agent permissions for it.", de: "„{name}“ trennen? Dadurch werden gespeicherte Zugangsdaten und Agenten-Rechte dafür dauerhaft gelöscht." },
   // Quick connect (public, no sign-in required to start)
+  "connect.title": { en: "Choose a platform to connect", de: "Wählen Sie eine Plattform zum Verbinden" },
+  "connect.subtitle": {
+    en: "Pick where your data lives — you'll see a live example of what your AI assistant could do there before you connect anything real.",
+    de: "Wählen Sie, wo Ihre Daten liegen — Sie sehen ein Live-Beispiel dessen, was Ihr KI-Assistent dort tun könnte, bevor Sie etwas Echtes verbinden.",
+  },
+  "connect.searchPlaceholder": { en: "Search platforms…", de: "Plattformen durchsuchen…" },
+  "connect.noResults": { en: "No platforms match \"{query}\".", de: "Keine Plattformen passen zu „{query}“." },
   "quickConnect.eyebrow": { en: "Quick connect", de: "Schnellverbindung" },
   "quickConnect.title": { en: "Connect {platform} in one step", de: "{platform} in einem Schritt verbinden" },
   "quickConnect.subtitle": { en: "Create your Hub account and connect this platform at the same time — no separate sign-up first.", de: "Erstellen Sie Ihr Hub-Konto und verbinden Sie diese Plattform gleichzeitig — keine separate Anmeldung nötig." },
@@ -270,6 +277,7 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "landing.headline2": { en: "Every business system.", de: "Jedes Geschäftssystem." },
   "landing.subhead": { en: "Standardize your AI agent operations across disjointed commerce, bookkeeping, CMS, time-tracking, and banking backends. Deploy policies, audit actions, and route intents through a single integration point.", de: "Vereinheitlichen Sie die Aktionen Ihrer KI-Agenten über verschiedene Commerce-, Buchhaltungs-, CMS-, Zeiterfassungs- und Banking-Systeme hinweg. Richtlinien durchsetzen, Aktionen protokollieren, alles über einen Zugangspunkt." },
   "landing.getStarted": { en: "Get started", de: "Jetzt starten" },
+  "landing.connectCta": { en: "Connect a platform", de: "Plattform verbinden" },
   "landing.viewDocs": { en: "View documentation", de: "Dokumentation ansehen" },
   "landing.signIn": { en: "Sign in", de: "Anmelden" },
   "landing.goToApp": { en: "Go to app", de: "Zur App" },
