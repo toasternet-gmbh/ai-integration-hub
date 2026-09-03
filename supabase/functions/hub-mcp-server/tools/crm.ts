@@ -68,6 +68,46 @@ export const definitions: ToolDefinition[] = [
     },
   },
   {
+    name: "tickets.search",
+    description: "Search support tickets on a CRM integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id"],
+      properties: { integration_id: { type: "string" }, limit: { type: "number" } },
+    },
+  },
+  {
+    name: "tickets.get",
+    description: "Get one ticket by id.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "ticket_id"],
+      properties: { integration_id: { type: "string" }, ticket_id: { type: "string" } },
+    },
+  },
+  {
+    name: "tickets.create",
+    description: "Create a new support ticket on a CRM integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "subject"],
+      properties: {
+        integration_id: { type: "string" },
+        subject: { type: "string" },
+        description: { type: "string" },
+      },
+    },
+  },
+  {
+    name: "owners.search",
+    description: "List the owners (team members who can be assigned to records) on a CRM integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id"],
+      properties: { integration_id: { type: "string" }, limit: { type: "number" } },
+    },
+  },
+  {
     name: "associations.list",
     description: "List the records of one object type associated with a CRM record (e.g. the deals linked to a contact).",
     inputSchema: {
@@ -127,6 +167,30 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("companies.get", args)).data;
+  },
+
+  async "tickets.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("tickets.search", args)).data;
+  },
+
+  async "tickets.get"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("tickets.get", args)).data;
+  },
+
+  async "tickets.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("tickets.create", args)).data;
+  },
+
+  async "owners.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("owners.search", args)).data;
   },
 
   async "associations.list"(args, { admin, projectId }) {

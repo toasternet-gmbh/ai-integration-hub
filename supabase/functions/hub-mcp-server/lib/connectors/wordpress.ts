@@ -45,7 +45,15 @@ export class WordPressConnector implements Connector {
   }
 
   async getCapabilities(): Promise<Capability[]> {
-    return [{ domain: "cms", tools: ["cms.pages.search", "cms.pages.get", "cms.posts.search", "cms.posts.get", "cms.posts.create", "cms.posts.update"] }];
+    return [{
+      domain: "cms",
+      tools: [
+        "cms.pages.search", "cms.pages.get",
+        "cms.posts.search", "cms.posts.get", "cms.posts.create", "cms.posts.update",
+        "cms.media.search", "cms.media.get", "cms.media.create",
+        "cms.comments.search", "cms.comments.get", "cms.comments.update",
+      ],
+    }];
   }
 
   async execute(tool: string, input: Record<string, unknown>): Promise<ToolResult> {
@@ -99,6 +107,65 @@ export class WordPressConnector implements Connector {
         if (input.content != null) body.content = String(input.content);
         if (input.status != null) body.status = String(input.status);
         const data = await this.request(`/posts/${encodeURIComponent(postId)}`, { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      // /wp-json/wp/v2/media is a real, confirmed core resource. Upload takes the raw file bytes
+      // as the request body with `Content-Disposition` naming the file -- WordPress's own
+      // documented convention, distinct from the multipart FormData pattern most other connectors
+      // in this codebase use.
+      case "cms.media.search": {
+        const params = new URLSearchParams();
+        if (input.search) params.set("search", String(input.search));
+        params.set("per_page", String(input.limit ?? 25));
+        const data = await this.request(`/media?${params.toString()}`);
+        return { data };
+      }
+      case "cms.media.get": {
+        const mediaId = String(input.media_id ?? "");
+        if (!mediaId) throw new Error("media_id is required.");
+        const data = await this.request(`/media/${encodeURIComponent(mediaId)}`);
+        return { data };
+      }
+      case "cms.media.create": {
+        const fileBase64 = String(input.file_base64 ?? "");
+        const fileName = String(input.file_name ?? "");
+        if (!fileBase64 || !fileName) throw new Error("file_base64 and file_name are required.");
+        const bytes = Uint8Array.from(atob(fileBase64), (c) => c.charCodeAt(0));
+        const res = await fetch(`${this.baseUrl()}/media`, {
+          method: "POST",
+          headers: {
+            Authorization: this.authHeader(),
+            "Content-Type": String(input.mime_type ?? "image/jpeg"),
+            "Content-Disposition": `attachment; filename="${fileName}"`,
+            Accept: "application/json",
+          },
+          body: bytes,
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) throw new Error((data as { message?: string })?.message ?? `WordPress HTTP ${res.status}`);
+        return { data };
+      }
+      // /wp-json/wp/v2/comments is a real, confirmed core resource -- moderation is just a status
+      // update, same PUT-via-POST pattern cms.posts.update already uses.
+      case "cms.comments.search": {
+        const params = new URLSearchParams();
+        if (input.status) params.set("status", String(input.status));
+        params.set("per_page", String(input.limit ?? 25));
+        const data = await this.request(`/comments?${params.toString()}`);
+        return { data };
+      }
+      case "cms.comments.get": {
+        const commentId = String(input.comment_id ?? "");
+        if (!commentId) throw new Error("comment_id is required.");
+        const data = await this.request(`/comments/${encodeURIComponent(commentId)}`);
+        return { data };
+      }
+      case "cms.comments.update": {
+        const commentId = String(input.comment_id ?? "");
+        const status = String(input.status ?? "");
+        if (!commentId) throw new Error("comment_id is required.");
+        if (!status) throw new Error("status is required.");
+        const data = await this.request(`/comments/${encodeURIComponent(commentId)}`, { method: "POST", body: JSON.stringify({ status }) });
         return { data };
       }
       default:

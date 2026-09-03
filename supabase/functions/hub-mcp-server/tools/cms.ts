@@ -54,6 +54,104 @@ export const definitions: ToolDefinition[] = [
     },
   },
   {
+    name: "cms.pages.update",
+    description: "Update an existing content entry on a CMS integration. On Contentful, updates field values on an existing entry.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "page_id", "fields"],
+      properties: {
+        integration_id: { type: "string" },
+        page_id: { type: "string" },
+        fields: { type: "object", description: "Field id -> plain value (not locale-wrapped). Only the fields given are changed." },
+        publish: { type: "boolean", description: "Publish immediately after updating. Defaults to false." },
+      },
+    },
+  },
+  {
+    name: "cms.media.search",
+    description: "Search media/attachments on a CMS integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id"],
+      properties: { integration_id: { type: "string" }, search: { type: "string" }, limit: { type: "number" } },
+    },
+  },
+  {
+    name: "cms.media.get",
+    description: "Get one media item by id.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "media_id"],
+      properties: { integration_id: { type: "string" }, media_id: { type: "string" } },
+    },
+  },
+  {
+    name: "cms.media.create",
+    description: "Upload a media file (image or other) to a CMS integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "file_base64", "file_name"],
+      properties: {
+        integration_id: { type: "string" },
+        file_base64: { type: "string", description: "Base64-encoded file content." },
+        file_name: { type: "string", description: "e.g. photo.jpg" },
+        mime_type: { type: "string", description: "e.g. image/jpeg. Defaults to image/jpeg." },
+      },
+    },
+  },
+  {
+    name: "cms.comments.search",
+    description: "Search comments on a CMS integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id"],
+      properties: {
+        integration_id: { type: "string" },
+        status: { type: "string", description: "e.g. approve, hold, spam, trash" },
+        limit: { type: "number" },
+      },
+    },
+  },
+  {
+    name: "cms.comments.get",
+    description: "Get one comment by id.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "comment_id"],
+      properties: { integration_id: { type: "string" }, comment_id: { type: "string" } },
+    },
+  },
+  {
+    name: "cms.comments.update",
+    description: "Moderate a comment (change its status, e.g. to approve, spam, or trash it).",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "comment_id", "status"],
+      properties: {
+        integration_id: { type: "string" }, comment_id: { type: "string" },
+        status: { type: "string", description: "approve, hold, spam, or trash." },
+      },
+    },
+  },
+  {
+    name: "cms.assets.search",
+    description: "Search media assets on a CMS integration (Contentful: images/files, distinct from entries).",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id"],
+      properties: { integration_id: { type: "string" }, search: { type: "string" }, limit: { type: "number" } },
+    },
+  },
+  {
+    name: "cms.assets.get",
+    description: "Get one media asset by id.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "asset_id"],
+      properties: { integration_id: { type: "string" }, asset_id: { type: "string" } },
+    },
+  },
+  {
     name: "cms.posts.search",
     description: "Search blog posts on a CMS integration (distinct from static pages).",
     inputSchema: {
@@ -121,6 +219,60 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("cms.pages.create", args)).data;
+  },
+
+  async "cms.pages.update"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("cms.pages.update", args)).data;
+  },
+
+  async "cms.media.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("cms.media.search", args)).data;
+  },
+
+  async "cms.media.get"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("cms.media.get", args)).data;
+  },
+
+  async "cms.media.create"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("cms.media.create", args)).data;
+  },
+
+  async "cms.comments.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("cms.comments.search", args)).data;
+  },
+
+  async "cms.comments.get"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("cms.comments.get", args)).data;
+  },
+
+  async "cms.comments.update"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("cms.comments.update", args)).data;
+  },
+
+  async "cms.assets.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("cms.assets.search", args)).data;
+  },
+
+  async "cms.assets.get"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("cms.assets.get", args)).data;
   },
 
   async "cms.posts.search"(args, { admin, projectId }) {

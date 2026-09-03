@@ -43,6 +43,8 @@ export class HubSpotConnector implements Connector {
       { domain: "deals", tools: ["deals.search", "deals.get", "deals.create"] },
       { domain: "companies", tools: ["companies.search", "companies.get"] },
       { domain: "associations", tools: ["associations.list", "associations.create"] },
+      { domain: "tickets", tools: ["tickets.search", "tickets.get", "tickets.create"] },
+      { domain: "owners", tools: ["owners.search"] },
     ];
   }
 
@@ -165,6 +167,38 @@ export class HubSpotConnector implements Connector {
           `/crm/objects/2026-03/${encodeURIComponent(objectType)}/${encodeURIComponent(objectId)}/associations/default/${encodeURIComponent(toObjectType)}/${encodeURIComponent(toObjectId)}`,
           { method: "PUT" },
         );
+        return { data };
+      }
+      // Tickets are a real, distinct fourth core CRM object (support/service use case), same
+      // /crm/v3/objects/{type} shape as contacts/deals/companies (developers.hubspot.com).
+      case "tickets.search": {
+        const data = await this.request(`/crm/v3/objects/tickets?limit=${Number(input.limit ?? 25)}`);
+        return { data };
+      }
+      case "tickets.get": {
+        const ticketId = String(input.ticket_id ?? "");
+        if (!ticketId) throw new Error("ticket_id is required.");
+        const data = await this.request(`/crm/v3/objects/tickets/${encodeURIComponent(ticketId)}`);
+        return { data };
+      }
+      // subject/content are the two documented core ticket properties; hs_pipeline_stage is
+      // required by HubSpot but, like deals.create's dealstage, has no universal default -- omitted
+      // here, so a ticket created without an explicit pipeline stage relies on HubSpot's own
+      // server-side default for the account's default ticket pipeline (not independently confirmed
+      // this always succeeds; verify against a live account before relying on it for real ticket
+      // pipelines with mandatory stage selection).
+      case "tickets.create": {
+        const subject = String(input.subject ?? "");
+        if (!subject) throw new Error("subject is required.");
+        const properties: Record<string, unknown> = { subject };
+        if (input.description != null) properties.content = String(input.description);
+        const data = await this.request("/crm/v3/objects/tickets", { method: "POST", body: JSON.stringify({ properties }) });
+        return { data };
+      }
+      // GET /crm/v3/owners is real and confirmed (developers.hubspot.com/docs/api/crm/owners) --
+      // lets an agent see who a record could be assigned to, rather than guessing an owner id.
+      case "owners.search": {
+        const data = await this.request(`/crm/v3/owners?limit=${Number(input.limit ?? 25)}`);
         return { data };
       }
       default:

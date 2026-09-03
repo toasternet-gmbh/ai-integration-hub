@@ -89,8 +89,8 @@ export class ContentfulConnector implements Connector {
   }
 
   async getCapabilities(): Promise<Capability[]> {
-    const tools = ["cms.pages.search", "cms.pages.get"];
-    if (this.creds.managementToken) tools.push("cms.pages.create");
+    const tools = ["cms.pages.search", "cms.pages.get", "cms.assets.search", "cms.assets.get"];
+    if (this.creds.managementToken) tools.push("cms.pages.create", "cms.pages.update");
     return [{ domain: "cms", tools }];
   }
 
@@ -132,6 +132,48 @@ export class ContentfulConnector implements Connector {
           headers: { "X-Contentful-Version": String(created.sys.version) },
         });
         return { data: published };
+      }
+      // Verified against Contentful's own CMA docs: fetch the entry via the Management API (needed
+      // for its current sys.version, required on every PUT for optimistic locking), merge in only
+      // the fields the caller supplied under the resolved locale, PUT it back. Same "publish is a
+      // separate explicit step" posture as cms.pages.create.
+      case "cms.pages.update": {
+        const pageId = String(input.page_id ?? "");
+        const fields = input.fields as Record<string, unknown> | undefined;
+        if (!pageId) throw new Error("page_id is required.");
+        if (!fields || Object.keys(fields).length === 0) throw new Error("fields is required.");
+        const existing = (await this.requestCma(`/entries/${encodeURIComponent(pageId)}`)) as {
+          sys: { version: number }; fields?: Record<string, Record<string, unknown>>;
+        };
+        const locale = await this.defaultLocale();
+        const mergedFields = { ...(existing.fields ?? {}) };
+        for (const [fieldId, value] of Object.entries(fields)) mergedFields[fieldId] = { ...(mergedFields[fieldId] ?? {}), [locale]: value };
+        const updated = (await this.requestCma(`/entries/${encodeURIComponent(pageId)}`, {
+          method: "PUT",
+          headers: { "X-Contentful-Version": String(existing.sys.version) },
+          body: JSON.stringify({ fields: mergedFields }),
+        })) as { sys: { id: string; version: number } };
+        if (!input.publish) return { data: updated };
+        const published = await this.requestCma(`/entries/${encodeURIComponent(pageId)}/published`, {
+          method: "PUT",
+          headers: { "X-Contentful-Version": String(updated.sys.version) },
+        });
+        return { data: published };
+      }
+      // Assets (images/files) are a distinct Contentful object from entries -- read via the same
+      // Content Delivery API already used for cms.pages.search/get, no management token needed.
+      case "cms.assets.search": {
+        const params = new URLSearchParams();
+        if (input.search) params.set("query", String(input.search));
+        params.set("limit", String(input.limit ?? 25));
+        const data = await this.request(`/assets?${params.toString()}`);
+        return { data };
+      }
+      case "cms.assets.get": {
+        const assetId = String(input.asset_id ?? "");
+        if (!assetId) throw new Error("asset_id is required.");
+        const data = await this.request(`/assets/${encodeURIComponent(assetId)}`);
+        return { data };
       }
       default:
         throw new Error(`Contentful connector does not support tool '${tool}'.`);
