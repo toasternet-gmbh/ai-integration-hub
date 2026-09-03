@@ -61,7 +61,7 @@ export async function loadConnector(integration: { platform: string; credentials
     case "datev":
       return new DatevConnector(creds as { clientId: string; clientSecret: string });
     case "jtl":
-      return new JtlConnector(creds as { clientId: string; clientSecret: string });
+      return new JtlConnector(creds as { clientId: string; clientSecret: string; tenantId: string });
     case "typo3": {
       const c = creds as { siteUrl: string; accessToken: string };
       assertPublicHttpUrl(c.siteUrl, "siteUrl");

@@ -32,7 +32,7 @@ export const definitions: ToolDefinition[] = [
             "magento: {storeUrl, accessToken}; lexoffice: {apiKey}; " +
             "wordpress: {siteUrl, username, appPassword}; toggl: {apiToken}; sevdesk: {apiKey}; " +
             "personio: {clientId, clientSecret}; datev: {clientId, clientSecret}; " +
-            "jtl: {clientId, clientSecret}; typo3: {siteUrl, accessToken}; " +
+            "jtl: {clientId, clientSecret, tenantId}; typo3: {siteUrl, accessToken}; " +
             "contentful: {spaceId, accessToken, environmentId?, managementToken?} (managementToken enables cms.pages.create); clockify: {workspaceId, apiKey}; " +
             "prestashop: {storeUrl, accessToken (webservice key)}; hubspot: {accessToken (private app token)}.",
         },
