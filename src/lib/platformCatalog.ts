@@ -81,6 +81,14 @@ export const TOOL_INFO: Record<string, Bi> = {
   "tickets.get": { en: "Look up a ticket", de: "Ticket abrufen" },
   "tickets.create": { en: "Create a ticket", de: "Ticket erstellen" },
   "owners.search": { en: "List team owners", de: "Team-Mitglieder auflisten" },
+  "time_entries.report": { en: "Get a time report", de: "Zeitbericht abrufen" },
+  "projects.search": { en: "Search projects", de: "Projekte durchsuchen" },
+  "projects.get": { en: "Look up a project", de: "Projekt abrufen" },
+  "projects.create": { en: "Create a project", de: "Projekt erstellen" },
+  "clients.search": { en: "Search clients", de: "Kunden durchsuchen" },
+  "clients.create": { en: "Create a client", de: "Kunde erstellen" },
+  "tags.search": { en: "Search tags", de: "Tags durchsuchen" },
+  "tags.create": { en: "Create a tag", de: "Tag erstellen" },
   "products.create": { en: "Create a product", de: "Produkt erstellen" },
   "vouchers.create_from_file": { en: "Book an expense from a receipt", de: "Ausgabe aus Beleg buchen" },
   "orders.cancel": { en: "Cancel an order", de: "Bestellung stornieren" },
@@ -177,8 +185,17 @@ const BOOKKEEPING_CAPABILITIES: PlatformCapability[] = [
 
 const CMS_CAPABILITIES: PlatformCapability[] = [{ domain: "cms", tools: ["cms.pages.search", "cms.pages.get"] }];
 
+/** Personio-only — an HR attendance ledger, not a stopwatch tool, so it has no projects/clients/
+ *  tags/reports concept the way Toggl/Clockify do. */
 const TIME_TRACKING_CAPABILITIES: PlatformCapability[] = [
   { domain: "time_entries", tools: ["time_entries.search", "time_entries.get", "time_entries.create", "time_entries.update", "time_entries.delete"] },
+];
+
+const FULL_TIME_TRACKING_CAPABILITIES: PlatformCapability[] = [
+  { domain: "time_entries", tools: ["time_entries.search", "time_entries.get", "time_entries.create", "time_entries.update", "time_entries.delete", "time_entries.report"] },
+  { domain: "projects", tools: ["projects.search", "projects.get", "projects.create"] },
+  { domain: "clients", tools: ["clients.search", "clients.create"] },
+  { domain: "tags", tools: ["tags.search", "tags.create"] },
 ];
 
 export const PLATFORM_CATALOG: PlatformMeta[] = [
@@ -252,10 +269,10 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "toggl", category: "time_tracking", name: "Toggl Track", icon: "schedule", color: "#E01B84",
     description: {
-      en: "Time entry search, lookup, logging, editing, and deletion against a Toggl Track workspace.",
-      de: "Suche, Abfrage, Erfassung, Bearbeitung und Löschung von Zeiteinträgen in einem Toggl-Track-Workspace.",
+      en: "Time entry search, lookup, logging, editing, deletion, and reporting, plus project, client, and tag tools, against a Toggl Track workspace.",
+      de: "Suche, Abfrage, Erfassung, Bearbeitung, Löschung und Auswertung von Zeiteinträgen sowie Projekt-, Kunden- und Tag-Tools in einem Toggl-Track-Workspace.",
     },
-    capabilities: TIME_TRACKING_CAPABILITIES,
+    capabilities: FULL_TIME_TRACKING_CAPABILITIES,
     verificationStatus: "api_verified",
   },
   {
@@ -336,10 +353,10 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "clockify", category: "time_tracking", name: "Clockify", icon: "timer", color: "#03A9F4",
     description: {
-      en: "Time entry search, lookup, logging, editing, and deletion against a Clockify workspace.",
-      de: "Suche, Abfrage, Erfassung, Bearbeitung und Löschung von Zeiteinträgen in einem Clockify-Workspace.",
+      en: "Time entry search, lookup, logging, editing, deletion, and reporting, plus project, client, and tag tools, against a Clockify workspace.",
+      de: "Suche, Abfrage, Erfassung, Bearbeitung, Löschung und Auswertung von Zeiteinträgen sowie Projekt-, Kunden- und Tag-Tools in einem Clockify-Workspace.",
     },
-    capabilities: TIME_TRACKING_CAPABILITIES,
+    capabilities: FULL_TIME_TRACKING_CAPABILITIES,
     verificationStatus: "api_verified",
   },
   {
