@@ -3,12 +3,13 @@ import type { FormEvent } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { PublicShell } from "../components/PublicShell";
 import { PlatformCredentialFields } from "../components/PlatformCredentialFields";
+import { ToolTesterDemo } from "../components/ToolTesterDemo";
 import { useI18n } from "../lib/i18n";
 import { useSession } from "../lib/useSession";
 import { supabase } from "../lib/supabase";
 import { mcp } from "../lib/mcp";
 import { storageKey } from "../App";
-import { PLATFORM_CATALOG, platformToolList, VERIFICATION_LABEL, VERIFICATION_TONE } from "../lib/platformCatalog";
+import { PLATFORM_CATALOG, VERIFICATION_LABEL, VERIFICATION_TONE } from "../lib/platformCatalog";
 import { buildCredentials, OAUTH2_PLATFORMS } from "../lib/platformCredentials";
 
 export default function QuickConnect() {
@@ -88,6 +89,15 @@ export default function QuickConnect() {
           <p className="font-body-lg text-body-lg text-on-surface-variant">{t("quickConnect.subtitle")}</p>
         </div>
 
+        <div className="mb-10">
+          <h2 className="font-headline-sm text-headline-sm text-on-surface mb-1">{t("quickConnect.demoHeading")}</h2>
+          <p className="font-body-md text-body-md text-on-surface-variant mb-4">{t("quickConnect.demoIntro")}</p>
+          <ToolTesterDemo platform={platform} />
+          <p className="font-body-md text-body-md text-on-surface mt-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+            {t("quickConnect.demoCta").replace("{platform}", platform.name)}
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
           <div className="lg:col-span-5">
             <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 sticky top-24">
@@ -100,15 +110,7 @@ export default function QuickConnect() {
               <span className={`inline-block font-label-caps text-[10px] leading-none px-2 py-1 rounded-full whitespace-nowrap mb-3 ${VERIFICATION_TONE[platform.verificationStatus]}`}>
                 {VERIFICATION_LABEL[platform.verificationStatus][lang]}
               </span>
-              <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed mb-4">{platform.description[lang]}</p>
-              <span className="block font-label-caps text-label-caps text-on-surface-variant mb-2">{t("quickConnect.toolsHeading")}</span>
-              <div className="flex flex-wrap gap-1.5">
-                {platformToolList(platform).map(({ tool, description }) => (
-                  <span key={tool} title={description[lang]} className="font-mono-data text-[11px] leading-none px-2 py-1 rounded-full bg-surface-container text-on-surface-variant">
-                    {tool}
-                  </span>
-                ))}
-              </div>
+              <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{platform.description[lang]}</p>
             </div>
           </div>
 
