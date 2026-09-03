@@ -144,19 +144,6 @@ export const definitions: ToolDefinition[] = [
     },
   },
   {
-    name: "reports.profit_and_loss",
-    description: "Get a profit and loss summary for a date range on a bookkeeping integration.",
-    inputSchema: {
-      type: "object",
-      required: ["integration_id", "start_date", "end_date"],
-      properties: {
-        integration_id: { type: "string" },
-        start_date: { type: "string", description: "ISO 8601 date, e.g. 2026-01-01" },
-        end_date: { type: "string", description: "ISO 8601 date, e.g. 2026-12-31" },
-      },
-    },
-  },
-  {
     name: "vouchers.create_from_file",
     description: "Book an expense by uploading a receipt or bill (image or PDF) as a voucher on a bookkeeping integration.",
     inputSchema: {
@@ -232,12 +219,6 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("contacts.update", args)).data;
-  },
-
-  async "reports.profit_and_loss"(args, { admin, projectId }) {
-    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
-    const connector = await loadConnector(integration);
-    return (await connector.execute("reports.profit_and_loss", args)).data;
   },
 
   async "vouchers.create_from_file"(args, { admin, projectId }) {

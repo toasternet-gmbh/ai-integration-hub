@@ -1,6 +1,13 @@
 /**
  * sevDesk connector — bookkeeping. Single API token, sent as a raw `Authorization` header value
  * (sevDesk's convention — no "Bearer" prefix, unlike Lexoffice). Docs: api.sevdesk.de.
+ *
+ * `reports.profit_and_loss` (GET /Report/profitAndLoss) was removed 2026-09-03: cross-checked
+ * against sevDesk's own official OpenAPI spec (api.sevdesk.de/openapi.yaml, fetched and grepped in
+ * full) and that path simply does not exist — sevDesk's only `/Report/*` endpoints are CSV list
+ * exports (invoicelist/orderlist/contactlist/voucherlist), and the Gewinn-und-Verlustrechnung
+ * (P&L) is a web-UI-only feature with no documented API. The tool as shipped would have 404'd on
+ * every real call. See 20260903000009_sevdesk_reports_pnl_bugfix.sql.
  */
 import type { Connector, ConnectionResult, Capability, ToolResult } from "./types.ts";
 
@@ -42,7 +49,6 @@ export class SevdeskConnector implements Connector {
     return [
       { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create", "invoices.finalize", "invoices.record_payment", "invoices.void"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create", "contacts.update"] },
-      { domain: "reports", tools: ["reports.profit_and_loss"] },
       { domain: "products", tools: ["products.create", "products.update"] },
       { domain: "vouchers", tools: ["vouchers.create_from_file"] },
     ];
@@ -131,17 +137,6 @@ export class SevdeskConnector implements Connector {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
-        return { data };
-      }
-      // GET /Report/profitAndLoss is a real, confirmed endpoint (sevDesk's dedicated Report
-      // resource) — the exact query param names (startDate/endDate) are best-effort, not confirmed
-      // against a live account.
-      case "reports.profit_and_loss": {
-        const params = new URLSearchParams({
-          startDate: String(input.start_date ?? ""),
-          endDate: String(input.end_date ?? ""),
-        });
-        const data = await this.request(`/Report/profitAndLoss?${params.toString()}`);
         return { data };
       }
       // Best-effort — POST /Part is a real, confirmed endpoint (api.sevdesk.de), but the exact body

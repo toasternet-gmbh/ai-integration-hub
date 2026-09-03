@@ -54,7 +54,6 @@ export const TOOL_INFO: Record<string, Bi> = {
   "invoices.record_payment": { en: "Record a payment", de: "Zahlung erfassen" },
   "invoices.void": { en: "Cancel an invoice", de: "Rechnung stornieren" },
   "products.update": { en: "Update a product", de: "Produkt aktualisieren" },
-  "reports.profit_and_loss": { en: "Get a profit & loss report", de: "Gewinn-und-Verlust-Bericht abrufen" },
   "products.create": { en: "Create a product", de: "Produkt erstellen" },
   "vouchers.create_from_file": { en: "Book an expense from a receipt", de: "Ausgabe aus Beleg buchen" },
   "orders.cancel": { en: "Cancel an order", de: "Bestellung stornieren" },
@@ -237,13 +236,12 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "sevdesk", category: "bookkeeping", name: "sevDesk", icon: "request_quote", color: "#00A88E",
     description: {
-      en: "Invoice search, lookup, creation, finalization, payment recording, and cancellation, plus contact and product tools and a profit-and-loss report, via sevDesk's bookkeeping API.",
-      de: "Rechnungssuche, -abfrage, -erstellung, -finalisierung, Zahlungserfassung und -stornierung sowie Kontakt- und Produkt-Tools und ein Gewinn-und-Verlust-Bericht über die Buchhaltungs-API von sevDesk.",
+      en: "Invoice search, lookup, creation, finalization, payment recording, and cancellation, plus contact and product tools, via sevDesk's bookkeeping API.",
+      de: "Rechnungssuche, -abfrage, -erstellung, -finalisierung, Zahlungserfassung und -stornierung sowie Kontakt- und Produkt-Tools über die Buchhaltungs-API von sevDesk.",
     },
     capabilities: [
       { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create", "invoices.finalize", "invoices.record_payment", "invoices.void"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create", "contacts.update"] },
-      { domain: "reports", tools: ["reports.profit_and_loss"] },
       { domain: "products", tools: ["products.create", "products.update"] },
       { domain: "vouchers", tools: ["vouchers.create_from_file"] },
     ],

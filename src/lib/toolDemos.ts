@@ -195,13 +195,6 @@ export const TOOL_DEMOS: Record<string, ToolDemo> = {
     agentAsks: { en: "Invoice #RE-2024-118 was sent to the wrong client — cancel it.", de: "Rechnung #RE-2024-118 wurde an den falschen Kunden gesendet — storniere sie." },
     hubReplies: { en: "Invoice #RE-2024-118 cancelled — a reversing cancellation invoice was created.", de: "Rechnung #RE-2024-118 storniert — eine stornierende Rechnung wurde erstellt." },
   },
-  "reports.profit_and_loss": {
-    icon: "trending_up",
-    label: { en: "Get a profit & loss report", de: "Gewinn-und-Verlust-Bericht abrufen" },
-    benefit: { en: "Ask how the business is doing this quarter without waiting for your accountant.", de: "Fragen Sie, wie das Geschäft dieses Quartal läuft, ohne auf Ihren Steuerberater zu warten." },
-    agentAsks: { en: "How did we do financially last quarter?", de: "Wie standen wir finanziell im letzten Quartal da?" },
-    hubReplies: { en: "Q2: €84,200 revenue, €61,900 expenses, €22,300 profit.", de: "Q2: 84.200 € Umsatz, 61.900 € Ausgaben, 22.300 € Gewinn." },
-  },
   "products.create": {
     icon: "inventory_2",
     label: { en: "Create a product (with your approval)", de: "Produkt erstellen (mit Ihrer Freigabe)" },
