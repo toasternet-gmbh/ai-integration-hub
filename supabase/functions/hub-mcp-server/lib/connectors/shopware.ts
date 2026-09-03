@@ -58,9 +58,10 @@ export class ShopwareConnector implements Connector {
 
   async getCapabilities(): Promise<Capability[]> {
     return [
-      { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund"] },
+      { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel", "orders.fulfill"] },
       { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
   }
 
@@ -133,6 +134,48 @@ export class ShopwareConnector implements Connector {
         if (!transactionId) throw new Error(`No payment transaction found on order ${orderId}.`);
         const data = await this.request(`/_action/order_transaction/${transactionId}/state/refund`, { method: "POST" });
         return { data: data ?? { order_id: orderId, transaction_id: transactionId, status: "refunded" } };
+      }
+      case "contacts.search": {
+        const body: Record<string, unknown> = { limit: Number(input.limit ?? 25) };
+        if (input.email) body.term = String(input.email);
+        else if (input.name) body.term = String(input.name);
+        const data = await this.request("/search/customer", { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      case "contacts.get": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        const data = await this.request(`/customer/${encodeURIComponent(contactId)}`);
+        return { data };
+      }
+      // POST /_action/order/{id}/state/cancel — the order-level state machine's own cancel
+      // transition, a different state machine from the order_transaction one orders.refund uses
+      // (verified live for refund; cancel is the same documented family of generic
+      // `/_action/<entity>/{id}/state/<transitionName>` endpoints, not separately live-tested).
+      case "orders.cancel": {
+        const orderId = String(input.order_id ?? "");
+        if (!orderId) throw new Error("order_id is required.");
+        const data = await this.request(`/_action/order/${encodeURIComponent(orderId)}/state/cancel`, { method: "POST" });
+        return { data: data ?? { order_id: orderId, status: "cancelled" } };
+      }
+      // Two real, documented steps: PATCH the delivery's trackingCodes (a string array), then fire
+      // the order-delivery state machine's "ship" transition — the same generic transition-endpoint
+      // family as orders.cancel/orders.refund, applied to the delivery entity instead of the order
+      // or order_transaction. Assumes one delivery per order (true unless the order ships from
+      // multiple shipping addresses/partial shipments).
+      case "orders.fulfill": {
+        const orderId = String(input.order_id ?? "");
+        const trackingNumber = String(input.tracking_number ?? "");
+        if (!orderId) throw new Error("order_id is required.");
+        if (!trackingNumber) throw new Error("tracking_number is required.");
+        const order = (await this.request(`/order/${encodeURIComponent(orderId)}?associations[deliveries][]`)) as {
+          data?: { relationships?: { deliveries?: { data?: { id: string }[] } } };
+        };
+        const deliveryId = order?.data?.relationships?.deliveries?.data?.[0]?.id;
+        if (!deliveryId) throw new Error(`No delivery found on order ${orderId}.`);
+        await this.request(`/order-delivery/${deliveryId}`, { method: "PATCH", body: JSON.stringify({ trackingCodes: [trackingNumber] }) });
+        const data = await this.request(`/_action/order_delivery/${deliveryId}/state/ship`, { method: "POST" });
+        return { data: data ?? { order_id: orderId, delivery_id: deliveryId, status: "shipped" } };
       }
       default:
         throw new Error(`Shopware connector does not support tool '${tool}'.`);

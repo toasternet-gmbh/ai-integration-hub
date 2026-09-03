@@ -7,7 +7,10 @@
  */
 import type { Connector, ConnectionResult, Capability, ToolResult } from "./types.ts";
 
-const API_VERSION = "2024-01";
+// Shopify sunsets each quarterly version ~12 months after release. Bumped 2026-08-28 (was
+// "2024-01", already sunset) to the then-current stable release — check
+// https://shopify.dev/docs/api/admin-rest/usage/versioning before this goes stale again.
+const API_VERSION = "2026-07";
 
 export interface ShopifyCredentials {
   storeUrl: string; // e.g. "my-store.myshopify.com" (a full https:// prefix is also accepted)
@@ -53,9 +56,10 @@ export class ShopifyConnector implements Connector {
 
   async getCapabilities(): Promise<Capability[]> {
     return [
-      { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund"] },
+      { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel", "orders.fulfill"] },
       { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
   }
 
@@ -153,6 +157,70 @@ export class ShopifyConnector implements Connector {
         const data = await this.request(`/orders/${encodeURIComponent(orderId)}/refunds.json`, {
           method: "POST",
           body: JSON.stringify({ refund: { ...calc.refund, notify: true, note: input.reason ? String(input.reason) : undefined } }),
+        });
+        return { data };
+      }
+      // GET /customers/search.json is Shopify's real, dedicated free-text search endpoint (plain
+      // /customers.json has no text-search param, only pagination/date filters). Its `query` param
+      // accepts field-scoped terms like `email:x@y.com` — built here from whichever of name/email
+      // was given, or a bare term if only one was.
+      case "contacts.search": {
+        const terms: string[] = [];
+        if (input.email) terms.push(`email:${input.email}`);
+        if (input.name) terms.push(String(input.name));
+        const params = new URLSearchParams({ limit: "25" });
+        if (terms.length > 0) params.set("query", terms.join(" "));
+        const data = terms.length > 0
+          ? await this.request(`/customers/search.json?${params.toString()}`)
+          : await this.request(`/customers.json?${params.toString()}`);
+        return { data };
+      }
+      case "contacts.get": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        const data = await this.request(`/customers/${encodeURIComponent(contactId)}.json`);
+        return { data };
+      }
+      // POST /orders/{id}/cancel.json is a real, confirmed endpoint (shopify.dev order resource).
+      // `reason` must be one of Shopify's fixed enum values; anything else is passed through as
+      // "other" rather than rejected outright, since an agent's free-text reason won't usually
+      // match the enum. Shopify auto-refunds a captured payment on cancel unless told not to —
+      // deliberately not overriding that default here (no `refund` override field sent).
+      case "orders.cancel": {
+        const orderId = String(input.order_id ?? "");
+        if (!orderId) throw new Error("order_id is required.");
+        const allowedReasons = new Set(["customer", "inventory", "fraud", "declined", "other"]);
+        const reason = input.reason && allowedReasons.has(String(input.reason)) ? String(input.reason) : "other";
+        const data = await this.request(`/orders/${encodeURIComponent(orderId)}/cancel.json`, {
+          method: "POST",
+          body: JSON.stringify({ reason }),
+        });
+        return { data };
+      }
+      // Two-step, confirmed on shopify.dev's fulfillment resource: the legacy single-call
+      // `orders/{id}/fulfillments.json` shape is retired — a fulfillment now targets a
+      // fulfillment_order_id, fetched first via GET .../fulfillment_orders.json. Assumes a single
+      // fulfillment order per order (true for orders that aren't split across locations/vendors),
+      // same one-location assumption `firstLocationId()` already makes for inventory.
+      case "orders.fulfill": {
+        const orderId = String(input.order_id ?? "");
+        const trackingNumber = String(input.tracking_number ?? "");
+        if (!orderId) throw new Error("order_id is required.");
+        if (!trackingNumber) throw new Error("tracking_number is required.");
+        const fulfillmentOrders = (await this.request(`/orders/${encodeURIComponent(orderId)}/fulfillment_orders.json`)) as {
+          fulfillment_orders?: { id: number }[];
+        };
+        const fulfillmentOrderId = fulfillmentOrders.fulfillment_orders?.[0]?.id;
+        if (!fulfillmentOrderId) throw new Error(`Order ${orderId} has no open fulfillment order.`);
+        const data = await this.request("/fulfillments.json", {
+          method: "POST",
+          body: JSON.stringify({
+            fulfillment: {
+              line_items_by_fulfillment_order: [{ fulfillment_order_id: fulfillmentOrderId }],
+              tracking_info: { number: trackingNumber, company: input.carrier ? String(input.carrier) : undefined, url: input.tracking_url ? String(input.tracking_url) : undefined },
+              notify_customer: true,
+            },
+          }),
         });
         return { data };
       }

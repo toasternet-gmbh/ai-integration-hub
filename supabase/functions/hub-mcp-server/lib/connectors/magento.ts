@@ -41,9 +41,10 @@ export class MagentoConnector implements Connector {
 
   async getCapabilities(): Promise<Capability[]> {
     return [
-      { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund"] },
+      { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel", "orders.fulfill"] },
       { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
   }
 
@@ -119,6 +120,55 @@ export class MagentoConnector implements Connector {
         if (input.reason) body.comment = { comment: String(input.reason), is_visible_on_front: 0 };
         const creditMemoId = await this.request(`/order/${encodeURIComponent(orderId)}/refund`, { method: "POST", body: JSON.stringify(body) });
         return { data: { credit_memo_id: creditMemoId } };
+      }
+      case "contacts.search": {
+        const params = new URLSearchParams();
+        params.set("searchCriteria[pageSize]", "25");
+        if (input.email) {
+          params.set("searchCriteria[filterGroups][0][filters][0][field]", "email");
+          params.set("searchCriteria[filterGroups][0][filters][0][value]", String(input.email));
+        } else if (input.name) {
+          params.set("searchCriteria[filterGroups][0][filters][0][field]", "firstname");
+          params.set("searchCriteria[filterGroups][0][filters][0][value]", `%${input.name}%`);
+          params.set("searchCriteria[filterGroups][0][filters][0][conditionType]", "like");
+        }
+        const data = await this.request(`/customers/search?${params.toString()}`);
+        return { data };
+      }
+      case "contacts.get": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        const data = await this.request(`/customers/${encodeURIComponent(contactId)}`);
+        return { data };
+      }
+      // POST /orders/{id}/cancel is a real, confirmed endpoint — returns a bare boolean, not an
+      // order object. Fails once the order has an invoice, same "can't undo a completed payment
+      // this way" posture orders.refund exists for.
+      case "orders.cancel": {
+        const orderId = String(input.order_id ?? "");
+        if (!orderId) throw new Error("order_id is required.");
+        const cancelled = await this.request(`/orders/${encodeURIComponent(orderId)}/cancel`, { method: "POST" });
+        return { data: { order_id: orderId, cancelled } };
+      }
+      // POST /order/{id}/ship is a real, confirmed endpoint, but its `items` array (order_item_id +
+      // qty per line) is required, not optional — Magento won't infer "ship everything" the way
+      // Shopify's refund-calculate does, so the order is fetched first to ship every line in full.
+      // `carrier_code: "custom"` is Magento's well-known fallback code for a tracking number that
+      // isn't from a carrier registered as a real shipping method in the store.
+      case "orders.fulfill": {
+        const orderId = String(input.order_id ?? "");
+        const trackingNumber = String(input.tracking_number ?? "");
+        if (!orderId) throw new Error("order_id is required.");
+        if (!trackingNumber) throw new Error("tracking_number is required.");
+        const order = (await this.request(`/orders/${encodeURIComponent(orderId)}`)) as { items?: { item_id: number; qty_ordered: number }[] };
+        const items = (order.items ?? []).map((i) => ({ order_item_id: i.item_id, qty: i.qty_ordered }));
+        if (items.length === 0) throw new Error(`Order ${orderId} has no items to ship.`);
+        const body = {
+          items,
+          tracks: [{ track_number: trackingNumber, carrier_code: "custom", title: input.carrier ? String(input.carrier) : "Carrier" }],
+        };
+        const shipmentId = await this.request(`/order/${encodeURIComponent(orderId)}/ship`, { method: "POST", body: JSON.stringify(body) });
+        return { data: { shipment_id: shipmentId } };
       }
       default:
         throw new Error(`Magento connector does not support tool '${tool}'.`);

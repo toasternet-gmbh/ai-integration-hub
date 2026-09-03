@@ -46,6 +46,29 @@ export const definitions: ToolDefinition[] = [
       },
     },
   },
+  {
+    name: "orders.cancel",
+    description: "Cancel an unfulfilled order — distinct from a refund, this stops the order rather than reversing a completed payment.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "order_id"],
+      properties: { integration_id: { type: "string" }, order_id: { type: "string" }, reason: { type: "string" } },
+    },
+  },
+  {
+    name: "orders.fulfill",
+    description: "Mark an order as shipped and attach a tracking number.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "order_id", "tracking_number"],
+      properties: {
+        integration_id: { type: "string" }, order_id: { type: "string" },
+        tracking_number: { type: "string" },
+        carrier: { type: "string", description: "e.g. DHL, UPS, FedEx." },
+        tracking_url: { type: "string" },
+      },
+    },
+  },
 ];
 
 export const handlers: ToolModule["handlers"] = {
@@ -65,5 +88,17 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("orders.refund", args)).data;
+  },
+
+  async "orders.cancel"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("orders.cancel", args)).data;
+  },
+
+  async "orders.fulfill"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("orders.fulfill", args)).data;
   },
 };

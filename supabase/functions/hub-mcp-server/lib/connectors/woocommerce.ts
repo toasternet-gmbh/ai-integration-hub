@@ -2,6 +2,12 @@
  * WooCommerce connector (Milestone 1's first connector) — WooCommerce REST API v3.
  * Auth: Consumer Key/Secret over HTTPS Basic Auth (the standard approach for an HTTPS store;
  * OAuth1.0a query-param signing for plain-HTTP stores is deferred — not needed for Milestone 1).
+ *
+ * No orders.fulfill here: WooCommerce core's order resource has no tracking-number field at all —
+ * shipment tracking only exists via third-party plugins (WooCommerce Shipment Tracking, Advanced
+ * Shipment Tracking, ...), each with its own non-standard endpoint, so there's no one call that
+ * works on every WooCommerce store the way there is on Shopify/Magento/Shopware. Deliberately left
+ * unimplemented rather than silently doing nothing or depending on a plugin that may not be installed.
  */
 import type { Connector, ConnectionResult, Capability, ToolResult } from "./types.ts";
 
@@ -46,9 +52,10 @@ export class WooCommerceConnector implements Connector {
 
   async getCapabilities(): Promise<Capability[]> {
     return [
-      { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund"] },
+      { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel"] },
       { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
   }
 
@@ -125,6 +132,31 @@ export class WooCommerceConnector implements Connector {
           });
           return { data };
         }
+      }
+      case "contacts.search": {
+        const params = new URLSearchParams();
+        if (input.email) params.set("email", String(input.email));
+        else if (input.name) params.set("search", String(input.name));
+        params.set("per_page", "25");
+        const data = await this.request(`/customers?${params.toString()}`);
+        return { data };
+      }
+      case "contacts.get": {
+        const contactId = String(input.contact_id ?? "");
+        if (!contactId) throw new Error("contact_id is required.");
+        const data = await this.request(`/customers/${encodeURIComponent(contactId)}`);
+        return { data };
+      }
+      // Same generic order-status PUT the rest of this connector already uses — WooCommerce has no
+      // separate cancel endpoint, "cancelled" is just one of its documented status enum values.
+      case "orders.cancel": {
+        const orderId = String(input.order_id ?? "");
+        if (!orderId) throw new Error("order_id is required.");
+        const data = await this.request(`/orders/${encodeURIComponent(orderId)}`, {
+          method: "PUT",
+          body: JSON.stringify({ status: "cancelled" }),
+        });
+        return { data };
       }
       default:
         throw new Error(`WooCommerce connector does not support tool '${tool}'.`);
