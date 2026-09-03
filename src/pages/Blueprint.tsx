@@ -3,6 +3,7 @@ import { useI18n } from "../lib/i18n";
 import { PublicShell } from "../components/PublicShell";
 import { POLICY_STEPS, ROLES, WORKFLOWS } from "../lib/blueprintContent";
 import { CATEGORY_LABEL, platformsByCategory, platformToolList, VERIFICATION_LABEL, VERIFICATION_TONE } from "../lib/platformCatalog";
+import { TOOL_DEMOS } from "../lib/toolDemos";
 
 const SECTIONS = [
   { id: "architecture", labelKey: "blueprint.nav.architecture" },
@@ -156,9 +157,13 @@ export default function Blueprint() {
                             </div>
                             <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{p.description[lang]}</p>
                             <div className="flex flex-wrap gap-1.5 mt-3">
-                              {platformToolList(p).map(({ tool, description }) => (
-                                <span key={tool} title={description[lang]} className="font-mono-data text-[11px] leading-none px-2 py-1 rounded-full bg-surface-container text-on-surface-variant">
-                                  {tool}
+                              {platformToolList(p).map(({ tool }) => (
+                                <span
+                                  key={tool}
+                                  title={TOOL_DEMOS[tool]?.benefit[lang]}
+                                  className="font-body-md text-[11px] leading-none px-2 py-1 rounded-full bg-surface-container text-on-surface-variant"
+                                >
+                                  {TOOL_DEMOS[tool]?.label[lang] ?? tool}
                                 </span>
                               ))}
                             </div>

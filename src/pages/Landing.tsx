@@ -4,6 +4,7 @@ import { useSession } from "../lib/useSession";
 import { PublicShell } from "../components/PublicShell";
 import { ProductPreview } from "../components/ProductPreview";
 import { CATEGORY_LABEL, platformsByCategory, platformToolList, VERIFICATION_LABEL, VERIFICATION_TONE } from "../lib/platformCatalog";
+import { TOOL_DEMOS } from "../lib/toolDemos";
 
 export default function Landing() {
   const { t, path, lang } = useI18n();
@@ -159,9 +160,13 @@ export default function Landing() {
                           </div>
                           <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{p.description[lang]}</p>
                           <div className="flex flex-wrap gap-1.5 mt-3">
-                            {platformToolList(p).map(({ tool, description }) => (
-                              <span key={tool} title={description[lang]} className="font-mono-data text-[11px] leading-none px-2 py-1 rounded-full bg-surface-container text-on-surface-variant">
-                                {tool}
+                            {platformToolList(p).map(({ tool }) => (
+                              <span
+                                key={tool}
+                                title={TOOL_DEMOS[tool]?.benefit[lang]}
+                                className="font-body-md text-[11px] leading-none px-2 py-1 rounded-full bg-surface-container text-on-surface-variant"
+                              >
+                                {TOOL_DEMOS[tool]?.label[lang] ?? tool}
                               </span>
                             ))}
                           </div>
