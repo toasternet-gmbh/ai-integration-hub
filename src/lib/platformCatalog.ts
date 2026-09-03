@@ -58,6 +58,9 @@ export const TOOL_INFO: Record<string, Bi> = {
   "cms.pages.get": { en: "Look up a page", de: "Seite abrufen" },
   "time_entries.search": { en: "Search time entries", de: "Zeiteinträge durchsuchen" },
   "time_entries.get": { en: "Look up a time entry", de: "Zeiteintrag abrufen" },
+  "time_entries.create": { en: "Log a time entry", de: "Zeiteintrag erfassen" },
+  "time_entries.update": { en: "Update a time entry", de: "Zeiteintrag aktualisieren" },
+  "time_entries.delete": { en: "Delete a time entry", de: "Zeiteintrag löschen" },
   "accounts.list": { en: "List bank accounts", de: "Bankkonten auflisten" },
   "transactions.search": { en: "Search transactions", de: "Transaktionen durchsuchen" },
   "deals.search": { en: "Search deals", de: "Deals durchsuchen" },
@@ -139,7 +142,9 @@ const BOOKKEEPING_CAPABILITIES: PlatformCapability[] = [
 
 const CMS_CAPABILITIES: PlatformCapability[] = [{ domain: "cms", tools: ["cms.pages.search", "cms.pages.get"] }];
 
-const TIME_TRACKING_CAPABILITIES: PlatformCapability[] = [{ domain: "time_entries", tools: ["time_entries.search", "time_entries.get"] }];
+const TIME_TRACKING_CAPABILITIES: PlatformCapability[] = [
+  { domain: "time_entries", tools: ["time_entries.search", "time_entries.get", "time_entries.create", "time_entries.update", "time_entries.delete"] },
+];
 
 export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
@@ -205,8 +210,8 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "toggl", category: "time_tracking", name: "Toggl Track", icon: "schedule", color: "#E01B84",
     description: {
-      en: "Time entry search and lookup against a Toggl Track workspace.",
-      de: "Suche und Abfrage von Zeiteinträgen in einem Toggl-Track-Workspace.",
+      en: "Time entry search, lookup, logging, editing, and deletion against a Toggl Track workspace.",
+      de: "Suche, Abfrage, Erfassung, Bearbeitung und Löschung von Zeiteinträgen in einem Toggl-Track-Workspace.",
     },
     capabilities: TIME_TRACKING_CAPABILITIES,
     verificationStatus: "api_verified",
@@ -241,8 +246,8 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "personio", category: "time_tracking", name: "Personio", icon: "event_available", color: "#FF6B4A",
     description: {
-      en: "Attendance period search and lookup via Personio's HR platform.",
-      de: "Suche und Abfrage von Anwesenheitszeiträumen über die HR-Plattform Personio.",
+      en: "Attendance period search, lookup, logging, editing, and deletion via Personio's HR platform.",
+      de: "Suche, Abfrage, Erfassung, Bearbeitung und Löschung von Anwesenheitszeiträumen über die HR-Plattform Personio.",
     },
     capabilities: TIME_TRACKING_CAPABILITIES,
     verificationStatus: "api_verified",
@@ -286,8 +291,8 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "clockify", category: "time_tracking", name: "Clockify", icon: "timer", color: "#03A9F4",
     description: {
-      en: "Time entry search and lookup against a Clockify workspace.",
-      de: "Suche und Abfrage von Zeiteinträgen in einem Clockify-Workspace.",
+      en: "Time entry search, lookup, logging, editing, and deletion against a Clockify workspace.",
+      de: "Suche, Abfrage, Erfassung, Bearbeitung und Löschung von Zeiteinträgen in einem Clockify-Workspace.",
     },
     capabilities: TIME_TRACKING_CAPABILITIES,
     verificationStatus: "api_verified",

@@ -257,6 +257,27 @@ export const TOOL_DEMOS: Record<string, ToolDemo> = {
     agentAsks: { en: "What was logged on Tuesday for the Acme project?", de: "Was wurde am Dienstag für das Projekt Acme erfasst?" },
     hubReplies: { en: "Tuesday, Acme project — 3h 15m, \"Client call + follow-up notes\", logged by Jonas.", de: "Dienstag, Projekt Acme — 3 Std. 15 Min., „Kundengespräch + Notizen“, erfasst von Jonas." },
   },
+  "time_entries.create": {
+    icon: "schedule",
+    label: { en: "Log a time entry (with your approval)", de: "Zeiteintrag erfassen (mit Ihrer Freigabe)" },
+    benefit: { en: "Let an agent log work as it happens instead of you typing it in later.", de: "Lassen Sie einen Agenten Arbeitszeit erfassen, sobald sie anfällt — statt sie später selbst einzutragen." },
+    agentAsks: { en: "Log 2 hours on the Acme project, ending now.", de: "Erfasse 2 Stunden für das Projekt Acme, endend jetzt." },
+    hubReplies: { en: "Time entry logged: Acme project, 2h, ending just now.", de: "Zeiteintrag erfasst: Projekt Acme, 2 Std., soeben beendet." },
+  },
+  "time_entries.update": {
+    icon: "schedule",
+    label: { en: "Update a time entry (with your approval)", de: "Zeiteintrag aktualisieren (mit Ihrer Freigabe)" },
+    benefit: { en: "Fix a logged time entry the moment you notice it's wrong.", de: "Korrigieren Sie einen erfassten Zeiteintrag, sobald Ihnen auffällt, dass er falsch ist." },
+    agentAsks: { en: "That Acme entry should be 1.5 hours, not 2.", de: "Der Acme-Eintrag sollte 1,5 Stunden sein, nicht 2." },
+    hubReplies: { en: "Time entry updated: Acme project, 1h 30m.", de: "Zeiteintrag aktualisiert: Projekt Acme, 1 Std. 30 Min." },
+  },
+  "time_entries.delete": {
+    icon: "schedule",
+    label: { en: "Delete a time entry (with your approval)", de: "Zeiteintrag löschen (mit Ihrer Freigabe)" },
+    benefit: { en: "Remove a duplicate or mistaken entry instantly.", de: "Entfernen Sie einen doppelten oder versehentlichen Eintrag sofort." },
+    agentAsks: { en: "Delete that duplicate Acme entry from this morning.", de: "Lösche den doppelten Acme-Eintrag von heute Morgen." },
+    hubReplies: { en: "Time entry deleted.", de: "Zeiteintrag gelöscht." },
+  },
   "accounts.list": {
     icon: "account_balance_wallet",
     label: { en: "See your bank accounts", de: "Bankkonten einsehen" },
