@@ -68,6 +68,19 @@ export const TOOL_INFO: Record<string, Bi> = {
   "credit_notes.search": { en: "Search credit notes", de: "Gutschriften durchsuchen" },
   "credit_notes.get": { en: "Look up a credit note", de: "Gutschrift abrufen" },
   "credit_notes.create": { en: "Create a credit note", de: "Gutschrift erstellen" },
+  "cms.pages.update": { en: "Update a content entry", de: "Content-Eintrag aktualisieren" },
+  "cms.media.search": { en: "Search media", de: "Medien durchsuchen" },
+  "cms.media.get": { en: "Look up a media item", de: "Medienelement abrufen" },
+  "cms.media.create": { en: "Upload media", de: "Medien hochladen" },
+  "cms.comments.search": { en: "Search comments", de: "Kommentare durchsuchen" },
+  "cms.comments.get": { en: "Look up a comment", de: "Kommentar abrufen" },
+  "cms.comments.update": { en: "Moderate a comment", de: "Kommentar moderieren" },
+  "cms.assets.search": { en: "Search assets", de: "Assets durchsuchen" },
+  "cms.assets.get": { en: "Look up an asset", de: "Asset abrufen" },
+  "tickets.search": { en: "Search tickets", de: "Tickets durchsuchen" },
+  "tickets.get": { en: "Look up a ticket", de: "Ticket abrufen" },
+  "tickets.create": { en: "Create a ticket", de: "Ticket erstellen" },
+  "owners.search": { en: "List team owners", de: "Team-Mitglieder auflisten" },
   "products.create": { en: "Create a product", de: "Produkt erstellen" },
   "vouchers.create_from_file": { en: "Book an expense from a receipt", de: "Ausgabe aus Beleg buchen" },
   "orders.cancel": { en: "Cancel an order", de: "Bestellung stornieren" },
@@ -226,11 +239,13 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "wordpress", category: "cms", name: "WordPress", icon: "edit_note", color: "#21759B",
     description: {
-      en: "Page search and lookup, plus blog post search, lookup, creation, and editing, via the WordPress REST API, authenticated with an Application Password.",
-      de: "Seitensuche und -abfrage sowie Blogbeitrags-Suche, -Abfrage, -Erstellung und -Bearbeitung über die WordPress-REST-API, authentifiziert mit einem Anwendungspasswort.",
+      en: "Page search and lookup, blog post search, lookup, creation, and editing, media upload, and comment moderation, via the WordPress REST API, authenticated with an Application Password.",
+      de: "Seitensuche und -abfrage, Blogbeitrags-Suche, -Abfrage, -Erstellung und -Bearbeitung, Medien-Upload und Kommentarmoderation über die WordPress-REST-API, authentifiziert mit einem Anwendungspasswort.",
     },
     capabilities: [
       { domain: "cms", tools: ["cms.pages.search", "cms.pages.get", "cms.posts.search", "cms.posts.get", "cms.posts.create", "cms.posts.update"] },
+      { domain: "cms", tools: ["cms.media.search", "cms.media.get", "cms.media.create"] },
+      { domain: "cms", tools: ["cms.comments.search", "cms.comments.get", "cms.comments.update"] },
     ],
     verificationStatus: "api_verified",
   },
@@ -312,10 +327,10 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "contentful", category: "cms", name: "Contentful", icon: "cloud_queue", color: "#3C8DBC",
     description: {
-      en: "Page search and lookup via Contentful's Content Delivery API, plus entry creation via the Content Management API if a management token is provided.",
-      de: "Seitensuche und -abfrage über die Content-Delivery-API von Contentful, plus Eintragserstellung über die Content-Management-API bei hinterlegtem Management-Token.",
+      en: "Page and asset search and lookup via Contentful's Content Delivery API, plus entry creation and editing via the Content Management API if a management token is provided.",
+      de: "Eintrags- und Asset-Suche und -Abfrage über die Content-Delivery-API von Contentful, plus Eintragserstellung und -bearbeitung über die Content-Management-API bei hinterlegtem Management-Token.",
     },
-    capabilities: [{ domain: "cms", tools: ["cms.pages.search", "cms.pages.get", "cms.pages.create"] }],
+    capabilities: [{ domain: "cms", tools: ["cms.pages.search", "cms.pages.get", "cms.pages.create", "cms.pages.update", "cms.assets.search", "cms.assets.get"] }],
     verificationStatus: "api_verified",
   },
   {
@@ -345,14 +360,16 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "hubspot", category: "crm", name: "HubSpot", icon: "handshake", color: "#FF7A59",
     description: {
-      en: "Contact, deal, and company search, lookup, and creation, plus linking records together, via HubSpot's CRM API — the Hub's first CRM platform.",
-      de: "Kontakt-, Deal- und Unternehmenssuche, -abfrage und -erstellung sowie das Verknüpfen von Datensätzen über die CRM-API von HubSpot — die erste CRM-Plattform des Hubs.",
+      en: "Contact, deal, company, and support ticket search, lookup, and creation, plus linking records together and listing team owners, via HubSpot's CRM API — the Hub's first CRM platform.",
+      de: "Kontakt-, Deal-, Unternehmens- und Support-Ticket-Suche, -Abfrage und -Erstellung sowie das Verknüpfen von Datensätzen und Auflisten von Team-Mitgliedern über die CRM-API von HubSpot — die erste CRM-Plattform des Hubs.",
     },
     capabilities: [
       { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
       { domain: "deals", tools: ["deals.search", "deals.get", "deals.create"] },
       { domain: "companies", tools: ["companies.search", "companies.get"] },
       { domain: "associations", tools: ["associations.list", "associations.create"] },
+      { domain: "tickets", tools: ["tickets.search", "tickets.get", "tickets.create"] },
+      { domain: "owners", tools: ["owners.search"] },
     ],
     verificationStatus: "api_verified",
   },
