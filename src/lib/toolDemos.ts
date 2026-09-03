@@ -154,6 +154,13 @@ export const TOOL_DEMOS: Record<string, ToolDemo> = {
     agentAsks: { en: "Add a new customer: Schmidt Consulting, schmidt@example.com.", de: "Lege einen neuen Kunden an: Schmidt Consulting, schmidt@example.com." },
     hubReplies: { en: "Contact created: Schmidt Consulting.", de: "Kontakt erstellt: Schmidt Consulting." },
   },
+  "contacts.update": {
+    icon: "group",
+    label: { en: "Update a contact", de: "Kontakt aktualisieren" },
+    benefit: { en: "Fix a contact's details the moment you notice they've changed.", de: "Korrigieren Sie die Daten eines Kontakts, sobald Sie eine Änderung bemerken." },
+    agentAsks: { en: "Update Schmidt Consulting's email to info@schmidt-consulting.de.", de: "Aktualisiere die E-Mail von Schmidt Consulting auf info@schmidt-consulting.de." },
+    hubReplies: { en: "Contact updated: Schmidt Consulting.", de: "Kontakt aktualisiert: Schmidt Consulting." },
+  },
   "invoices.create": {
     icon: "receipt_long",
     label: { en: "Create an invoice (with your approval)", de: "Rechnung erstellen (mit Ihrer Freigabe)" },
@@ -166,6 +173,27 @@ export const TOOL_DEMOS: Record<string, ToolDemo> = {
       en: "A draft invoice for €600.00 is waiting in your Approvals inbox — nothing is sent until you approve it.",
       de: "Ein Rechnungsentwurf über 600,00 € wartet in Ihrem Freigabe-Postfach — es wird nichts versendet, bevor Sie zustimmen.",
     },
+  },
+  "invoices.finalize": {
+    icon: "receipt_long",
+    label: { en: "Finalize an invoice (with your approval)", de: "Rechnung finalisieren (mit Ihrer Freigabe)" },
+    benefit: { en: "Turn a reviewed draft into a real, numbered invoice the moment you're ready.", de: "Verwandeln Sie einen geprüften Entwurf sofort in eine echte, nummerierte Rechnung." },
+    agentAsks: { en: "That draft invoice for Schmidt Consulting looks right — finalize it.", de: "Der Rechnungsentwurf für Schmidt Consulting sieht richtig aus — finalisiere ihn." },
+    hubReplies: { en: "Invoice finalized: #RE-2024-118, €600.00.", de: "Rechnung finalisiert: #RE-2024-118, 600,00 €." },
+  },
+  "invoices.record_payment": {
+    icon: "receipt_long",
+    label: { en: "Record a payment (with your approval)", de: "Zahlung erfassen (mit Ihrer Freigabe)" },
+    benefit: { en: "Mark an invoice paid the moment the money arrives, without opening your accounting software.", de: "Markieren Sie eine Rechnung als bezahlt, sobald das Geld eingeht — ohne Ihre Buchhaltungssoftware zu öffnen." },
+    agentAsks: { en: "Schmidt Consulting just paid invoice #RE-2024-118 in full.", de: "Schmidt Consulting hat Rechnung #RE-2024-118 soeben vollständig bezahlt." },
+    hubReplies: { en: "Payment of €600.00 recorded against invoice #RE-2024-118 — now marked paid.", de: "Zahlung über 600,00 € für Rechnung #RE-2024-118 erfasst — jetzt als bezahlt markiert." },
+  },
+  "invoices.void": {
+    icon: "receipt_long",
+    label: { en: "Cancel an invoice (with your approval)", de: "Rechnung stornieren (mit Ihrer Freigabe)" },
+    benefit: { en: "Correctly reverse an invoice sent by mistake, with a proper paper trail.", de: "Stornieren Sie eine versehentlich versendete Rechnung ordnungsgemäß, mit sauberer Nachvollziehbarkeit." },
+    agentAsks: { en: "Invoice #RE-2024-118 was sent to the wrong client — cancel it.", de: "Rechnung #RE-2024-118 wurde an den falschen Kunden gesendet — storniere sie." },
+    hubReplies: { en: "Invoice #RE-2024-118 cancelled — a reversing cancellation invoice was created.", de: "Rechnung #RE-2024-118 storniert — eine stornierende Rechnung wurde erstellt." },
   },
   "reports.profit_and_loss": {
     icon: "trending_up",
@@ -180,6 +208,13 @@ export const TOOL_DEMOS: Record<string, ToolDemo> = {
     benefit: { en: "Add a new billable item the moment you start offering it — no manual catalog entry later.", de: "Fügen Sie einen neuen abrechenbaren Artikel hinzu, sobald Sie ihn anbieten — keine spätere manuelle Erfassung." },
     agentAsks: { en: "Add a new item: \"Onboarding package\", €450 net.", de: "Lege einen neuen Artikel an: „Onboarding-Paket“, 450 € netto." },
     hubReplies: { en: "A new item \"Onboarding package\" (€450.00) is waiting in your Approvals inbox.", de: "Ein neuer Artikel „Onboarding-Paket“ (450,00 €) wartet in Ihrem Freigabe-Postfach." },
+  },
+  "products.update": {
+    icon: "inventory_2",
+    label: { en: "Update a product (with your approval)", de: "Produkt aktualisieren (mit Ihrer Freigabe)" },
+    benefit: { en: "Fix a billable item's price or details the moment you notice they're wrong.", de: "Korrigieren Sie Preis oder Details eines abrechenbaren Artikels, sobald Ihnen ein Fehler auffällt." },
+    agentAsks: { en: "The \"Onboarding package\" price should be €500, not €450.", de: "Der Preis für „Onboarding-Paket“ sollte 500 € sein, nicht 450 €." },
+    hubReplies: { en: "\"Onboarding package\" updated: €450.00 → €500.00.", de: "„Onboarding-Paket“ aktualisiert: 450,00 € → 500,00 €." },
   },
   "vouchers.create_from_file": {
     icon: "receipt",
