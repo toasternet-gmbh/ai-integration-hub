@@ -56,8 +56,8 @@ export const CREDENTIAL_HELP: Record<string, Bi> = {
     de: "Dafür gibt es bei DATEV keine Selbstbedienungsmöglichkeit — dafür ist zunächst eine zertifizierte DATEV-Marktplatz-Partnerschaft nötig.",
   },
   jtl: {
-    en: "Generated from JTL's Cloud/Channel platform for your sales channel — check JTL's own developer documentation for the current location.",
-    de: "Wird über die JTL-Cloud-/Channel-Plattform für Ihren Vertriebskanal erzeugt — die aktuelle Stelle dafür finden Sie in JTLs eigener Entwicklerdokumentation.",
+    en: "Register your app at partner.jtl-cloud.com to get a Client ID and Client Secret immediately (no approval wait); find your Tenant ID in the JTL Cloud App Shell for the merchant account you're connecting.",
+    de: "Registrieren Sie Ihre App auf partner.jtl-cloud.com, um sofort eine Client-ID und ein Client-Secret zu erhalten (keine Wartezeit); Ihre Tenant-ID finden Sie in der JTL-Cloud-App-Shell des zu verbindenden Händlerkontos.",
   },
   typo3: {
     en: "Requires the cundd/rest extension installed on your TYPO3 site — ask whoever manages your site's extensions for its access token.",

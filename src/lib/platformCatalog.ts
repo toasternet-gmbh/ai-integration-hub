@@ -326,10 +326,15 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "jtl", category: "ecommerce", name: "JTL", icon: "warehouse", color: "#FF6600",
     description: {
-      en: "Order, product, and inventory tools via JTL's Channel/Platform API — connects a JTL sales channel, not a JTL-Wawi installation directly.",
-      de: "Bestell-, Produkt- und Lager-Tools über die JTL-Channel-/Platform-API — verbindet einen JTL-Vertriebskanal, nicht direkt eine JTL-Wawi-Installation.",
+      en: "Order, product, inventory, and customer search and lookup via JTL's Cloud GraphQL API — connects a JTL Cloud tenant, not a JTL-Wawi installation directly.",
+      de: "Bestell-, Produkt-, Lager- und Kundensuche sowie -abfrage über die JTL-Cloud-GraphQL-API — verbindet einen JTL-Cloud-Tenant, nicht direkt eine JTL-Wawi-Installation.",
     },
-    capabilities: ECOMMERCE_CAPABILITIES,
+    capabilities: [
+      { domain: "orders", tools: ["orders.search", "orders.get"] },
+      { domain: "products", tools: ["products.search", "products.get"] },
+      { domain: "inventory", tools: ["inventory.get_stock"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
+    ],
     verificationStatus: "unverified",
   },
   {

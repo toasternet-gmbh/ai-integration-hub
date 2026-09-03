@@ -35,6 +35,7 @@ export function buildCredentials(platform: string, { storeUrl, key, secret }: Cr
     : platform === "contentful" ? { spaceId: storeUrl, accessToken: secret, ...(key ? { managementToken: key } : {}) }
     : platform === "shopware" ? { storeUrl, clientId: key, clientSecret: secret }
     : platform === "clockify" ? { workspaceId: key, apiKey: secret }
+    : platform === "jtl" ? { clientId: key, clientSecret: secret, tenantId: storeUrl }
     : CLIENT_CREDENTIALS_PLATFORMS.has(platform) ? { clientId: key, clientSecret: secret }
     : TOKEN_AUTH_PLATFORMS.has(platform) ? { storeUrl, accessToken: secret }
     : { storeUrl, consumerKey: key, consumerSecret: secret };

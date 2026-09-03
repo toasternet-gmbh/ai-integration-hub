@@ -28,15 +28,15 @@ export function PlatformCredentialFields({
           </p>
         </div>
       )}
-      {!NO_STORE_URL_PLATFORMS.has(platform) && !CLIENT_CREDENTIALS_PLATFORMS.has(platform) && (
+      {((!NO_STORE_URL_PLATFORMS.has(platform) && !CLIENT_CREDENTIALS_PLATFORMS.has(platform)) || platform === "jtl") && (
         <div>
           <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">
-            {(platform === "contentful" ? t("integrations.spaceId") : t("integrations.storeUrl")).toUpperCase()}
+            {(platform === "contentful" ? t("integrations.spaceId") : platform === "jtl" ? t("integrations.tenantId") : t("integrations.storeUrl")).toUpperCase()}
           </label>
           <input
             value={storeUrl} onChange={(e) => onStoreUrl(e.target.value)}
             className="w-full px-4 py-2 border border-outline-variant rounded font-body-md text-body-md bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary"
-            placeholder={platform === "contentful" ? undefined : "https://your-store.com"} type={platform === "contentful" ? "text" : "url"}
+            placeholder={platform === "contentful" || platform === "jtl" ? undefined : "https://your-store.com"} type={platform === "contentful" || platform === "jtl" ? "text" : "url"}
           />
         </div>
       )}
