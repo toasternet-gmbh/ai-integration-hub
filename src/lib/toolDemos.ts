@@ -55,6 +55,26 @@ export const TOOL_DEMOS: Record<string, ToolDemo> = {
       de: "Eine Erstattung über 38,00 € wartet in Ihrem Freigabe-Postfach — es wird nichts belastet, bevor Sie zustimmen.",
     },
   },
+  "orders.cancel": {
+    icon: "shopping_cart",
+    label: { en: "Cancel an order", de: "Bestellung stornieren" },
+    benefit: {
+      en: "Stop an order before it ships — e.g. the customer changed their mind or it was a duplicate.",
+      de: "Stoppen Sie eine Bestellung, bevor sie versendet wird — z. B. bei einer Kundenmeinungsänderung oder einer Doppelbestellung.",
+    },
+    agentAsks: { en: "Cancel order #1046, the customer ordered twice by mistake.", de: "Storniere Bestellung #1046, der Kunde hat versehentlich doppelt bestellt." },
+    hubReplies: { en: "Order #1046 cancelled.", de: "Bestellung #1046 storniert." },
+  },
+  "orders.fulfill": {
+    icon: "local_shipping",
+    label: { en: "Mark an order shipped", de: "Bestellung als versandt markieren" },
+    benefit: {
+      en: "The moment a package leaves, let an agent notify the customer with tracking — no manual dashboard entry.",
+      de: "Sobald ein Paket rausgeht, lassen Sie einen Agenten den Kunden mit Sendungsverfolgung benachrichtigen — ganz ohne manuelle Eingabe im Dashboard.",
+    },
+    agentAsks: { en: "Mark order #1042 as shipped, DHL tracking 00340434123456.", de: "Markiere Bestellung #1042 als versandt, DHL-Sendungsnummer 00340434123456." },
+    hubReplies: { en: "Order #1042 marked shipped — tracking 00340434123456 (DHL) sent to the customer.", de: "Bestellung #1042 als versandt markiert — Sendungsnummer 00340434123456 (DHL) an den Kunden gesendet." },
+  },
   "products.search": {
     icon: "inventory_2",
     label: { en: "Browse your products", de: "Produkte durchsuchen" },

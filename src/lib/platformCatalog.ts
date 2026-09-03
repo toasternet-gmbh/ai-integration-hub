@@ -52,6 +52,8 @@ export const TOOL_INFO: Record<string, Bi> = {
   "reports.profit_and_loss": { en: "Get a profit & loss report", de: "Gewinn-und-Verlust-Bericht abrufen" },
   "products.create": { en: "Create a product", de: "Produkt erstellen" },
   "vouchers.create_from_file": { en: "Book an expense from a receipt", de: "Ausgabe aus Beleg buchen" },
+  "orders.cancel": { en: "Cancel an order", de: "Bestellung stornieren" },
+  "orders.fulfill": { en: "Mark an order shipped", de: "Bestellung als versandt markieren" },
   "cms.pages.search": { en: "Search pages", de: "Seiten durchsuchen" },
   "cms.pages.get": { en: "Look up a page", de: "Seite abrufen" },
   "time_entries.search": { en: "Search time entries", de: "Zeiteinträge durchsuchen" },
@@ -97,10 +99,29 @@ export interface PlatformMeta {
   capabilities: PlatformCapability[];
 }
 
+/** Legacy shared shape — still used by JTL (best-effort/unverified), which hasn't had the
+ *  contacts/cancel/fulfill additions extended to it yet. */
 const ECOMMERCE_CAPABILITIES: PlatformCapability[] = [
   { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund"] },
   { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
   { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
+];
+
+/** Shopify/Magento/Shopware all have a real, distinct order-cancel endpoint and a real
+ *  tracking-number field for fulfillment — WooCommerce core has neither (no tracking field at
+ *  all), so it gets its own, slightly smaller capability list below instead of sharing this one. */
+const FULL_ECOMMERCE_CAPABILITIES: PlatformCapability[] = [
+  { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel", "orders.fulfill"] },
+  { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
+  { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
+  { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
+];
+
+const WOOCOMMERCE_CAPABILITIES: PlatformCapability[] = [
+  { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel"] },
+  { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
+  { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
+  { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
 ];
 
 const BOOKKEEPING_CAPABILITIES: PlatformCapability[] = [
@@ -116,37 +137,37 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "woocommerce", category: "ecommerce", name: "WooCommerce", icon: "storefront", color: "#7F54B3",
     description: {
-      en: "Order search, lookup, and refunds, plus product and inventory tools.",
-      de: "Bestellsuche, -abfrage und -erstattungen sowie Produkt- und Lager-Tools.",
+      en: "Order search, lookup, refunds, and cancellation, plus product, inventory, and customer tools.",
+      de: "Bestellsuche, -abfrage, -erstattung und -stornierung sowie Produkt-, Lager- und Kunden-Tools.",
     },
-    capabilities: ECOMMERCE_CAPABILITIES,
+    capabilities: WOOCOMMERCE_CAPABILITIES,
     verificationStatus: "api_verified",
   },
   {
     id: "shopware", category: "ecommerce", name: "Shopware 6", icon: "inventory_2", color: "#189EFF",
     description: {
-      en: "Order search, lookup, and refunds, plus product and inventory tools, via Shopware's OAuth2 API.",
-      de: "Bestellsuche, -abfrage und -erstattungen sowie Produkt- und Lager-Tools über die OAuth2-API von Shopware.",
+      en: "Order search, lookup, refunds, cancellation, and shipment tracking, plus product, inventory, and customer tools, via Shopware's OAuth2 API.",
+      de: "Bestellsuche, -abfrage, -erstattung, -stornierung und Sendungsverfolgung sowie Produkt-, Lager- und Kunden-Tools über die OAuth2-API von Shopware.",
     },
-    capabilities: ECOMMERCE_CAPABILITIES,
+    capabilities: FULL_ECOMMERCE_CAPABILITIES,
     verificationStatus: "api_verified",
   },
   {
     id: "shopify", category: "ecommerce", name: "Shopify", icon: "shopping_bag", color: "#95BF47",
     description: {
-      en: "Order search, lookup, and refunds, plus product and inventory tools.",
-      de: "Bestellsuche, -abfrage und -erstattungen sowie Produkt- und Lager-Tools.",
+      en: "Order search, lookup, refunds, cancellation, and shipment tracking, plus product, inventory, and customer tools.",
+      de: "Bestellsuche, -abfrage, -erstattung, -stornierung und Sendungsverfolgung sowie Produkt-, Lager- und Kunden-Tools.",
     },
-    capabilities: ECOMMERCE_CAPABILITIES,
+    capabilities: FULL_ECOMMERCE_CAPABILITIES,
     verificationStatus: "api_verified",
   },
   {
     id: "magento", category: "ecommerce", name: "Magento", icon: "shopping_cart", color: "#EE672F",
     description: {
-      en: "Order search, lookup, and refunds, plus product and inventory tools.",
-      de: "Bestellsuche, -abfrage und -erstattungen sowie Produkt- und Lager-Tools.",
+      en: "Order search, lookup, refunds, cancellation, and shipment tracking, plus product, inventory, and customer tools.",
+      de: "Bestellsuche, -abfrage, -erstattung, -stornierung und Sendungsverfolgung sowie Produkt-, Lager- und Kunden-Tools.",
     },
-    capabilities: ECOMMERCE_CAPABILITIES,
+    capabilities: FULL_ECOMMERCE_CAPABILITIES,
     verificationStatus: "unverified",
   },
   {
@@ -264,12 +285,14 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "prestashop", category: "ecommerce", name: "PrestaShop", icon: "local_mall", color: "#DF0067",
     description: {
-      en: "Order and product search and lookup via PrestaShop's Webservice API.",
-      de: "Bestell- und Produktsuche sowie -abfrage über die Webservice-API von PrestaShop.",
+      en: "Order search, lookup, refunds, and cancellation, plus product, inventory, and customer tools, via PrestaShop's Webservice API.",
+      de: "Bestellsuche, -abfrage, -erstattung und -stornierung sowie Produkt-, Lager- und Kunden-Tools über die Webservice-API von PrestaShop.",
     },
     capabilities: [
-      { domain: "orders", tools: ["orders.search", "orders.get"] },
-      { domain: "products", tools: ["products.search", "products.get"] },
+      { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel"] },
+      { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
+      { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ],
     verificationStatus: "api_verified",
   },
