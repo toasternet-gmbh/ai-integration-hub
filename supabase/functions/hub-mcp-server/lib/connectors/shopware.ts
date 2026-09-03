@@ -61,6 +61,7 @@ export class ShopwareConnector implements Connector {
       { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel", "orders.fulfill"] },
       { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
       { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
+      { domain: "products", tools: ["products.variants.search"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
@@ -168,6 +169,15 @@ export class ShopwareConnector implements Connector {
         const categoryId = String(input.category_id ?? "");
         if (!categoryId) throw new Error("category_id is required.");
         const data = await this.request(`/category/${encodeURIComponent(categoryId)}`);
+        return { data };
+      }
+      // Shopware has no nested /product/{id}/children path -- variants are just other product
+      // records sharing the same parentId, found the same way as any other search/product filter.
+      case "products.variants.search": {
+        const productId = String(input.product_id ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        const body = { filter: [{ type: "equals", field: "parentId", value: productId }], limit: 100 };
+        const data = await this.request("/search/product", { method: "POST", body: JSON.stringify(body) });
         return { data };
       }
       case "inventory.get_stock": {

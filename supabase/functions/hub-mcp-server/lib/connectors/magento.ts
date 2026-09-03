@@ -45,6 +45,7 @@ export class MagentoConnector implements Connector {
       { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
       { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
       { domain: "products", tools: ["products.images.search", "products.images.create"] },
+      { domain: "products", tools: ["products.variants.search"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
       { domain: "contacts", tools: ["contacts.addresses.search", "contacts.addresses.create"] },
@@ -125,6 +126,14 @@ export class MagentoConnector implements Connector {
         const categoryId = String(input.category_id ?? "");
         if (!categoryId) throw new Error("category_id is required.");
         const data = await this.request(`/categories/${encodeURIComponent(categoryId)}`);
+        return { data };
+      }
+      // GET /V1/configurable-products/{sku}/children is real and confirmed -- returns the full
+      // child (simple) product objects that make up a configurable product's variants.
+      case "products.variants.search": {
+        const sku = String(input.product_id ?? "");
+        if (!sku) throw new Error("product_id (SKU) is required.");
+        const data = await this.request(`/configurable-products/${encodeURIComponent(sku)}/children`);
         return { data };
       }
       // GET/POST /V1/products/{sku}/media are real, confirmed endpoints. Upload embeds the file as

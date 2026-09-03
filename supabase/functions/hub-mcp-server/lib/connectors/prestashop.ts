@@ -132,6 +132,7 @@ export class PrestaShopConnector implements Connector {
       { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel"] },
       { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
       { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
+      { domain: "products", tools: ["products.variants.search"] },
       { domain: "products", tools: ["products.images.search", "products.images.create"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
@@ -230,6 +231,15 @@ export class PrestaShopConnector implements Connector {
         const categoryId = String(input.category_id ?? "");
         if (!categoryId) throw new Error("category_id is required.");
         const data = await this.request(`/categories/${encodeURIComponent(categoryId)}`);
+        return { data };
+      }
+      // PrestaShop's variants ("combinations", e.g. size/color) are a real, separate resource --
+      // confirmed via the /combinations webservice endpoint, filterable by the parent product id.
+      case "products.variants.search": {
+        const productId = String(input.product_id ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        const params = new URLSearchParams({ limit: "100", "filter[id_product]": productId });
+        const data = await this.request("/combinations", params);
         return { data };
       }
       // Best-effort, not live-verified this round (unlike the products/orders/stock writes

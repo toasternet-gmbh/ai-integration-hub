@@ -93,6 +93,15 @@ export const definitions: ToolDefinition[] = [
     },
   },
   {
+    name: "products.variants.search",
+    description: "List the variants (e.g. different sizes/colors) of a product. Not needed on Shopify -- products.get already returns variants embedded on the product.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "product_id"],
+      properties: { integration_id: { type: "string" }, product_id: { type: "string" } },
+    },
+  },
+  {
     name: "products.images.search",
     description: "List the images on a product.",
     inputSchema: {
@@ -159,6 +168,12 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("products.categories.get", args)).data;
+  },
+
+  async "products.variants.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("products.variants.search", args)).data;
   },
 
   async "products.images.search"(args, { admin, projectId }) {

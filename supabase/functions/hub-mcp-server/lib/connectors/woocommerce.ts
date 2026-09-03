@@ -55,6 +55,7 @@ export class WooCommerceConnector implements Connector {
       { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel"] },
       { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
       { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
+      { domain: "products", tools: ["products.variants.search"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
@@ -115,6 +116,15 @@ export class WooCommerceConnector implements Connector {
         const categoryId = String(input.category_id ?? "");
         if (!categoryId) throw new Error("category_id is required.");
         const data = await this.request(`/products/categories/${encodeURIComponent(categoryId)}`);
+        return { data };
+      }
+      // GET /products/{id}/variations is real and confirmed -- unlike Shopify, a WooCommerce
+      // "variable" product's variations are NOT embedded in products.get's response and need this
+      // dedicated call.
+      case "products.variants.search": {
+        const productId = String(input.product_id ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        const data = await this.request(`/products/${encodeURIComponent(productId)}/variations`);
         return { data };
       }
       case "inventory.get_stock": {
