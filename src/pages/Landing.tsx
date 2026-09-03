@@ -48,41 +48,25 @@ export default function Landing() {
                     <div className="w-3 h-3 rounded-full bg-on-tertiary-container" />
                     <div className="w-3 h-3 rounded-full bg-secondary" />
                   </div>
-                  <span className="font-label-caps text-on-surface-variant">Transaction Log</span>
+                  <span className="font-label-caps text-on-surface-variant">{t("landing.hero.chatLabel")}</span>
                 </div>
-                <div className="p-6 font-mono-data text-[14px] flex flex-col gap-4 text-outline-variant/80">
-                  <div>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="text-primary-fixed-dim">01</span>
-                      <span className="text-on-primary">&gt;</span>
-                      <span className="text-secondary-fixed">agent.call</span>
-                      <span className="text-on-primary">(</span>
-                      <span className="text-on-tertiary-container">"orders.refund"</span>
-                      <span className="text-on-primary">, {"{"} order_id: </span>
-                      <span className="text-tertiary-fixed-dim">"ORD-8821A"</span>
-                      <span className="text-on-primary"> {"}"})</span>
-                    </div>
-                    <div className="pl-12 text-outline text-[12px] mt-1">// Invoking canonical refund intent</div>
+                <div className="p-6 flex flex-col gap-5">
+                  <div className="flex items-start gap-3">
+                    <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-[16px] text-outline-variant">person</span>
+                    </span>
+                    <p className="font-body-md text-[14px] text-on-primary leading-relaxed pt-1">&ldquo;{t("landing.hero.youAsk")}&rdquo;</p>
                   </div>
-                  <div className="flex flex-col mt-2 border-l border-outline-variant/30 ml-[23px] pl-6 py-2">
-                    <div className="flex items-center gap-3 opacity-80">
-                      <span className="text-on-primary">&lt;-</span>
-                      <span className="text-outline-variant">policy_response:</span>
-                      <span className="text-on-tertiary-container">require_approval</span>
-                    </div>
-                    <div className="flex items-center gap-3 opacity-80 mt-1">
-                      <span className="text-on-primary">-&gt;</span>
-                      <span className="text-outline-variant">approval_granted:</span>
-                      <span className="text-secondary-fixed">true</span>
-                    </div>
+                  <div className="flex items-start gap-3">
+                    <span className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-[16px] text-secondary-fixed">smart_toy</span>
+                    </span>
+                    <p className="font-body-md text-[14px] text-outline-variant leading-relaxed pt-1">{t("landing.hero.assistantReplies")}</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-primary-fixed-dim">02</span>
-                    <span className="text-on-primary">&lt;-</span>
-                    <span className="text-outline-variant">result:</span>
-                    <span className="text-secondary-fixed font-bold bg-secondary/20 px-2 py-0.5 rounded">refund_success</span>
+                  <div className="flex items-center gap-2 ml-11">
+                    <span className="material-symbols-outlined text-[16px] text-secondary-fixed">check_circle</span>
+                    <span className="font-mono-data text-[12px] text-secondary-fixed">{t("landing.hero.approvedNote")}</span>
                   </div>
-                  <div className="w-2 h-4 bg-primary-fixed-dim mt-2" />
                 </div>
               </div>
             </div>
