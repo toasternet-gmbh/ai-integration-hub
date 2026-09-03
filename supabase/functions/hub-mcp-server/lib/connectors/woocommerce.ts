@@ -53,7 +53,8 @@ export class WooCommerceConnector implements Connector {
   async getCapabilities(): Promise<Capability[]> {
     return [
       { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel"] },
-      { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
+      { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
+      { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
@@ -81,6 +82,39 @@ export class WooCommerceConnector implements Connector {
         const data = await this.request(`/products/${encodeURIComponent(productId)}`, {
           method: "PUT", body: JSON.stringify({ regular_price: String(input.price) }),
         });
+        return { data };
+      }
+      // POST /products is real and confirmed (woocommerce.github.io/woocommerce-rest-api-docs).
+      case "products.create": {
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        if (input.price == null) throw new Error("price is required.");
+        const body: Record<string, unknown> = { name, regular_price: String(input.price) };
+        if (input.sku) body.sku = String(input.sku);
+        const data = await this.request("/products", { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      case "products.update": {
+        const productId = String(input.product_id ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        const body: Record<string, unknown> = {};
+        if (input.name != null) body.name = String(input.name);
+        if (input.price != null) body.regular_price = String(input.price);
+        if (input.sku != null) body.sku = String(input.sku);
+        const data = await this.request(`/products/${encodeURIComponent(productId)}`, { method: "PUT", body: JSON.stringify(body) });
+        return { data };
+      }
+      case "products.categories.search": {
+        const params = new URLSearchParams();
+        if (input.search) params.set("search", String(input.search));
+        params.set("per_page", String(input.limit ?? 25));
+        const data = await this.request(`/products/categories?${params.toString()}`);
+        return { data };
+      }
+      case "products.categories.get": {
+        const categoryId = String(input.category_id ?? "");
+        if (!categoryId) throw new Error("category_id is required.");
+        const data = await this.request(`/products/categories/${encodeURIComponent(categoryId)}`);
         return { data };
       }
       case "inventory.get_stock": {

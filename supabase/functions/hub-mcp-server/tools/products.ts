@@ -45,7 +45,7 @@ export const definitions: ToolDefinition[] = [
   },
   {
     name: "products.create",
-    description: "Create a new product on an integration — on a bookkeeping platform, this creates a billable article/item, not a storefront listing.",
+    description: "Create a new product on an integration — on an e-commerce platform, a real storefront listing; on a bookkeeping platform, a billable article/item.",
     inputSchema: {
       type: "object",
       required: ["integration_id", "name", "price"],
@@ -72,6 +72,24 @@ export const definitions: ToolDefinition[] = [
         tax_rate: { type: "number" },
         sku: { type: "string" },
       },
+    },
+  },
+  {
+    name: "products.categories.search",
+    description: "Search the product categories/collections on an e-commerce integration.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id"],
+      properties: { integration_id: { type: "string" }, search: { type: "string" }, limit: { type: "number" } },
+    },
+  },
+  {
+    name: "products.categories.get",
+    description: "Get one product category/collection by id.",
+    inputSchema: {
+      type: "object",
+      required: ["integration_id", "category_id"],
+      properties: { integration_id: { type: "string" }, category_id: { type: "string" } },
     },
   },
 ];
@@ -105,5 +123,17 @@ export const handlers: ToolModule["handlers"] = {
     const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
     const connector = await loadConnector(integration);
     return (await connector.execute("products.update", args)).data;
+  },
+
+  async "products.categories.search"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("products.categories.search", args)).data;
+  },
+
+  async "products.categories.get"(args, { admin, projectId }) {
+    const integration = await requireIntegration(admin, projectId, String(args.integration_id ?? ""));
+    const connector = await loadConnector(integration);
+    return (await connector.execute("products.categories.get", args)).data;
   },
 };

@@ -59,10 +59,33 @@ export class ShopwareConnector implements Connector {
   async getCapabilities(): Promise<Capability[]> {
     return [
       { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel", "orders.fulfill"] },
-      { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
+      { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
+      { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
+  }
+
+  /** Shopware prices/taxes are store-specific UUIDs, not something a caller can supply directly --
+   *  resolved here via a search rather than hardcoded, since there's no universal constant. */
+  private async defaultCurrencyId(): Promise<string> {
+    const data = (await this.request("/search/currency", {
+      method: "POST",
+      body: JSON.stringify({ filter: [{ type: "equals", field: "isSystemDefault", value: true }], limit: 1 }),
+    })) as { data?: { id: string }[] };
+    const id = data.data?.[0]?.id;
+    if (!id) throw new Error("Could not resolve this store's default currency.");
+    return id;
+  }
+
+  private async findTaxId(rate?: number): Promise<string> {
+    const data = (await this.request("/search/tax", { method: "POST", body: JSON.stringify({ limit: 50 }) })) as {
+      data?: { id: string; attributes?: { taxRate?: number } }[];
+    };
+    const taxes = data.data ?? [];
+    if (taxes.length === 0) throw new Error("This store has no tax rates configured.");
+    const match = rate != null ? taxes.find((t) => t.attributes?.taxRate === rate) : undefined;
+    return (match ?? taxes[0]).id;
   }
 
   async execute(tool: string, input: Record<string, unknown>): Promise<ToolResult> {
@@ -97,6 +120,55 @@ export class ShopwareConnector implements Connector {
         const nextPrice = priceEntries.map((p) => ({ ...p, gross: amount, net: amount }));
         const data = await this.request(`/product/${encodeURIComponent(productId)}`, { method: "PATCH", body: JSON.stringify({ price: nextPrice }) });
         return { data: data ?? { product_id: productId, price: nextPrice } };
+      }
+      // POST /product is real and confirmed. Shopware requires a taxId and a per-currency price
+      // array on creation, both store-specific UUIDs -- resolved live via defaultCurrencyId()/
+      // findTaxId() rather than guessed. productNumber must be unique; falls back to the caller's
+      // sku or a generated one since Shopware won't invent one itself the way its own admin UI does.
+      case "products.create": {
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        if (input.price == null) throw new Error("price is required.");
+        const [currencyId, taxId] = await Promise.all([this.defaultCurrencyId(), this.findTaxId(input.tax_rate != null ? Number(input.tax_rate) : undefined)]);
+        const amount = Number(input.price);
+        const body = {
+          name,
+          productNumber: input.sku ? String(input.sku) : `SKU-${Date.now()}`,
+          stock: 0,
+          taxId,
+          price: [{ currencyId, gross: amount, net: amount, linked: true }],
+        };
+        const data = await this.request("/product", { method: "POST", body: JSON.stringify(body) });
+        return { data: data ?? body };
+      }
+      case "products.update": {
+        const productId = String(input.product_id ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        const body: Record<string, unknown> = {};
+        if (input.name != null) body.name = String(input.name);
+        if (input.sku != null) body.productNumber = String(input.sku);
+        if (input.price != null) {
+          const existing = (await this.request(`/product/${encodeURIComponent(productId)}`)) as {
+            data?: { attributes?: { price?: { currencyId: string; gross: number; net: number; linked: boolean }[] } };
+          };
+          const priceEntries = existing?.data?.attributes?.price ?? [];
+          const amount = Number(input.price);
+          body.price = priceEntries.map((p) => ({ ...p, gross: amount, net: amount }));
+        }
+        const data = await this.request(`/product/${encodeURIComponent(productId)}`, { method: "PATCH", body: JSON.stringify(body) });
+        return { data: data ?? { product_id: productId } };
+      }
+      case "products.categories.search": {
+        const body: Record<string, unknown> = { limit: Number(input.limit ?? 25) };
+        if (input.search) body.term = String(input.search);
+        const data = await this.request("/search/category", { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      case "products.categories.get": {
+        const categoryId = String(input.category_id ?? "");
+        if (!categoryId) throw new Error("category_id is required.");
+        const data = await this.request(`/category/${encodeURIComponent(categoryId)}`);
+        return { data };
       }
       case "inventory.get_stock": {
         const productId = String(input.product_id ?? "");

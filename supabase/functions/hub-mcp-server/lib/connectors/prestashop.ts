@@ -29,7 +29,15 @@
  * connector — a store with customizations to these resources could reject a field this connector
  * doesn't know to strip.
  *
- * Still short of a real, fully-authorized customer store on either round — see README.md "Known
+ * products.create/products.update/products.categories.* were added and round-tripped live
+ * 2026-09-03 against a third, fresh local PrestaShop 8 Docker store. Creating from the blank
+ * product schema (`?schema=blank`) hits one more read-only-computed-field rejection beyond the
+ * ones already known: `position_in_category` must be stripped on create too (PrestaShop rejects
+ * the blank schema's empty value with "You cannot set 0 or a negative position, the minimum is
+ * 1") — confirmed live, along with confirming `link_rewrite` (the URL slug) doesn't need to be
+ * set explicitly; PrestaShop auto-derives it from the name.
+ *
+ * Still short of a real, fully-authorized customer store on any round — see README.md "Known
  * gaps" before enabling for real customers.
  */
 import type { Connector, ConnectionResult, Capability, ToolResult } from "./types.ts";
@@ -93,6 +101,18 @@ export class PrestaShopConnector implements Connector {
     return xml.replace(re, `$1$2${value}$3$4`);
   }
 
+  /** Some fields (product `name`/`description`, etc.) are multi-language on PrestaShop, wrapped as
+   *  `<tag><language id="X"><![CDATA[...]]></language>...</tag>` rather than a plain scalar CDATA
+   *  — this sets every `<language>` entry inside the field to the same value rather than trying to
+   *  target one specific language id. */
+  private setXmlLocalizedField(xml: string, tag: string, value: string): string {
+    const fieldRe = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`);
+    const m = fieldRe.exec(xml);
+    if (!m) throw new Error(`PrestaShop response has no <${tag}> field to update.`);
+    const updatedInner = m[1].replace(/(<language[^>]*>)(<!\[CDATA\[)[\s\S]*?(\]\]>)(<\/language>)/g, `$1$2${value}$3$4`);
+    return xml.replace(fieldRe, `<${tag}>${updatedInner}</${tag}>`);
+  }
+
   private getXmlField(xml: string, tag: string): string | null {
     const m = new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]></${tag}>`).exec(xml);
     return m ? m[1] : null;
@@ -110,7 +130,8 @@ export class PrestaShopConnector implements Connector {
   async getCapabilities(): Promise<Capability[]> {
     return [
       { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel"] },
-      { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
+      { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
+      { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
@@ -167,6 +188,47 @@ export class PrestaShopConnector implements Connector {
         xml = this.setXmlField(xml, "price", String(input.price));
         await this.requestXml(`/products/${encodeURIComponent(productId)}`, { method: "PUT", headers: { "Content-Type": "text/xml" }, body: xml });
         return { data: { product_id: productId, price: Number(input.price) } };
+      }
+      // Verified live: GET the blank product schema, strip position_in_category (the one field
+      // PrestaShop rejects as an empty/zero value on create -- "You cannot set 0 or a negative
+      // position, the minimum is 1"), fill in name/price/reference, POST it. link_rewrite (the
+      // URL slug) is left blank -- confirmed PrestaShop auto-derives it from the name.
+      case "products.create": {
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        if (input.price == null) throw new Error("price is required.");
+        let xml = await this.requestXml("/products?schema=blank");
+        xml = this.stripXmlTag(xml, "position_in_category");
+        xml = this.setXmlLocalizedField(xml, "name", name);
+        xml = this.setXmlField(xml, "price", String(input.price));
+        if (input.sku) xml = this.setXmlField(xml, "reference", String(input.sku));
+        const response = await this.requestXml("/products", { method: "POST", headers: { "Content-Type": "text/xml" }, body: xml });
+        const productId = this.getXmlField(response, "id");
+        return { data: { product_id: productId, name, price: Number(input.price) } };
+      }
+      case "products.update": {
+        const productId = String(input.product_id ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        let xml = await this.requestXml(`/products/${encodeURIComponent(productId)}`);
+        for (const tag of ["position_in_category", "manufacturer_name", "quantity", "type"]) xml = this.stripXmlTag(xml, tag);
+        xml = this.stripXmlTag(xml, "associations");
+        if (input.name != null) xml = this.setXmlLocalizedField(xml, "name", String(input.name));
+        if (input.price != null) xml = this.setXmlField(xml, "price", String(input.price));
+        if (input.sku != null) xml = this.setXmlField(xml, "reference", String(input.sku));
+        await this.requestXml(`/products/${encodeURIComponent(productId)}`, { method: "PUT", headers: { "Content-Type": "text/xml" }, body: xml });
+        return { data: { product_id: productId } };
+      }
+      case "products.categories.search": {
+        const params = new URLSearchParams({ limit: String(input.limit ?? 25) });
+        if (input.search) params.set("filter[name]", `%${input.search}%`);
+        const data = await this.request("/categories", params);
+        return { data };
+      }
+      case "products.categories.get": {
+        const categoryId = String(input.category_id ?? "");
+        if (!categoryId) throw new Error("category_id is required.");
+        const data = await this.request(`/categories/${encodeURIComponent(categoryId)}`);
+        return { data };
       }
       // stock_availables is a plain, uncomplicated resource (verified live) — no field-stripping
       // needed the way products/orders need. A simple (non-combination) product's own stock lives

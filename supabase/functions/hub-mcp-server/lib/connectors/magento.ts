@@ -42,7 +42,8 @@ export class MagentoConnector implements Connector {
   async getCapabilities(): Promise<Capability[]> {
     return [
       { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel", "orders.fulfill"] },
-      { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
+      { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
+      { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
@@ -75,6 +76,53 @@ export class MagentoConnector implements Connector {
         const data = await this.request(`/products/${encodeURIComponent(sku)}`, {
           method: "PUT", body: JSON.stringify({ product: { sku, price: Number(input.price) } }),
         });
+        return { data };
+      }
+      // POST /V1/products is real and confirmed. `sku` doubles as `name` when the caller doesn't
+      // supply one via product_id (there's no separate id at create time -- SKU is chosen here,
+      // not assigned by Magento) -- if the caller wants a specific SKU they should pass it via
+      // `sku`, otherwise the product name is reused. attributeSetId=4 (Default) and typeId=simple
+      // are Magento's own out-of-the-box defaults on every fresh install.
+      case "products.create": {
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        if (input.price == null) throw new Error("price is required.");
+        const sku = input.sku ? String(input.sku) : name;
+        const body = {
+          product: {
+            sku, name, price: Number(input.price),
+            attributeSetId: 4, typeId: "simple", status: 1, visibility: 4,
+          },
+        };
+        const data = await this.request("/products", { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      case "products.update": {
+        const sku = String(input.product_id ?? "");
+        if (!sku) throw new Error("product_id (SKU) is required.");
+        const product: Record<string, unknown> = { sku };
+        if (input.name != null) product.name = String(input.name);
+        if (input.price != null) product.price = Number(input.price);
+        const data = await this.request(`/products/${encodeURIComponent(sku)}`, { method: "PUT", body: JSON.stringify({ product }) });
+        return { data };
+      }
+      // GET /V1/categories/list is real and confirmed -- Magento's category tree is queried with
+      // the same searchCriteria filter shape products.search already uses.
+      case "products.categories.search": {
+        const params = new URLSearchParams();
+        params.set("searchCriteria[pageSize]", String(input.limit ?? 25));
+        if (input.search) {
+          params.set("searchCriteria[filterGroups][0][filters][0][field]", "name");
+          params.set("searchCriteria[filterGroups][0][filters][0][value]", `%${input.search}%`);
+          params.set("searchCriteria[filterGroups][0][filters][0][conditionType]", "like");
+        }
+        const data = await this.request(`/categories/list?${params.toString()}`);
+        return { data };
+      }
+      case "products.categories.get": {
+        const categoryId = String(input.category_id ?? "");
+        if (!categoryId) throw new Error("category_id is required.");
+        const data = await this.request(`/categories/${encodeURIComponent(categoryId)}`);
         return { data };
       }
       case "inventory.get_stock": {

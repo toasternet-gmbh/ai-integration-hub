@@ -57,7 +57,8 @@ export class ShopifyConnector implements Connector {
   async getCapabilities(): Promise<Capability[]> {
     return [
       { domain: "orders", tools: ["orders.search", "orders.get", "orders.refund", "orders.cancel", "orders.fulfill"] },
-      { domain: "products", tools: ["products.search", "products.get", "products.update_price"] },
+      { domain: "products", tools: ["products.search", "products.get", "products.update_price", "products.create", "products.update"] },
+      { domain: "products", tools: ["products.categories.search", "products.categories.get"] },
       { domain: "inventory", tools: ["inventory.get_stock", "inventory.update_stock"] },
       { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
     ];
@@ -99,6 +100,55 @@ export class ShopifyConnector implements Connector {
         const data = await this.request(`/products/${encodeURIComponent(productId)}.json`, {
           method: "PUT", body: JSON.stringify({ product: { id: Number(productId), variants: [{ id: variantId, price: String(input.price) }] } }),
         });
+        return { data };
+      }
+      // POST /products.json is real and confirmed (shopify.dev). The initial variant carries
+      // price/sku, matching the shape products.update_price already reads/writes.
+      case "products.create": {
+        const name = String(input.name ?? "");
+        if (!name) throw new Error("name is required.");
+        if (input.price == null) throw new Error("price is required.");
+        const body = {
+          product: {
+            title: name,
+            variants: [{ price: String(input.price), sku: input.sku ? String(input.sku) : undefined }],
+          },
+        };
+        const data = await this.request("/products.json", { method: "POST", body: JSON.stringify(body) });
+        return { data };
+      }
+      // PUT /products/{id}.json is real and confirmed. Fetches the existing product first so a
+      // partial update doesn't wipe fields not mentioned -- same posture as products.update_price.
+      case "products.update": {
+        const productId = String(input.product_id ?? "");
+        if (!productId) throw new Error("product_id is required.");
+        const existing = (await this.request(`/products/${encodeURIComponent(productId)}.json`)) as ShopifyProduct;
+        const variantId = existing.product?.variants?.[0]?.id;
+        const product: Record<string, unknown> = { id: Number(productId) };
+        if (input.name != null) product.title = String(input.name);
+        if ((input.price != null || input.sku != null) && variantId) {
+          product.variants = [{
+            id: variantId,
+            ...(input.price != null ? { price: String(input.price) } : {}),
+            ...(input.sku != null ? { sku: String(input.sku) } : {}),
+          }];
+        }
+        const data = await this.request(`/products/${encodeURIComponent(productId)}.json`, { method: "PUT", body: JSON.stringify({ product }) });
+        return { data };
+      }
+      // Shopify's "category" concept is a Collection -- custom_collections are the manually
+      // curated kind (as opposed to smart_collections, which are rule-based and not something a
+      // product is explicitly assigned to), so that's what this reads. Real, confirmed endpoint.
+      case "products.categories.search": {
+        const params = new URLSearchParams({ limit: String(input.limit ?? 25) });
+        if (input.search) params.set("title", String(input.search));
+        const data = await this.request(`/custom_collections.json?${params.toString()}`);
+        return { data };
+      }
+      case "products.categories.get": {
+        const categoryId = String(input.category_id ?? "");
+        if (!categoryId) throw new Error("category_id is required.");
+        const data = await this.request(`/custom_collections/${encodeURIComponent(categoryId)}.json`);
         return { data };
       }
       case "inventory.get_stock": {
