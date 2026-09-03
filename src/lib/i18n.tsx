@@ -123,6 +123,7 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "integrations.username": { en: "Username", de: "Benutzername" },
   "integrations.applicationPassword": { en: "Application password", de: "Anwendungspasswort" },
   "integrations.spaceId": { en: "Space ID", de: "Space-ID" },
+  "integrations.managementToken": { en: "Content Management token (optional)", de: "Content-Management-Token (optional)" },
   "integrations.workspaceId": { en: "Workspace ID", de: "Workspace-ID" },
   "integrations.webserviceKey": { en: "Webservice key", de: "Webservice-Key" },
   "integrations.bankCountry": { en: "Country", de: "Land" },

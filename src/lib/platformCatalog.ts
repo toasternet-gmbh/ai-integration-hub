@@ -62,6 +62,14 @@ export const TOOL_INFO: Record<string, Bi> = {
   "transactions.search": { en: "Search transactions", de: "Transaktionen durchsuchen" },
   "deals.search": { en: "Search deals", de: "Deals durchsuchen" },
   "deals.get": { en: "Look up a deal", de: "Deal abrufen" },
+  "deals.create": { en: "Create a deal", de: "Deal erstellen" },
+  "companies.search": { en: "Search companies", de: "Unternehmen durchsuchen" },
+  "companies.get": { en: "Look up a company", de: "Unternehmen abrufen" },
+  "cms.posts.search": { en: "Search blog posts", de: "Blogbeiträge durchsuchen" },
+  "cms.posts.get": { en: "Look up a blog post", de: "Blogbeitrag abrufen" },
+  "cms.posts.create": { en: "Create a blog post", de: "Blogbeitrag erstellen" },
+  "cms.posts.update": { en: "Update a blog post", de: "Blogbeitrag aktualisieren" },
+  "cms.pages.create": { en: "Create a content entry", de: "Content-Eintrag erstellen" },
 };
 
 export type VerificationStatus = "unverified" | "api_verified" | "real_customer_verified";
@@ -186,10 +194,12 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "wordpress", category: "cms", name: "WordPress", icon: "edit_note", color: "#21759B",
     description: {
-      en: "Page search and lookup via the WordPress REST API, authenticated with an Application Password.",
-      de: "Seitensuche und -abfrage über die WordPress-REST-API, authentifiziert mit einem Anwendungspasswort.",
+      en: "Page search and lookup, plus blog post search, lookup, creation, and editing, via the WordPress REST API, authenticated with an Application Password.",
+      de: "Seitensuche und -abfrage sowie Blogbeitrags-Suche, -Abfrage, -Erstellung und -Bearbeitung über die WordPress-REST-API, authentifiziert mit einem Anwendungspasswort.",
     },
-    capabilities: CMS_CAPABILITIES,
+    capabilities: [
+      { domain: "cms", tools: ["cms.pages.search", "cms.pages.get", "cms.posts.search", "cms.posts.get", "cms.posts.create", "cms.posts.update"] },
+    ],
     verificationStatus: "api_verified",
   },
   {
@@ -267,10 +277,10 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "contentful", category: "cms", name: "Contentful", icon: "cloud_queue", color: "#3C8DBC",
     description: {
-      en: "Page search and lookup via Contentful's Content Delivery API, a real REST surface built for exactly this.",
-      de: "Seitensuche und -abfrage über die Content-Delivery-API von Contentful, eine echte REST-Schnittstelle genau dafür.",
+      en: "Page search and lookup via Contentful's Content Delivery API, plus entry creation via the Content Management API if a management token is provided.",
+      de: "Seitensuche und -abfrage über die Content-Delivery-API von Contentful, plus Eintragserstellung über die Content-Management-API bei hinterlegtem Management-Token.",
     },
-    capabilities: CMS_CAPABILITIES,
+    capabilities: [{ domain: "cms", tools: ["cms.pages.search", "cms.pages.get", "cms.pages.create"] }],
     verificationStatus: "api_verified",
   },
   {
@@ -299,12 +309,13 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "hubspot", category: "crm", name: "HubSpot", icon: "handshake", color: "#FF7A59",
     description: {
-      en: "Contact and deal search and lookup via HubSpot's CRM API — the Hub's first CRM platform.",
-      de: "Kontakt- und Deal-Suche sowie -Abfrage über die CRM-API von HubSpot — die erste CRM-Plattform des Hubs.",
+      en: "Contact, deal, and company search, lookup, and creation via HubSpot's CRM API — the Hub's first CRM platform.",
+      de: "Kontakt-, Deal- und Unternehmenssuche, -abfrage und -erstellung über die CRM-API von HubSpot — die erste CRM-Plattform des Hubs.",
     },
     capabilities: [
-      { domain: "contacts", tools: ["contacts.search", "contacts.get"] },
-      { domain: "deals", tools: ["deals.search", "deals.get"] },
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
+      { domain: "deals", tools: ["deals.search", "deals.get", "deals.create"] },
+      { domain: "companies", tools: ["companies.search", "companies.get"] },
     ],
     verificationStatus: "api_verified",
   },

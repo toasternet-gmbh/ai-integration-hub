@@ -32,7 +32,7 @@ export function buildCredentials(platform: string, { storeUrl, key, secret }: Cr
     : platform === "hubspot" ? { accessToken: secret }
     : platform === "wordpress" ? { siteUrl: storeUrl, username: key, appPassword: secret }
     : platform === "typo3" ? { siteUrl: storeUrl, accessToken: secret }
-    : platform === "contentful" ? { spaceId: storeUrl, accessToken: secret }
+    : platform === "contentful" ? { spaceId: storeUrl, accessToken: secret, ...(key ? { managementToken: key } : {}) }
     : platform === "shopware" ? { storeUrl, clientId: key, clientSecret: secret }
     : platform === "clockify" ? { workspaceId: key, apiKey: secret }
     : CLIENT_CREDENTIALS_PLATFORMS.has(platform) ? { clientId: key, clientSecret: secret }

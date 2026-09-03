@@ -40,11 +40,12 @@ export function PlatformCredentialFields({
           />
         </div>
       )}
-      {!TOKEN_AUTH_PLATFORMS.has(platform) && !NO_STORE_URL_PLATFORMS.has(platform) && (
+      {((!TOKEN_AUTH_PLATFORMS.has(platform) && !NO_STORE_URL_PLATFORMS.has(platform)) || platform === "contentful") && (
         <div>
           <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">
             {(
-              platform === "clockify" ? t("integrations.workspaceId")
+              platform === "contentful" ? t("integrations.managementToken")
+              : platform === "clockify" ? t("integrations.workspaceId")
               : platform === "shopware" || CLIENT_CREDENTIALS_PLATFORMS.has(platform) ? t("integrations.clientId")
               : platform === "wordpress" ? t("integrations.username")
               : t("integrations.consumerKey")
@@ -52,6 +53,7 @@ export function PlatformCredentialFields({
           </label>
           <input
             value={keyValue} onChange={(e) => onKey(e.target.value)}
+            type={platform === "contentful" ? "password" : "text"}
             className="w-full px-4 py-2 border border-outline-variant rounded font-mono-data text-mono-data bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary"
           />
         </div>
