@@ -174,10 +174,10 @@ with `redirect_uri_mismatch`).
   project's usual "tested against a real, fully-authorized customer account" bar before flipping a
   kill switch — the bar PrestaShop's flip in `20260827000009_ecommerce_prestashop_enable.sql` did
   meet. `enabled: true` here does **not** mean verified: every caveat below about unconfirmed
-  endpoints, guessed field names, untested filters, or (for JTL) a **confirmed-wrong** API host
-  still applies exactly as before — the flip only means the Policy Engine and `create_integration`
-  no longer block a project from trying a platform. Confirm the specific caveat for a platform
-  below before relying on it for a real customer.
+  endpoints, guessed field names, or untested filters still applies exactly as before — the flip
+  only means the Policy Engine and `create_integration` no longer block a project from trying a
+  platform. Confirm the specific caveat for a platform below before relying on it for a real
+  customer.
 - `hub-billing`/`hub-billing-webhook` are built but not fully wired up against this project's own
   Supabase stack yet (test-mode Stripe keys only).
 - Resend has no verified sending domain — auth emails only reach the account owner.
@@ -191,13 +191,23 @@ with `redirect_uri_mismatch`).
   real demo order/product data through the Hub — but that's still Docker demo data, not a real
   customer's own store, so it's not yet at the "real customer account" bar the others in this
   group need.
-- DATEV, JTL, and TYPO3 connectors are unverified but now ship `enabled: true` (see the
-  founder-decision note above): DATEV requires DATEV Marktplatz partner certification (no public
-  sandbox) — every call will fail without it; JTL's real API host couldn't be found through public
-  research and **the guessed one is confirmed wrong** — every call will fail with a connection
-  error, not just an unverified one; TYPO3 core has no built-in REST API for content, so it only
-  works against a site running a specific community extension (`cundd/rest`). See each connector
-  file's header comment before touching it.
+- DATEV and TYPO3 connectors are unverified but now ship `enabled: true` (see the founder-decision
+  note above): DATEV requires DATEV Marktplatz partner certification (no public sandbox) — every
+  call will fail without it; TYPO3 core has no built-in REST API for content, so it only works
+  against a site running a specific community extension (`cundd/rest`). See each connector file's
+  header comment before touching it.
+- JTL was rewritten 2026-09-03 (`supabase/migrations/20260903000016_jtl_graphql_rewrite.sql`) after
+  discovering the original implementation targeted the wrong hosts entirely (`auth.jtl-software.com`
+  / `api.jtl-software.com`); the current connector uses `auth.jtl-cloud.com` (OAuth2
+  client-credentials) and `api.jtl-cloud.com/erp/v2/graphql` (GraphQL, `X-Tenant-ID` header),
+  confirmed against JTL's official SDL schema reference. **Live-verified 2026-09-04**: a real
+  `create_integration` call with intentionally-invalid credentials returned a genuine OAuth2 error
+  from `auth.jtl-cloud.com` (`"Client authentication failed ... Unable to locate the resource"`),
+  not a DNS/connection failure — confirming the host is real and reachable. Still not tested against
+  a real, valid JTL Cloud account/tenant, so response shapes for `orders.search`/`products.search`/
+  etc. remain schema-confirmed rather than live-confirmed. (An earlier version of this file claimed
+  the guessed host was "confirmed wrong" — that described the pre-rewrite connector and was stale;
+  corrected here after re-testing.)
 - Magento ships `enabled: true` (has since the very first `hub_platform_types` migration) but has
   no verification evidence anywhere — no commit, no prior doc — per
   `supabase/migrations/20260902000000_hub_platform_types_verification_status.sql`. Confirm it
