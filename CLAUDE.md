@@ -247,14 +247,26 @@ with `redirect_uri_mismatch`).
   `contacts`/`invoices` slice of its 150+-entity API is implemented, and `/salesInvoice`'s
   line-item field names plus its filter field names for `invoices.search`'s `search`/`status`
   (left unimplemented — throws rather than guessing) aren't independently confirmed against a live
-  tenant — see `lib/connectors/weclapp.ts`'s header comment.
+  tenant. **Partially live-tested 2026-09-04**: weclapp is tenant-scoped
+  (`https://{tenant}.weclapp.com/...`), so there's no single fixed vendor host to probe the way
+  Billwerk+/JTL have — but a request to a made-up tenant subdomain did hit a real `server: weclapp`
+  response (a proper 404, not a DNS failure), confirming the tenant-subdomain base-URL pattern
+  itself is correct; the `/party` endpoint shape is still unconfirmed since no real tenant exists
+  to reach it with. See `lib/connectors/weclapp.ts`'s header comment.
 - `billwerk` (Billwerk+/Frisbii) ships `enabled: true` (see the founder-decision note above): it's
   a subscription-billing platform, not a general bookkeeping system, so `invoices.create` maps
   onto a real payment charge (`POST /charge` with `settle: true`) rather than a bookkeeping
   document — the Approvals page surfaces a specific warning for this platform+tool combo, but the
   connector itself, and its `order_lines` field names, aren't independently confirmed against a
   live sandbox account. Its `contacts.search`/`invoices.search` filters are left unimplemented
-  (throw rather than guess) for the same reason.
+  (throw rather than guess) for the same reason. **Live-tested 2026-09-04** with a deliberately
+  invalid private key: `api.frisbii.com/v1/list/customer` returned a real, detailed
+  `400 {"error": "Invalid request", "message": "Not a valid private key", ...}` — confirms host,
+  path, and Basic-auth scheme are all correct. That test also caught a real bug (fixed in the same
+  pass): the connector checked the generic `.error` field ("Invalid request") before the specific
+  `.message` field ("Not a valid private key"), so the actually useful detail was getting hidden
+  behind a near-meaningless label — field precedence flipped in `lib/connectors/billwerk.ts`'s
+  `request()`.
 - `openhandwerk` ships `enabled: true` (see the founder-decision note above) but still implements
   **zero tools** — `getCapabilities()` returns an empty array and every `execute()` call throws
   immediately (`lib/connectors/openhandwerk.ts`'s stub error) — so flipping this to enabled only

@@ -45,7 +45,10 @@ export class BillwerkConnector implements Connector {
     });
     const body = await res.json().catch(() => null);
     if (!res.ok) {
-      const message = (body as { error?: string; message?: string })?.error ?? (body as { message?: string })?.message ?? `Frisbii/Billwerk+ HTTP ${res.status}`;
+      // Live-tested 2026-09-04: a real Frisbii error body looks like {"error": "Invalid request",
+      // "message": "Not a valid private key", ...} -- `error` is a generic category label,
+      // `message` carries the actually useful detail, so `message` is checked first.
+      const message = (body as { message?: string; error?: string })?.message ?? (body as { error?: string })?.error ?? `Frisbii/Billwerk+ HTTP ${res.status}`;
       throw new Error(message);
     }
     return body;
