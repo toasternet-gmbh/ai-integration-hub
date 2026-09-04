@@ -72,6 +72,19 @@ function getProviderConfig(platform: string): ProviderConfig {
   }
 }
 
+/** Validates that a platform's Hub-wide OAuth2 app registration (client id/secret, etc.) is
+ *  configured, without needing a `state`/row id yet. Callers that create a DB row keyed by the
+ *  eventual authorize URL's `state` (e.g. start_oauth_connection, which reuses the row's own id)
+ *  should call this FIRST, before inserting anything — otherwise a misconfigured Hub leaves an
+ *  orphaned "pending" integration row behind with no error_status, since `buildAuthorizeUrl`
+ *  would only fail after the insert already happened. Live-tested 2026-09-04: this was a real bug,
+ *  not a hypothetical — confirmed by two `start_oauth_connection` calls with no
+ *  MICROSOFT_CLIENT_ID/GOOGLE_CLIENT_ID configured, each leaving a `status: "pending"` row behind
+ *  forever with an empty error_status. */
+export function assertOAuth2Configured(platform: string): void {
+  getProviderConfig(platform);
+}
+
 export function buildAuthorizeUrl(platform: string, state: string, redirectUrl: string): string {
   const cfg = getProviderConfig(platform);
   const params = new URLSearchParams({

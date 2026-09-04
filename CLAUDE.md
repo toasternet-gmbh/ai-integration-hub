@@ -217,7 +217,16 @@ with `redirect_uri_mismatch`).
   decision note above) despite `MICROSOFT_CLIENT_ID`/`SECRET` and `GOOGLE_CLIENT_ID`/`SECRET` still
   needing to be configured and a real consent-redirect round-trip still not tested end-to-end —
   see `.env.example`'s comments on both. Without those env vars configured, connecting either
-  platform will fail at the authorize-URL step regardless of the `enabled` flag.
+  platform will fail at the authorize-URL step regardless of the `enabled` flag. **Live-tested
+  2026-09-04** (neither env var configured on the local dev stack): `start_oauth_connection`
+  correctly throws `"MICROSOFT_CLIENT_ID is not configured Hub-wide..."` /
+  `"GOOGLE_CLIENT_ID is not configured Hub-wide..."`. That test caught a real bug (fixed in the
+  same pass): the handler inserted the pending `hub_integrations` row *before* calling
+  `buildAuthorizeUrl()` (which needs the row's own id as the OAuth `state`), so a Hub-wide
+  misconfiguration left an orphaned `status: "pending"` row behind forever with an empty
+  `error_status` — confirmed by two real calls, each leaving exactly that. Fixed by adding
+  `assertOAuth2Configured()` (`lib/oauth2.ts`), called in `tools/oauthConnections.ts`'s
+  `start_oauth_connection` *before* the insert; re-tested and confirmed no orphaned row.
 - `123erfasst` ships `enabled: true` (see the founder-decision note above), same unverified-code
   tier as DATEV: it exposes a GraphQL API whose OAuth token endpoint is assumed discovered
   per-account via an `authProvider` query rather than a fixed public URL. **Live-tested

@@ -17,7 +17,7 @@
 import type { SupabaseAdmin, ToolDefinition, ToolModule } from "../lib/types.ts";
 import { encryptCredentials, decryptCredentials } from "../lib/crypto.ts";
 import { loadConnector } from "../lib/connectors/factory.ts";
-import { buildAuthorizeUrl, exchangeCode, isOAuth2Platform, OAUTH2_PLATFORMS } from "../lib/oauth2.ts";
+import { assertOAuth2Configured, buildAuthorizeUrl, exchangeCode, isOAuth2Platform, OAUTH2_PLATFORMS } from "../lib/oauth2.ts";
 
 const SAFE_COLUMNS = "id, project_id, platform, name, status, capabilities, last_sync_at, error_status, created_at";
 
@@ -83,6 +83,12 @@ export const handlers: ToolModule["handlers"] = {
     const { data: platformType, error: platformErr } = await admin.from("hub_platform_types").select("enabled").eq("name", platform).maybeSingle();
     if (platformErr) throw new Error(platformErr.message);
     if (platformType && !platformType.enabled) throw new Error(`Platform '${platform}' is disabled Hub-wide.`);
+
+    // Checked before the insert below, not after: buildAuthorizeUrl() needs the row's own id as
+    // `state`, so it can only run once the row exists — but if the Hub-wide app registration isn't
+    // configured, failing only after the insert would leave an orphaned "pending" row behind
+    // forever with no error_status (confirmed live 2026-09-04, see assertOAuth2Configured's doc).
+    assertOAuth2Configured(platform);
 
     // pendingUserId binds this specific pending flow to whoever started it — complete_oauth_
     // connection requires a match, so a completion request carrying someone else's authorization
