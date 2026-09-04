@@ -26,6 +26,21 @@ export interface SteelCredentials {
   apiKey: string;
 }
 
+// Live-tested 2026-09-04: a real Steel.dev error body is JSON, e.g. {"error": "Unauthorized",
+// "message": "Invalid Steel API key. ...", "linkToDocs": "..."} -- `message` carries the useful,
+// human-readable detail. Without this, the raw JSON string used to get dumped whole into the
+// thrown Error (and from there into hub_integrations.error_status), which is unreadable in the UI.
+function steelErrorMessage(text: string, status: number): string {
+  try {
+    const body = JSON.parse(text) as { message?: string; error?: string } | null;
+    const message = body?.message ?? body?.error;
+    if (message) return message;
+  } catch {
+    // Not JSON -- fall through to the raw text.
+  }
+  return text || `Steel.dev HTTP ${status}`;
+}
+
 export class SteelConnector implements Connector {
   constructor(private creds: SteelCredentials) {}
 
@@ -36,7 +51,7 @@ export class SteelConnector implements Connector {
       body: JSON.stringify(body),
     });
     const text = await res.text();
-    if (!res.ok) throw new Error(text || `Steel.dev HTTP ${res.status}`);
+    if (!res.ok) throw new Error(steelErrorMessage(text, res.status));
     const contentType = res.headers.get("content-type") ?? "";
     return contentType.includes("application/json") ? JSON.parse(text) : text;
   }
@@ -49,7 +64,7 @@ export class SteelConnector implements Connector {
     });
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      throw new Error(text || `Steel.dev HTTP ${res.status}`);
+      throw new Error(steelErrorMessage(text, res.status));
     }
     const contentType = res.headers.get("content-type") ?? "application/octet-stream";
     const buffer = await res.arrayBuffer();

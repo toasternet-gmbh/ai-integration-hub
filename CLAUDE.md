@@ -272,21 +272,30 @@ with `redirect_uri_mismatch`).
   immediately (`lib/connectors/openhandwerk.ts`'s stub error) — so flipping this to enabled only
   removes the `create_integration` gate, it does not unlock any working tool. Its REST API needs
   10 licenses plus a paid add-on to unlock, and no public developer documentation exists, so
-  nothing was safe to implement yet. DATEV, JTL, and TYPO3 remain the unchanged, still-disabled
-  tier below — their blockers (partner certification, a confirmed-wrong API host, a required
-  third-party extension) aren't something a founder enable decision works around.
+  nothing was safe to implement yet — enabling this platform is purely cosmetic until a real
+  implementation lands, unlike DATEV/JTL/TYPO3 above which at least reach a real host.
 - `browserless` ships `enabled: true` (see the founder-decision note above). Its per-call
   `assertPublicHttpUrl` check on the target `url` is a real but partial mitigation, not a complete
   one: it pattern-matches literal IPs/hostnames with no DNS resolution (a domain whose A-record
   points at a private/metadata address isn't caught), and the actual fetch happens on Browserless's
   own infrastructure, not this Hub's — so this check protects against careless misuse, not a
   determined one; the real backstop is expected to be Browserless's own network isolation, which
-  this Hub doesn't control or verify. See `lib/connectors/browserless.ts`'s header comment.
+  this Hub doesn't control or verify. **Live-tested 2026-09-04** with an invalid API key:
+  `production-sfo.browserless.io/content` returned a real, clean
+  `401 "Invalid API key. Please check your API key and try again. (requestId: ...)"` — confirms
+  host, path, and the `?token=` auth scheme are all correct. See
+  `lib/connectors/browserless.ts`'s header comment.
 - `steel` ships `enabled: true` (see the founder-decision note above) with narrower tool coverage
   than Browserless (`browser.get_content` and `browser.screenshot` only — no `browser.scrape`/
   `browser.pdf`, since no one-shot REST endpoint for either could be confirmed on this API). Same
-  partial-URL-mitigation caveat as Browserless applies. See `lib/connectors/steel.ts`'s header
-  comment.
+  partial-URL-mitigation caveat as Browserless applies. **Live-tested 2026-09-04** with an invalid
+  API key: `api.steel.dev/v1/scrape` returned a real, detailed
+  `401 {"error": "Unauthorized", "message": "Invalid Steel API key...", "linkToDocs": "..."}` —
+  confirms host, path, and the `steel-api-key` header scheme. That test also caught a real bug
+  (fixed in the same pass): the connector threw the raw JSON error body verbatim instead of
+  extracting `.message`, so `create_integration`'s `error_status` used to show the whole escaped
+  JSON blob instead of a readable sentence — fixed via a small `steelErrorMessage()` helper in
+  `lib/connectors/steel.ts` that both `requestJson()`/`requestBinary()` now share.
 - `beeper` ships `enabled: true` (see the founder-decision note above): the least precedented
   domain in this codebase (no prior chat/Matrix pattern to build on). `messages.list_rooms`/
   `messages.search` are `medium`/`require_approval` rather than the `low`/`allow` every other read
