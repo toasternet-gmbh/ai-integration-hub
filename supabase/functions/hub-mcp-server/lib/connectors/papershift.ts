@@ -101,6 +101,10 @@ export class PapershiftConnector implements Connector {
         const data = await this.request("/absences", "GET", { id: absenceId });
         return { data };
       }
+      // Papershift's absence response includes a `note` field (per developers.papershift.com's
+      // response examples) — mapped from this Hub's canonical `comment` field, best-effort since
+      // the exact request-body field name for setting it wasn't independently confirmed this
+      // session beyond the response echoing it back.
       case "absences.create": {
         const employeeId = String(input.employee_id ?? "");
         const absenceTypeId = String(input.absence_type_id ?? "");
@@ -111,6 +115,7 @@ export class PapershiftConnector implements Connector {
           absence_type_id: absenceTypeId,
           starts_at: startDate,
           ends_at: input.end_date ?? startDate,
+          note: input.comment != null ? String(input.comment) : undefined,
         });
         return { data };
       }
@@ -120,6 +125,7 @@ export class PapershiftConnector implements Connector {
         const params: Record<string, unknown> = { id: absenceId };
         if (input.start_date) params.starts_at = input.start_date;
         if (input.end_date) params.ends_at = input.end_date;
+        if (input.comment != null) params.note = String(input.comment);
         const data = await this.request("/absences", "PUT", params);
         return { data };
       }

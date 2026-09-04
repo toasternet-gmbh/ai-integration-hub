@@ -49,7 +49,7 @@ export const definitions: ToolDefinition[] = [
         description: { type: "string" },
         start_time: { type: "string", description: "ISO 8601 datetime." },
         end_time: { type: "string", description: "ISO 8601 datetime. Omit to start a running timer." },
-        project_id: { type: "string", description: "Toggl/Clockify only." },
+        project_id: { type: "string", description: "Optional for Toggl/Clockify. Required for Clockodo, which resolves the billed customer from the project." },
         employee_id: { type: "string", description: "Personio and clockin only — required there, since attendance is logged per employee, not per API token." },
       },
     },
@@ -112,7 +112,7 @@ export const definitions: ToolDefinition[] = [
     inputSchema: {
       type: "object",
       required: ["integration_id", "name"],
-      properties: { integration_id: { type: "string" }, name: { type: "string" }, client_id: { type: "string" } },
+      properties: { integration_id: { type: "string" }, name: { type: "string" }, client_id: { type: "string", description: "Optional for most platforms. Required for Clockodo, where a project must belong to a customer." } },
     },
   },
   {

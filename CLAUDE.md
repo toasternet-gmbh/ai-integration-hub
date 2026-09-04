@@ -188,3 +188,16 @@ with `redirect_uri_mismatch`).
 - `outlook` and `google` (productivity: calendar + mail) ship `enabled: false` pending
   `MICROSOFT_CLIENT_ID`/`SECRET` and `GOOGLE_CLIENT_ID`/`SECRET` being configured and a real
   consent-redirect round-trip being tested end-to-end — see `.env.example`'s comments on both.
+- `123erfasst` ships `enabled: false`, same unverified tier as DATEV: it exposes a GraphQL API
+  whose OAuth token endpoint is discovered per-account via an `authProvider` query rather than a
+  fixed public URL, so even the one tool implemented (`projects.search`) is a best-effort guess
+  pending real schema access — see `lib/connectors/erfasst123.ts`'s header comment.
+- `papershift` ships `enabled: false`: its API is a paid add-on that Papershift's own sales/CS
+  team must activate before an `api_token` can even be generated — no self-serve trial exists, so
+  endpoint shapes are confirmed against public docs but untested against a live account — see
+  `lib/connectors/papershift.ts`'s header comment.
+- `clockodo`'s connector originally used `/api/v2` uniformly; Clockodo's May 2026 deprecation
+  moved `/customers` to `/api/v3` and `/projects` to `/api/v4` (only `/entries` stayed on v2) —
+  corrected in the connector, but the exact v3/v4 response envelope shape for a single-resource
+  fetch couldn't be confirmed from public docs (a JS-rendered SPA) and needs a live-account check
+  before enabling.
