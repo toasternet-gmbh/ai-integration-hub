@@ -9,7 +9,7 @@ import { useSession } from "../lib/useSession";
 import { supabase } from "../lib/supabase";
 import { mcp } from "../lib/mcp";
 import { storageKey } from "../App";
-import { PLATFORM_CATALOG, VERIFICATION_LABEL, VERIFICATION_TONE } from "../lib/platformCatalog";
+import { PLATFORM_CATALOG } from "../lib/platformCatalog";
 import { buildCredentials, OAUTH2_PLATFORMS } from "../lib/platformCredentials";
 
 export default function QuickConnect() {
@@ -107,9 +107,6 @@ export default function QuickConnect() {
                 </div>
                 <h2 className="font-headline-sm text-headline-sm text-on-surface">{platform.name}</h2>
               </div>
-              <span className={`inline-block font-label-caps text-[10px] leading-none px-2 py-1 rounded-full whitespace-nowrap mb-3 ${VERIFICATION_TONE[platform.verificationStatus]}`}>
-                {VERIFICATION_LABEL[platform.verificationStatus][lang]}
-              </span>
               <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">{platform.description[lang]}</p>
             </div>
           </div>

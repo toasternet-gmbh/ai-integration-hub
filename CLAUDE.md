@@ -162,6 +162,18 @@ with `redirect_uri_mismatch`).
 
 ## Known gaps
 
+- As of 2026-09-04, this session's newly-added connectors (Pipedrive, monday.com, weclapp,
+  Billwerk+/Frisbii, clockin, Clockodo, 123erfasst, Papershift, openHandwerk, Outlook, Google,
+  Browserless, Steel.dev, Beeper) plus GoCardless were flipped from `enabled: false` to
+  `enabled: true` (`supabase/migrations/20260904000005_enable_new_platforms.sql`) per an explicit
+  founder decision to prioritize agent-facing MCP tool availability over this project's usual
+  "tested against a real, fully-authorized customer account" bar before flipping a kill switch —
+  the bar PrestaShop's flip in `20260827000009_ecommerce_prestashop_enable.sql` did meet.
+  `enabled: true` here does **not** mean verified: every caveat below about unconfirmed endpoints,
+  guessed field names, or untested filters still applies to these platforms exactly as before —
+  the flip only means the Policy Engine and `create_integration` no longer block a project from
+  trying them. DATEV, JTL, TYPO3, and Magento's pre-existing verification gaps are unaffected by
+  this decision and remain as described below.
 - `hub-billing`/`hub-billing-webhook` are built but not fully wired up against this project's own
   Supabase stack yet (test-mode Stripe keys only).
 - Resend has no verified sending domain — auth emails only reach the account owner.
@@ -185,53 +197,69 @@ with `redirect_uri_mismatch`).
   `supabase/migrations/20260902000000_hub_platform_types_verification_status.sql`. Confirm it
   against a real Magento store before relying on it; it does not belong in the "reaches the real
   API" group above until that happens.
-- `outlook` and `google` (productivity: calendar + mail) ship `enabled: false` pending
-  `MICROSOFT_CLIENT_ID`/`SECRET` and `GOOGLE_CLIENT_ID`/`SECRET` being configured and a real
-  consent-redirect round-trip being tested end-to-end — see `.env.example`'s comments on both.
-- `123erfasst` ships `enabled: false`, same unverified tier as DATEV: it exposes a GraphQL API
-  whose OAuth token endpoint is discovered per-account via an `authProvider` query rather than a
-  fixed public URL, so even the one tool implemented (`projects.search`) is a best-effort guess
-  pending real schema access — see `lib/connectors/erfasst123.ts`'s header comment.
-- `papershift` ships `enabled: false`: its API is a paid add-on that Papershift's own sales/CS
-  team must activate before an `api_token` can even be generated — no self-serve trial exists, so
-  endpoint shapes are confirmed against public docs but untested against a live account — see
-  `lib/connectors/papershift.ts`'s header comment.
+- `outlook` and `google` (productivity: calendar + mail) ship `enabled: true` (see the founder-
+  decision note above) despite `MICROSOFT_CLIENT_ID`/`SECRET` and `GOOGLE_CLIENT_ID`/`SECRET` still
+  needing to be configured and a real consent-redirect round-trip still not tested end-to-end —
+  see `.env.example`'s comments on both. Without those env vars configured, connecting either
+  platform will fail at the authorize-URL step regardless of the `enabled` flag.
+- `123erfasst` ships `enabled: true` (see the founder-decision note above), same unverified-code
+  tier as DATEV: it exposes a GraphQL API whose OAuth token endpoint is discovered per-account via
+  an `authProvider` query rather than a fixed public URL, so even the one tool implemented
+  (`projects.search`) is a best-effort guess pending real schema access — see
+  `lib/connectors/erfasst123.ts`'s header comment.
+- `papershift` ships `enabled: true` (see the founder-decision note above): its API is a paid
+  add-on that Papershift's own sales/CS team must activate before an `api_token` can even be
+  generated — no self-serve trial exists, so endpoint shapes are confirmed against public docs but
+  untested against a live account — see `lib/connectors/papershift.ts`'s header comment.
 - `clockodo`'s connector originally used `/api/v2` uniformly; Clockodo's May 2026 deprecation
   moved `/customers` to `/api/v3` and `/projects` to `/api/v4` (only `/entries` stayed on v2) —
   corrected in the connector, but the exact v3/v4 response envelope shape for a single-resource
   fetch couldn't be confirmed from public docs (a JS-rendered SPA) and needs a live-account check
   before enabling.
-- `weclapp` ships `enabled: false`: only the `contacts`/`invoices` slice of its 150+-entity API
-  is implemented, and `/salesInvoice`'s line-item field names plus its filter field names for
-  `invoices.search`'s `search`/`status` (left unimplemented — throws rather than guessing) aren't
-  independently confirmed against a live tenant — see `lib/connectors/weclapp.ts`'s header
+- `weclapp` ships `enabled: true` (see the founder-decision note above): only the
+  `contacts`/`invoices` slice of its 150+-entity API is implemented, and `/salesInvoice`'s
+  line-item field names plus its filter field names for `invoices.search`'s `search`/`status`
+  (left unimplemented — throws rather than guessing) aren't independently confirmed against a live
+  tenant — see `lib/connectors/weclapp.ts`'s header comment.
+- `billwerk` (Billwerk+/Frisbii) ships `enabled: true` (see the founder-decision note above): it's
+  a subscription-billing platform, not a general bookkeeping system, so `invoices.create` maps
+  onto a real payment charge (`POST /charge` with `settle: true`) rather than a bookkeeping
+  document — the Approvals page surfaces a specific warning for this platform+tool combo, but the
+  connector itself, and its `order_lines` field names, aren't independently confirmed against a
+  live sandbox account. Its `contacts.search`/`invoices.search` filters are left unimplemented
+  (throw rather than guess) for the same reason.
+- `openhandwerk` ships `enabled: true` (see the founder-decision note above) but still implements
+  **zero tools** — `getCapabilities()` returns an empty array and every `execute()` call throws
+  immediately (`lib/connectors/openhandwerk.ts`'s stub error) — so flipping this to enabled only
+  removes the `create_integration` gate, it does not unlock any working tool. Its REST API needs
+  10 licenses plus a paid add-on to unlock, and no public developer documentation exists, so
+  nothing was safe to implement yet. DATEV, JTL, and TYPO3 remain the unchanged, still-disabled
+  tier below — their blockers (partner certification, a confirmed-wrong API host, a required
+  third-party extension) aren't something a founder enable decision works around.
+- `browserless` ships `enabled: true` (see the founder-decision note above). Its per-call
+  `assertPublicHttpUrl` check on the target `url` is a real but partial mitigation, not a complete
+  one: it pattern-matches literal IPs/hostnames with no DNS resolution (a domain whose A-record
+  points at a private/metadata address isn't caught), and the actual fetch happens on Browserless's
+  own infrastructure, not this Hub's — so this check protects against careless misuse, not a
+  determined one; the real backstop is expected to be Browserless's own network isolation, which
+  this Hub doesn't control or verify. See `lib/connectors/browserless.ts`'s header comment.
+- `steel` ships `enabled: true` (see the founder-decision note above) with narrower tool coverage
+  than Browserless (`browser.get_content` and `browser.screenshot` only — no `browser.scrape`/
+  `browser.pdf`, since no one-shot REST endpoint for either could be confirmed on this API). Same
+  partial-URL-mitigation caveat as Browserless applies. See `lib/connectors/steel.ts`'s header
   comment.
-- `billwerk` (Billwerk+/Frisbii) ships `enabled: false`: it's a subscription-billing platform, not
-  a general bookkeeping system, so `invoices.create` maps onto a real payment charge
-  (`POST /charge` with `settle: true`) rather than a bookkeeping document — the Approvals page
-  now surfaces a specific warning for this platform+tool combo, but the connector itself, and its
-  `order_lines` field names, aren't independently confirmed against a live sandbox account. Its
-  `contacts.search`/`invoices.search` filters are left unimplemented (throw rather than guess) for
-  the same reason.
-- `openhandwerk` ships `enabled: false` and implements zero tools, same tier as DATEV/JTL/TYPO3
-  above: its REST API needs 10 licenses plus a paid add-on to unlock, and no public developer
-  documentation exists — nothing was safe to infer, so this is a deliberate empty stub rather than
-  a best-effort guess. See `lib/connectors/openhandwerk.ts`'s header comment.
-- `browserless` ships `enabled: false`. Its per-call `assertPublicHttpUrl` check on the target
-  `url` is a real but partial mitigation, not a complete one: it pattern-matches literal IPs/
-  hostnames with no DNS resolution (a domain whose A-record points at a private/metadata address
-  isn't caught), and the actual fetch happens on Browserless's own infrastructure, not this Hub's
-  — so this check protects against careless misuse, not a determined one; the real backstop is
-  expected to be Browserless's own network isolation, which this Hub doesn't control or verify.
-  See `lib/connectors/browserless.ts`'s header comment.
-- `steel` ships `enabled: false` with narrower tool coverage than Browserless (`browser.get_content`
-  and `browser.screenshot` only — no `browser.scrape`/`browser.pdf`, since no one-shot REST
-  endpoint for either could be confirmed on this API). Same partial-URL-mitigation caveat as
-  Browserless applies. See `lib/connectors/steel.ts`'s header comment.
-- `beeper` ships `enabled: false`: the least precedented domain in this codebase (no prior chat/
-  Matrix pattern to build on). `messages.list_rooms`/`messages.search` are `medium`/
-  `require_approval` rather than the `low`/`allow` every other read tool gets, since Beeper
-  aggregates a person's entire cross-platform personal chat history (iMessage/WhatsApp/Telegram/
-  Signal via bridges) and the Policy Engine has no per-room granularity to scope that down with.
-  See `lib/connectors/matrix.ts`'s header comment and
+- `beeper` ships `enabled: true` (see the founder-decision note above): the least precedented
+  domain in this codebase (no prior chat/Matrix pattern to build on). `messages.list_rooms`/
+  `messages.search` are `medium`/`require_approval` rather than the `low`/`allow` every other read
+  tool gets, since Beeper aggregates a person's entire cross-platform personal chat history
+  (iMessage/WhatsApp/Telegram/Signal via bridges) and the Policy Engine has no per-room granularity
+  to scope that down with. See `lib/connectors/matrix.ts`'s header comment and
   `supabase/migrations/20260904000003_messaging_beeper.sql`'s risk-posture note.
+- The public connect/quickconnect/blueprint pages (`src/pages/QuickConnect.tsx`,
+  `src/pages/Integrations.tsx`, `src/pages/Blueprint.tsx`, `src/components/PlatformPicker.tsx`) no
+  longer render the "Unverified"/"API-verified"/"Real-customer-verified" badge per platform — the
+  founder judged it as sending the wrong signal once unverified platforms are also enabled. The
+  underlying `verificationStatus` field in `src/lib/platformCatalog.ts` and the DB-backed
+  `verification_status` column (editable at `/superadmin/platforms`) are unchanged and still worth
+  keeping current — only the public-facing badge render was removed. The caveats in this Known
+  Gaps section remain the actual source of truth for what's confirmed vs. guessed per platform.
