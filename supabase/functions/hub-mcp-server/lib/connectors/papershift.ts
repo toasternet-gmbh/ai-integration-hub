@@ -45,7 +45,12 @@ export class PapershiftConnector implements Connector {
     const res = await fetch(url, init);
     const responseBody = await res.json().catch(() => null);
     if (!res.ok) {
-      const message = (responseBody as { error?: string; message?: string })?.error ?? (responseBody as { message?: string })?.message ?? `Papershift HTTP ${res.status}`;
+      // Live-tested 2026-09-04: a real 401 body from Papershift looks like {"response": "API Key
+      // not found!"} -- neither `error` nor `message`, so that field is checked too.
+      const message = (responseBody as { error?: string; message?: string; response?: string })?.error
+        ?? (responseBody as { message?: string })?.message
+        ?? (responseBody as { response?: string })?.response
+        ?? `Papershift HTTP ${res.status}`;
       throw new Error(message);
     }
     return responseBody;

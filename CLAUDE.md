@@ -219,14 +219,25 @@ with `redirect_uri_mismatch`).
   see `.env.example`'s comments on both. Without those env vars configured, connecting either
   platform will fail at the authorize-URL step regardless of the `enabled` flag.
 - `123erfasst` ships `enabled: true` (see the founder-decision note above), same unverified-code
-  tier as DATEV: it exposes a GraphQL API whose OAuth token endpoint is discovered per-account via
-  an `authProvider` query rather than a fixed public URL, so even the one tool implemented
-  (`projects.search`) is a best-effort guess pending real schema access — see
-  `lib/connectors/erfasst123.ts`'s header comment.
+  tier as DATEV: it exposes a GraphQL API whose OAuth token endpoint is assumed discovered
+  per-account via an `authProvider` query rather than a fixed public URL. **Live-tested
+  2026-09-04**: `POST server.123erfasst.de/graphql` is real (GET/OPTIONS correctly 405 — POST-only,
+  as GraphQL endpoints are), but **every** POST — including a bare unauthenticated `{__typename}`
+  with no query args — returns a blanket `401` with an empty body. That contradicts this
+  connector's core assumption that `authProvider` is a public, unauthenticated discovery query;
+  in practice the whole endpoint seems to require some undocumented auth before any query runs at
+  all, which the 401's empty body gives no hint about. This is a stronger finding than "unverified"
+  — the discovery mechanism the one implemented tool (`projects.search`) depends on may not work
+  as designed. See `lib/connectors/erfasst123.ts`'s header comment.
 - `papershift` ships `enabled: true` (see the founder-decision note above): its API is a paid
-  add-on that Papershift's own sales/CS team must activate before an `api_token` can even be
-  generated — no self-serve trial exists, so endpoint shapes are confirmed against public docs but
-  untested against a live account — see `lib/connectors/papershift.ts`'s header comment.
+  add-on that Papershift's own sales/CS team must activate before a real `api_token` can even be
+  generated, so a genuine round-trip is still untested — but **live-tested 2026-09-04** with a
+  deliberately-invalid token confirmed the host/path/param shape are all correct:
+  `app.papershift.com/public_api/v1/users` returned a real `401 {"response": "API Key not found!"}`
+  — a specific, on-topic application error, not a gateway rejection. That test also caught a real
+  bug (fixed in the same pass): the connector's error-message parser only checked `.error`/
+  `.message` fields, missing Papershift's actual `.response` field, so this exact error used to get
+  swallowed into a generic "Papershift HTTP 401" — see `lib/connectors/papershift.ts`'s `request()`.
 - `clockodo`'s connector originally used `/api/v2` uniformly; Clockodo's May 2026 deprecation
   moved `/customers` to `/api/v3` and `/projects` to `/api/v4` (only `/entries` stayed on v2) —
   corrected in the connector, but the exact v3/v4 response envelope shape for a single-resource
