@@ -16,6 +16,20 @@ import { ContentfulConnector } from "./contentful.ts";
 import { ClockifyConnector } from "./clockify.ts";
 import { PrestaShopConnector } from "./prestashop.ts";
 import { HubSpotConnector } from "./hubspot.ts";
+import { PipedriveConnector } from "./pipedrive.ts";
+import { MondayConnector } from "./monday.ts";
+import { ClockinConnector } from "./clockin.ts";
+import { ClockodoConnector } from "./clockodo.ts";
+import { WeclappConnector } from "./weclapp.ts";
+import { BillwerkConnector } from "./billwerk.ts";
+import { PapershiftConnector } from "./papershift.ts";
+import { Erfasst123Connector } from "./erfasst123.ts";
+import { OpenHandwerkConnector } from "./openhandwerk.ts";
+import { OutlookConnector } from "./outlook.ts";
+import { GoogleConnector } from "./google.ts";
+import { BrowserlessConnector } from "./browserless.ts";
+import { MatrixConnector } from "./matrix.ts";
+import { SteelConnector } from "./steel.ts";
 import { decryptCredentials } from "../crypto.ts";
 import { assertPublicHttpUrl } from "../urlGuard.ts";
 
@@ -78,6 +92,37 @@ export async function loadConnector(integration: { platform: string; credentials
     }
     case "hubspot":
       return new HubSpotConnector(creds as { accessToken: string });
+    case "pipedrive":
+      return new PipedriveConnector(creds as { companyDomain: string; apiToken: string });
+    case "monday":
+      return new MondayConnector(creds as { apiToken: string; dealsBoardId: string; contactsBoardId?: string; companiesBoardId?: string; dealAmountColumnId?: string; dealStageColumnId?: string });
+    case "clockin":
+      return new ClockinConnector(creds as { apiToken: string });
+    case "clockodo":
+      return new ClockodoConnector(creds as { email: string; apiKey: string });
+    case "weclapp":
+      return new WeclappConnector(creds as { tenant: string; apiToken: string });
+    case "billwerk":
+      return new BillwerkConnector(creds as { privateKey: string });
+    case "papershift":
+      return new PapershiftConnector(creds as { apiToken: string; interfaceLanguage?: string });
+    case "123erfasst":
+      return new Erfasst123Connector(creds as { clientId: string; clientSecret: string });
+    case "openhandwerk":
+      return new OpenHandwerkConnector(creds as { apiKey: string; accountId: string });
+    case "outlook":
+      return new OutlookConnector(creds as { accessToken: string; refreshToken: string; expiresAt: number });
+    case "google":
+      return new GoogleConnector(creds as { accessToken: string; refreshToken: string; expiresAt: number });
+    case "browserless":
+      return new BrowserlessConnector(creds as { apiKey: string; endpoint?: string });
+    case "beeper": {
+      const c = creds as { homeserverUrl: string; accessToken: string };
+      assertPublicHttpUrl(c.homeserverUrl, "homeserverUrl");
+      return new MatrixConnector(c);
+    }
+    case "steel":
+      return new SteelConnector(creds as { apiKey: string });
     default:
       throw new Error(`No connector implemented for platform '${integration.platform}'.`);
   }

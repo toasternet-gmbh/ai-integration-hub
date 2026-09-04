@@ -9,6 +9,7 @@
 import type { ToolContext, ToolDefinition, ToolModule } from "../lib/types.ts";
 import { recordAudit } from "../lib/policy.ts";
 import { loadConnector } from "../lib/connectors/factory.ts";
+import { requireOwner } from "../lib/authz.ts";
 
 export const definitions: ToolDefinition[] = [
   {
@@ -26,7 +27,7 @@ export const definitions: ToolDefinition[] = [
   },
   {
     name: "resolve_approval",
-    description: "Approve or deny a pending action. Approving executes the underlying tool call immediately.",
+    description: "Approve or deny a pending action. Approving executes the underlying tool call immediately. Owner-only — requires a signed-in project owner, not just a project API key.",
     inputSchema: {
       type: "object",
       required: ["approval_id", "decision"],
@@ -61,6 +62,9 @@ export const handlers: ToolModule["handlers"] = {
 
   async resolve_approval(args, ctx: ToolContext) {
     const { admin, projectId, userId } = ctx;
+    // The whole point of require_approval is a human check on an agent's action — an agent must
+    // never be able to clear its own pending action via the same API key that triggered it.
+    await requireOwner(admin, projectId, userId);
     const approvalId = String(args.approval_id ?? "");
     const decision = String(args.decision ?? "");
     if (!approvalId) throw new Error("approval_id is required.");

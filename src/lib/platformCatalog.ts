@@ -8,10 +8,10 @@
 
 export type Bi = { en: string; de: string };
 
-export type PlatformCategory = "ecommerce" | "bookkeeping" | "cms" | "time_tracking" | "banking" | "crm";
+export type PlatformCategory = "ecommerce" | "bookkeeping" | "cms" | "time_tracking" | "banking" | "crm" | "erp" | "productivity" | "automation" | "messaging";
 
 /** Display order for category groups wherever platforms are grouped. */
-export const CATEGORY_ORDER: PlatformCategory[] = ["ecommerce", "bookkeeping", "cms", "time_tracking", "banking", "crm"];
+export const CATEGORY_ORDER: PlatformCategory[] = ["ecommerce", "bookkeeping", "cms", "time_tracking", "banking", "crm", "erp", "productivity", "automation", "messaging"];
 
 export const CATEGORY_LABEL: Record<PlatformCategory, Bi> = {
   ecommerce: { en: "E-commerce", de: "E-Commerce" },
@@ -20,6 +20,10 @@ export const CATEGORY_LABEL: Record<PlatformCategory, Bi> = {
   time_tracking: { en: "Time tracking", de: "Zeiterfassung" },
   banking: { en: "Banking", de: "Banking" },
   crm: { en: "CRM", de: "CRM" },
+  erp: { en: "ERP", de: "ERP" },
+  productivity: { en: "Productivity", de: "Produktivität" },
+  automation: { en: "Browser automation", de: "Browser-Automatisierung" },
+  messaging: { en: "Messaging", de: "Messaging" },
 };
 
 /** One canonical-tool group, e.g. `{ domain: "orders", tools: ["orders.search", ...] }` —
@@ -424,6 +428,163 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
       { domain: "owners", tools: ["owners.search"] },
     ],
     verificationStatus: "api_verified",
+  },
+  {
+    id: "pipedrive", category: "crm", name: "Pipedrive", icon: "handshake", color: "#000000",
+    description: {
+      en: "Contact, deal, and organization search, lookup, and creation via Pipedrive's v2 REST API.",
+      de: "Kontakt-, Deal- und Organisationssuche, -abfrage und -erstellung über die v2-REST-API von Pipedrive.",
+    },
+    capabilities: [
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
+      { domain: "deals", tools: ["deals.search", "deals.get", "deals.create"] },
+      { domain: "companies", tools: ["companies.search", "companies.get"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "monday", category: "crm", name: "monday.com", icon: "view_kanban", color: "#FF3D57",
+    description: {
+      en: "Contact, deal, and company search, lookup, and creation on a monday sales CRM account, mapped onto the customer's own Deals/Contacts/Accounts boards via monday's GraphQL API.",
+      de: "Kontakt-, Deal- und Unternehmenssuche, -abfrage und -erstellung auf einem monday-sales-CRM-Konto, abgebildet auf die eigenen Deals-/Kontakte-/Konten-Boards des Kunden über die GraphQL-API von monday.",
+    },
+    capabilities: [
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
+      { domain: "deals", tools: ["deals.search", "deals.get", "deals.create"] },
+      { domain: "companies", tools: ["companies.search", "companies.get"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "clockin", category: "time_tracking", name: "clockin", icon: "schedule", color: "#00A99D",
+    description: {
+      en: "Time-entry logging and search, plus project search, for craft/trades businesses via clockin's Customer API.",
+      de: "Zeiterfassung und -suche sowie Projektsuche für Handwerksbetriebe über die Customer API von clockin.",
+    },
+    capabilities: [
+      { domain: "time_entries", tools: ["time_entries.search", "time_entries.create"] },
+      { domain: "projects", tools: ["projects.search"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "clockodo", category: "time_tracking", name: "Clockodo", icon: "schedule", color: "#FFC629",
+    description: {
+      en: "Time-entry, project, and customer search, lookup, and creation via Clockodo's REST API.",
+      de: "Zeiterfassungs-, Projekt- und Kundensuche, -abfrage und -erstellung über die REST-API von Clockodo.",
+    },
+    capabilities: [
+      { domain: "time_entries", tools: ["time_entries.search", "time_entries.get", "time_entries.create", "time_entries.update", "time_entries.delete"] },
+      { domain: "projects", tools: ["projects.search", "projects.create"] },
+      { domain: "clients", tools: ["clients.search", "clients.create"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "weclapp", category: "erp", name: "weclapp", icon: "warehouse", color: "#E2001A",
+    description: {
+      en: "Contact and sales-invoice search, lookup, and creation on weclapp's all-in-one ERP (CRM + bookkeeping + inventory + time tracking), via its tenant-scoped REST API.",
+      de: "Kontakt- und Rechnungssuche, -abfrage und -erstellung auf dem All-in-one-ERP weclapp (CRM, Buchhaltung, Lager, Zeiterfassung) über dessen mandantenbezogene REST-API.",
+    },
+    capabilities: [
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
+      { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "billwerk", category: "bookkeeping", name: "Billwerk+", icon: "receipt_long", color: "#5D3FD3",
+    description: {
+      en: "Customer and invoice search, lookup, and creation on Billwerk+ (now rebranded Frisbii Billing & Pay) via its on-demand charge API — a subscription-billing platform, not a general bookkeeping system.",
+      de: "Kunden- und Rechnungssuche, -abfrage und -erstellung auf Billwerk+ (jetzt umbenannt in Frisbii Billing & Pay) über dessen On-Demand-Charge-API — eine Subscription-Billing-Plattform, kein allgemeines Buchhaltungssystem.",
+    },
+    capabilities: [
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
+      { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "papershift", category: "time_tracking", name: "Papershift", icon: "event_available", color: "#4CAF50",
+    description: {
+      en: "Employee and absence/time-off search, lookup, and management via Papershift's public API — a paid add-on Papershift itself must activate before use.",
+      de: "Mitarbeiter- und Abwesenheitssuche, -abfrage und -verwaltung über die öffentliche API von Papershift — ein kostenpflichtiges Add-on, das Papershift selbst erst aktivieren muss.",
+    },
+    capabilities: [
+      { domain: "employees", tools: ["employees.search", "employees.get"] },
+      { domain: "absence_types", tools: ["absence_types.search"] },
+      { domain: "absences", tools: ["absences.search", "absences.get", "absences.create", "absences.update", "absences.delete"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "123erfasst", category: "time_tracking", name: "123erfasst", icon: "schedule", color: "#F5A623",
+    description: {
+      en: "Project search for construction/trades time tracking via 123erfasst's GraphQL API. Unverified stub — 123erfasst's per-account OAuth discovery and schema aren't publicly documented; not yet confirmed against a live account.",
+      de: "Projektsuche für die Bauzeiterfassung über die GraphQL-API von 123erfasst. Unverifizierter Stub — die kontobezogene OAuth-Erkennung und das Schema von 123erfasst sind nicht öffentlich dokumentiert; noch nicht gegen ein echtes Konto bestätigt.",
+    },
+    capabilities: [{ domain: "projects", tools: ["projects.search"] }],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "openhandwerk", category: "erp", name: "openHandwerk", icon: "construction", color: "#004C97",
+    description: {
+      en: "Craft/trades business management (quotes, invoicing, scheduling). Unverified stub — openHandwerk's REST API needs 10 licenses plus a paid add-on to unlock, and has no public developer documentation; no tools are implemented yet.",
+      de: "Handwerksbetriebsverwaltung (Angebote, Rechnungen, Terminplanung). Unverifizierter Stub — die REST-API von openHandwerk erfordert 10 Lizenzen plus ein kostenpflichtiges Add-on zur Freischaltung und hat keine öffentliche Entwicklerdokumentation; es sind noch keine Tools implementiert.",
+    },
+    capabilities: [],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "outlook", category: "productivity", name: "Outlook", icon: "calendar_month", color: "#0078D4",
+    description: {
+      en: "Calendar event search, lookup, and creation, plus email search and sending, via Microsoft Graph — connected via Microsoft sign-in, not an API key.",
+      de: "Kalenderereignis-Suche, -Abfrage und -Erstellung sowie E-Mail-Suche und -Versand über Microsoft Graph — verbunden per Microsoft-Anmeldung, nicht per API-Schlüssel.",
+    },
+    capabilities: [
+      { domain: "calendar", tools: ["calendar.list_events", "calendar.search", "calendar.create_event"] },
+      { domain: "mail", tools: ["mail.search", "mail.get", "mail.send"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "google", category: "productivity", name: "Google", icon: "calendar_month", color: "#4285F4",
+    description: {
+      en: "Calendar event search, lookup, and creation, plus email search and sending, via Gmail and Google Calendar — connected via Google sign-in, not an API key.",
+      de: "Kalenderereignis-Suche, -Abfrage und -Erstellung sowie E-Mail-Suche und -Versand über Gmail und Google Kalender — verbunden per Google-Anmeldung, nicht per API-Schlüssel.",
+    },
+    capabilities: [
+      { domain: "calendar", tools: ["calendar.list_events", "calendar.search", "calendar.create_event"] },
+      { domain: "mail", tools: ["mail.search", "mail.get", "mail.send"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "browserless", category: "automation", name: "Browserless", icon: "smart_toy", color: "#00D9C0",
+    description: {
+      en: "Rendered-HTML fetch, screenshot, structured scraping, and PDF rendering of any public URL via a hosted headless browser — for pages an agent needs to read but that aren't behind one of the Hub's own connectors.",
+      de: "Abruf von gerendertem HTML, Screenshots, strukturiertes Scraping und PDF-Rendering beliebiger öffentlicher URLs über einen gehosteten Headless-Browser — für Seiten, die ein Agent lesen muss, aber nicht hinter einem der Hub-Connectors liegen.",
+    },
+    capabilities: [{ domain: "browser", tools: ["browser.get_content", "browser.screenshot", "browser.scrape", "browser.pdf"] }],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "steel", category: "automation", name: "Steel.dev", icon: "smart_toy", color: "#7C3AED",
+    description: {
+      en: "Rendered-HTML fetch and screenshot of any public URL via a hosted headless browser — a second automation provider alongside Browserless, with narrower tool coverage (no structured scraping or PDF rendering).",
+      de: "Abruf von gerendertem HTML und Screenshots beliebiger öffentlicher URLs über einen gehosteten Headless-Browser — ein zweiter Automatisierungsanbieter neben Browserless, mit geringerem Funktionsumfang (kein strukturiertes Scraping oder PDF-Rendering).",
+    },
+    capabilities: [{ domain: "browser", tools: ["browser.get_content", "browser.screenshot"] }],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "beeper", category: "messaging", name: "Beeper", icon: "chat", color: "#8B5CF6",
+    description: {
+      en: "Chat/room listing, full-text search, and sending as the connected user, via the standard Matrix protocol Beeper is built on.",
+      de: "Chat-/Raum-Auflistung, Volltextsuche und Versand als der verbundene Benutzer über das Standard-Matrix-Protokoll, auf dem Beeper aufbaut.",
+    },
+    capabilities: [{ domain: "messages", tools: ["messages.list_rooms", "messages.search", "messages.get", "messages.send"] }],
+    verificationStatus: "unverified",
   },
 ];
 

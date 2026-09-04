@@ -5,16 +5,9 @@
  *  hands the raw action_link back to the caller to copy/send manually — same tradeoff as
  *  admin-user-mgmt's generate_magic_link action elsewhere in this codebase. */
 import type { ToolDefinition, ToolModule } from "../lib/types.ts";
+import { requireOwner } from "../lib/authz.ts";
 
 const VALID_ROLES = ["owner", "member"];
-
-// deno-lint-ignore no-explicit-any
-async function requireOwner(admin: any, projectId: string, userId: string | null): Promise<void> {
-  if (!userId) throw new Error("This action requires a signed-in user.");
-  const { data, error } = await admin.from("hub_project_members").select("role").eq("project_id", projectId).eq("user_id", userId).maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data || data.role !== "owner") throw new Error("Only a project owner can manage members.");
-}
 
 export const definitions: ToolDefinition[] = [
   {

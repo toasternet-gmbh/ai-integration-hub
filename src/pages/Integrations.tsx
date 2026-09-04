@@ -3,7 +3,7 @@ import { useOutletContext, useSearchParams } from "react-router-dom";
 import { mcp } from "../lib/mcp";
 import { useI18n } from "../lib/i18n";
 import { CATEGORY_LABEL, PLATFORM_CATALOG, platformsByCategory, platformToolList, VERIFICATION_LABEL, VERIFICATION_TONE } from "../lib/platformCatalog";
-import { buildCredentials, OAUTH2_PLATFORMS } from "../lib/platformCredentials";
+import { buildCredentials, GENERIC_OAUTH2_PLATFORMS } from "../lib/platformCredentials";
 import { PlatformCredentialFields } from "../components/PlatformCredentialFields";
 
 type Ctx = { projectId: string };
@@ -68,6 +68,21 @@ export default function Integrations() {
         { projectId },
       );
       window.location.href = redirect_url;
+    } catch (e) { setResult({ ok: false, message: (e as Error).message }); setBusy(false); }
+  }
+
+  async function connectOAuth() {
+    setErr(null);
+    setResult(null);
+    setBusy(true);
+    try {
+      const redirectUrl = `${window.location.origin}${path("/app/integrations/oauth-callback")}`;
+      const { authorize_url } = await mcp<{ integration_id: string; authorize_url: string }>(
+        "start_oauth_connection",
+        { platform, name, redirect_url: redirectUrl },
+        { projectId },
+      );
+      window.location.href = authorize_url;
     } catch (e) { setResult({ ok: false, message: (e as Error).message }); setBusy(false); }
   }
 
@@ -224,7 +239,7 @@ export default function Integrations() {
                 <PlatformCredentialFields
                   platform={platform} storeUrl={storeUrl} onStoreUrl={setStoreUrl} keyValue={key} onKey={setKey} secret={secret} onSecret={setSecret}
                 />
-                {OAUTH2_PLATFORMS.has(platform) && (
+                {platform === "gocardless" && (
                   <div className="space-y-5">
                     <div>
                       <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">{t("integrations.bankCountry").toUpperCase()}</label>
@@ -246,6 +261,9 @@ export default function Integrations() {
                     )}
                   </div>
                 )}
+                {GENERIC_OAUTH2_PLATFORMS.has(platform) && (
+                  <p className="font-body-md text-body-md text-on-surface-variant">{t("integrations.oauthRedirectNotice")}</p>
+                )}
               </form>
 
               {result && (
@@ -258,8 +276,12 @@ export default function Integrations() {
               )}
             </div>
             <div className="p-gutter border-t border-outline-variant bg-surface-container-lowest sticky bottom-0">
-              <button disabled={busy || (OAUTH2_PLATFORMS.has(platform) && !institutionId)} onClick={OAUTH2_PLATFORMS.has(platform) ? connectBank : connect} className="w-full bg-primary hover:bg-on-primary-container text-on-primary font-label-caps text-label-caps px-4 py-3 rounded transition-colors flex justify-center items-center gap-2 disabled:opacity-60">
-                {OAUTH2_PLATFORMS.has(platform) ? t("integrations.connectBank").toUpperCase() : t("action.connect").toUpperCase()}
+              <button
+                disabled={busy || (platform === "gocardless" && !institutionId)}
+                onClick={platform === "gocardless" ? connectBank : GENERIC_OAUTH2_PLATFORMS.has(platform) ? connectOAuth : connect}
+                className="w-full bg-primary hover:bg-on-primary-container text-on-primary font-label-caps text-label-caps px-4 py-3 rounded transition-colors flex justify-center items-center gap-2 disabled:opacity-60"
+              >
+                {platform === "gocardless" ? t("integrations.connectBank").toUpperCase() : GENERIC_OAUTH2_PLATFORMS.has(platform) ? t("integrations.connectOAuth").toUpperCase() : t("action.connect").toUpperCase()}
                 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
               </button>
             </div>

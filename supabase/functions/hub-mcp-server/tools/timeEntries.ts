@@ -50,7 +50,7 @@ export const definitions: ToolDefinition[] = [
         start_time: { type: "string", description: "ISO 8601 datetime." },
         end_time: { type: "string", description: "ISO 8601 datetime. Omit to start a running timer." },
         project_id: { type: "string", description: "Toggl/Clockify only." },
-        employee_id: { type: "string", description: "Personio only — required there, since attendance is logged per employee, not per API token." },
+        employee_id: { type: "string", description: "Personio and clockin only — required there, since attendance is logged per employee, not per API token." },
       },
     },
   },

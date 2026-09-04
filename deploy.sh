@@ -472,6 +472,7 @@ FRONTEND_URL=$(_env_val FRONTEND_URL)
 PROJECT_SHORT_CODE=$(_env_val PROJECT_SHORT_CODE)
 PAYMENT_TEST_USER=$(_env_val PAYMENT_TEST_USER)
 CREDENTIALS_ENCRYPTION_KEY=$(_env_val CREDENTIALS_ENCRYPTION_KEY)  # AES-256-GCM key for integration credentials (see _shared/crypto.ts)
+CREDENTIALS_ENCRYPTION_KEY_PREVIOUS=$(_env_val CREDENTIALS_ENCRYPTION_KEY_PREVIOUS)  # optional — retired key(s) kept live for decrypt-only during a rotation, see scripts/reencrypt-credentials.ts
 DB_URL=$(_env_val DB_URL)  # used in --remote migration mode
 
 # ── DOMAIN / URL DERIVATION ───────────────────────────────────────────────────
@@ -779,6 +780,7 @@ if [ "$REMOTE_MODE" = false ] && [ "$CADDY_ONLY" = false ]; then
   [ -n "$PROJECT_SHORT_CODE"          ] && _upsert_env "PROJECT_SHORT_CODE"          "$PROJECT_SHORT_CODE"
   [ -n "$PAYMENT_TEST_USER"           ] && _upsert_env "PAYMENT_TEST_USER"           "$PAYMENT_TEST_USER"
   [ -n "$CREDENTIALS_ENCRYPTION_KEY"  ] && _upsert_env "CREDENTIALS_ENCRYPTION_KEY"  "$CREDENTIALS_ENCRYPTION_KEY"
+  [ -n "$CREDENTIALS_ENCRYPTION_KEY_PREVIOUS" ] && _upsert_env "CREDENTIALS_ENCRYPTION_KEY_PREVIOUS" "$CREDENTIALS_ENCRYPTION_KEY_PREVIOUS"
 
   echo "✅ Project .env updated"
 
@@ -897,6 +899,7 @@ services:
       PROJECT_SHORT_CODE: ${PROJECT_SHORT_CODE:-STUDIO}
       PAYMENT_TEST_USER: ${PAYMENT_TEST_USER}
       CREDENTIALS_ENCRYPTION_KEY: ${CREDENTIALS_ENCRYPTION_KEY}
+      CREDENTIALS_ENCRYPTION_KEY_PREVIOUS: ${CREDENTIALS_ENCRYPTION_KEY_PREVIOUS}
 EOF
 
   echo "✅ docker-compose.functions-env.yml written"

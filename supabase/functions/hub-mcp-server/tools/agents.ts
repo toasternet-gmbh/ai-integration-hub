@@ -1,5 +1,6 @@
 /** Agent CRUD + per-tool permission management (mirrors yogaipilot's agentAdmin.ts shape). */
 import type { ToolDefinition, ToolModule } from "../lib/types.ts";
+import { requireOwner } from "../lib/authz.ts";
 
 // deno-lint-ignore no-explicit-any
 async function requireOwnAgent(admin: any, projectId: string, agentId: string): Promise<void> {
@@ -21,7 +22,7 @@ export const definitions: ToolDefinition[] = [
   },
   {
     name: "set_agent_tool_permission",
-    description: "Set an agent's permission for a tool: allow / deny / require_approval. Omit integration_id to set the agent's default rule for that tool across all integrations.",
+    description: "Set an agent's permission for a tool: allow / deny / require_approval. Omit integration_id to set the agent's default rule for that tool across all integrations. Owner-only — requires a signed-in project owner, not just a project API key.",
     inputSchema: {
       type: "object",
       required: ["agent_id", "tool_name", "permission"],
@@ -55,7 +56,10 @@ export const handlers: ToolModule["handlers"] = {
     return data;
   },
 
-  async set_agent_tool_permission(args, { admin, projectId }) {
+  async set_agent_tool_permission(args, { admin, projectId, userId }) {
+    // Policy Engine's whole model rests on this rule set being outside agent control — an agent
+    // must never be able to grant itself (or another agent) a wider permission via its own API key.
+    await requireOwner(admin, projectId, userId);
     const agentId = String(args.agent_id ?? "");
     const toolName = String(args.tool_name ?? "");
     const permission = String(args.permission ?? "");

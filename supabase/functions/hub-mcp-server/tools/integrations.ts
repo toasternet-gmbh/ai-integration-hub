@@ -14,14 +14,15 @@ export const definitions: ToolDefinition[] = [
       "Connect a new external platform (e.g. WooCommerce). Tests the connection immediately. " +
       "Does NOT cover 'gocardless' — banking connections start with list_bank_institutions / " +
       "start_bank_connection instead, since GoCardless uses a consent-redirect flow with no " +
-      "credentials to submit here.",
+      "credentials to submit here. Does NOT cover 'outlook'/'google' either — those start with " +
+      "start_oauth_connection instead, for the same reason.",
     inputSchema: {
       type: "object",
       required: ["platform", "name", "credentials"],
       properties: {
         platform: {
           type: "string",
-          enum: ["woocommerce", "shopware", "shopify", "magento", "wordpress", "lexoffice", "toggl", "sevdesk", "personio", "datev", "jtl", "typo3", "contentful", "clockify", "prestashop", "hubspot"],
+          enum: ["woocommerce", "shopware", "shopify", "magento", "wordpress", "lexoffice", "toggl", "sevdesk", "personio", "datev", "jtl", "typo3", "contentful", "clockify", "prestashop", "hubspot", "pipedrive", "monday", "clockin", "clockodo", "weclapp", "billwerk", "papershift", "123erfasst", "openhandwerk", "browserless", "beeper", "steel"],
         },
         name: { type: "string" },
         credentials: {
@@ -34,7 +35,16 @@ export const definitions: ToolDefinition[] = [
             "personio: {clientId, clientSecret}; datev: {clientId, clientSecret}; " +
             "jtl: {clientId, clientSecret, tenantId}; typo3: {siteUrl, accessToken}; " +
             "contentful: {spaceId, accessToken, environmentId?, managementToken?} (managementToken enables cms.pages.create); clockify: {workspaceId, apiKey}; " +
-            "prestashop: {storeUrl, accessToken (webservice key)}; hubspot: {accessToken (private app token)}.",
+            "prestashop: {storeUrl, accessToken (webservice key)}; hubspot: {accessToken (private app token)}; " +
+            "pipedrive: {companyDomain, apiToken}; " +
+            "monday: {apiToken, dealsBoardId, contactsBoardId?, companiesBoardId?, dealAmountColumnId?, dealStageColumnId?} (board/column ids are account-specific — from the target monday.com board's own settings); " +
+            "clockin: {apiToken}; clockodo: {email, apiKey}; " +
+            "weclapp: {tenant, apiToken}; billwerk: {privateKey} (Billwerk+/Frisbii); " +
+            "papershift: {apiToken, interfaceLanguage?}; 123erfasst: {clientId, clientSecret}; " +
+            "openhandwerk: {apiKey, accountId} (unverified stub — see lib/connectors/openhandwerk.ts); " +
+            "browserless: {apiKey, endpoint?} (endpoint is the region/self-hosted host assigned at signup); " +
+            "beeper: {homeserverUrl, accessToken} (a Matrix access token from your Beeper/Matrix client's own account settings); " +
+            "steel: {apiKey} (fewer tools than browserless — see lib/connectors/steel.ts).",
         },
       },
     },

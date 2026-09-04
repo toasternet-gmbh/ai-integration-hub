@@ -24,6 +24,15 @@ deployed independently — there is no runtime dependency on any other repo.
   subdirectory of a git repo, so the standalone mirror exists specifically to make that work).
 - `deploy.sh` — the one script that stands up/updates the self-hosted Supabase stack (Postgres,
   GoTrue, Kong, edge functions) this project runs on, and optionally the frontend container.
+- `scripts/backup-db.sh` / `scripts/restore-db.sh` — logical backup/restore of this project's
+  self-hosted Postgres via `pg_dump`/`pg_restore` run inside the db container. Deliberately
+  standalone rather than folded into `deploy.sh`, since that script is shared across other
+  projects' deployments too. Not yet wired to a schedule — see their header comments for cron/
+  launchd setup and `BACKUP_KEEP_DAYS`/`BACKUP_KEEP_MIN` retention knobs.
+- `scripts/remote-forward.sh` (macOS/Linux) / `scripts/remote-forward.ps1` (Windows) — exposes the
+  local dev `hub-mcp-server` (via Kong on `VITE_LOCAL_FUNCTIONS_PORT`) to a remote machine with a
+  Cloudflare quick tunnel (`cloudflared tunnel --url ...`). Unauthenticated and ephemeral by
+  design — see each script's header comment before leaving one running or sharing the URL.
 
 ## Commands
 
@@ -167,3 +176,8 @@ Required env (`.env.supabase`, gitignored — see `.env.example` for the templat
   through public research (the guessed one is confirmed wrong); TYPO3 core has no built-in REST
   API for content, so it only works against a site running a specific community extension
   (`cundd/rest`). See each connector file's header comment before touching it.
+- Magento ships `enabled: true` (has since the very first `hub_platform_types` migration) but has
+  no verification evidence anywhere — no commit, no prior doc — per
+  `supabase/migrations/20260902000000_hub_platform_types_verification_status.sql`. Confirm it
+  against a real Magento store before relying on it; it does not belong in the "reaches the real
+  API" group above until that happens.
