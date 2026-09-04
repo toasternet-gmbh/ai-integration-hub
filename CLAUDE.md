@@ -191,6 +191,18 @@ with `redirect_uri_mismatch`).
   real demo order/product data through the Hub — but that's still Docker demo data, not a real
   customer's own store, so it's not yet at the "real customer account" bar the others in this
   group need.
+- `gocardless` (banking) is in the "reaches the real API" group above, and **live-tested
+  2026-09-04**: the local dev stack's `.env.supabase` has placeholder
+  `GOCARDLESS_SECRET_ID`/`SECRET_KEY` (`dummy_secret_id_for_local_dev`/`dummy_secret_key_for_local_dev`),
+  and both `list_bank_institutions` and `start_bank_connection` correctly reached
+  `bankaccountdata.gocardless.com` and got back a real, structured `401
+  {"summary": "Authentication failed", "detail": "No active account found with the given
+  credentials", "status_code": 401}`, parsed and surfaced correctly by `lib/gocardless.ts`.
+  `start_bank_connection`'s existing try/catch also correctly recorded `status: "error"` with that
+  message on the integration row — no orphaned-row bug here (unlike `start_oauth_connection`
+  before its fix above), since this handler already wrapped the requisition call. Confirms host,
+  token endpoint, and error handling are all correct; still needs real GoCardless secrets and a
+  real bank consent round-trip before enabling for real customers.
 - DATEV and TYPO3 connectors are unverified but now ship `enabled: true` (see the founder-decision
   note above): DATEV requires DATEV Marktplatz partner certification (no public sandbox) — every
   call will fail without it; TYPO3 core has no built-in REST API for content, so it only works
