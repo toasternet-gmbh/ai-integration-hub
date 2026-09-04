@@ -22,8 +22,19 @@ export interface WeclappCredentials {
   apiToken: string;
 }
 
+// weclapp tenants are a plain DNS subdomain label — validated up front so a malformed value
+// (e.g. a pasted full URL containing '#', '/', or '@') can't shift the actual request host out
+// from under `AuthenticationToken`, which would otherwise send the token — and any customer/
+// invoice data an agent submits — to whatever host precedes the special character instead of
+// weclapp. Same class of bug fixed for Pipedrive's companyDomain.
+const VALID_TENANT = /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$/;
+
 export class WeclappConnector implements Connector {
-  constructor(private creds: WeclappCredentials) {}
+  constructor(private creds: WeclappCredentials) {
+    if (!VALID_TENANT.test(creds.tenant)) {
+      throw new Error("weclapp tenant must be just the subdomain label (e.g. 'mycompany' from mycompany.weclapp.com) — no scheme, slashes, or dots.");
+    }
+  }
 
   private get base(): string {
     return `https://${this.creds.tenant}.weclapp.com/webapp/api/v1`;
@@ -77,6 +88,14 @@ export class WeclappConnector implements Connector {
         const data = await this.request(`/party/id/${encodeURIComponent(contactId)}`);
         return { data };
       }
+      // NOTE (added on audit): weclapp's /party resource has confirmed `customer`/`supplier`
+      // boolean flags (e.g. `GET /party?supplier-eq=true` is a documented filter), but this Hub's
+      // shared contacts.create schema (tools/bookkeeping.ts, used identically by Lexoffice/
+      // sevDesk/weclapp) has no field to say "create this as a vendor" — every contact created
+      // through the Hub is tagged customer-only in weclapp. Fixing this properly means adding a
+      // discriminator to the shared canonical schema (affecting every bookkeeping platform, not
+      // just this connector) — out of scope for a per-connector fix; flagging here so it isn't a
+      // silent surprise.
       case "contacts.create": {
         const name = String(input.name ?? "");
         if (!name) throw new Error("name is required.");
@@ -85,7 +104,14 @@ export class WeclappConnector implements Connector {
         const data = await this.request("/party", { method: "POST", body: JSON.stringify(body) });
         return { data };
       }
+      // `search`/`status` are declared on the canonical schema but weclapp's salesInvoice filter
+      // field names for them (an invoiceNumber-like text match, and whatever enum/field backs
+      // status) couldn't be confirmed against a live tenant this session — thrown clearly instead
+      // of guessing a field name that could silently filter wrong or be rejected by the API.
       case "invoices.search": {
+        if (input.search || input.status) {
+          throw new Error("weclapp invoices.search does not yet support filtering by search/status — omit them (only page is supported) until this connector's filter field names are confirmed against a live tenant.");
+        }
         const params = new URLSearchParams();
         params.set("page", String(input.page ?? 1));
         params.set("pageSize", "25");

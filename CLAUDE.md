@@ -201,3 +201,19 @@ with `redirect_uri_mismatch`).
   corrected in the connector, but the exact v3/v4 response envelope shape for a single-resource
   fetch couldn't be confirmed from public docs (a JS-rendered SPA) and needs a live-account check
   before enabling.
+- `weclapp` ships `enabled: false`: only the `contacts`/`invoices` slice of its 150+-entity API
+  is implemented, and `/salesInvoice`'s line-item field names plus its filter field names for
+  `invoices.search`'s `search`/`status` (left unimplemented — throws rather than guessing) aren't
+  independently confirmed against a live tenant — see `lib/connectors/weclapp.ts`'s header
+  comment.
+- `billwerk` (Billwerk+/Frisbii) ships `enabled: false`: it's a subscription-billing platform, not
+  a general bookkeeping system, so `invoices.create` maps onto a real payment charge
+  (`POST /charge` with `settle: true`) rather than a bookkeeping document — the Approvals page
+  now surfaces a specific warning for this platform+tool combo, but the connector itself, and its
+  `order_lines` field names, aren't independently confirmed against a live sandbox account. Its
+  `contacts.search`/`invoices.search` filters are left unimplemented (throw rather than guess) for
+  the same reason.
+- `openhandwerk` ships `enabled: false` and implements zero tools, same tier as DATEV/JTL/TYPO3
+  above: its REST API needs 10 licenses plus a paid add-on to unlock, and no public developer
+  documentation exists — nothing was safe to infer, so this is a deliberate empty stub rather than
+  a best-effort guess. See `lib/connectors/openhandwerk.ts`'s header comment.

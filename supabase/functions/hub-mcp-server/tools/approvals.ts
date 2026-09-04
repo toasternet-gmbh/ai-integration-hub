@@ -46,8 +46,14 @@ export const definitions: ToolDefinition[] = [
 
 export const handlers: ToolModule["handlers"] = {
   async list_approvals(args, { admin, projectId }) {
+    // Embeds the integration's platform/name via the integration_id FK — an approver needs to
+    // know WHICH platform a tool call targets, not just the tool name, since the same canonical
+    // tool name can have very different real-world consequences on different platforms (e.g.
+    // invoices.create is a harmless bookkeeping document on Lexoffice/sevDesk/weclapp, but an
+    // immediate real-money charge on Billwerk+/Frisbii).
     const { data, error } = await admin
-      .from("hub_action_approvals").select("id, agent_id, tool_name, integration_id, input, status, requested_by, approved_by, decided_at, result, created_at")
+      .from("hub_action_approvals")
+      .select("id, agent_id, tool_name, integration_id, input, status, requested_by, approved_by, decided_at, result, created_at, hub_integrations(platform, name)")
       .eq("project_id", projectId).eq("status", args.status ? String(args.status) : "pending")
       .order("created_at", { ascending: false }).limit(Number(args.limit ?? 50));
     if (error) throw new Error(error.message);

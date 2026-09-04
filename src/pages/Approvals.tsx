@@ -7,6 +7,18 @@ type Ctx = { projectId: string };
 type Approval = {
   id: string; agent_id: string; tool_name: string; integration_id: string; input: Record<string, unknown>;
   status: string; created_at: string; decided_at?: string; result?: unknown;
+  hub_integrations?: { platform: string; name: string } | null;
+};
+
+/** Same canonical tool name can have very different real-world consequences on different
+ *  platforms — e.g. invoices.create is a harmless bookkeeping document on Lexoffice/sevDesk/
+ *  weclapp, but an immediate real-money charge on Billwerk+/Frisbii (POST /charge with
+ *  settle:true — see lib/connectors/billwerk.ts). Platform+tool combos listed here get a
+ *  prominent warning instead of looking identical to every other pending approval. */
+const MONEY_MOVEMENT_WARNINGS: Record<string, Record<string, string>> = {
+  billwerk: {
+    "invoices.create": "This immediately charges the customer's stored payment method via Billwerk+/Frisbii — it does not just record a bookkeeping document like it would on Lexoffice or sevDesk. This cannot be undone by denying it after the fact.",
+  },
 };
 
 export default function Approvals() {
@@ -71,6 +83,11 @@ export default function Approvals() {
                     <div className="flex flex-col gap-1 mt-0.5">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-mono-data text-mono-data text-primary px-1.5 py-0.5 bg-primary-fixed-dim/20 rounded">{a.tool_name}</span>
+                        {a.hub_integrations && (
+                          <span className="font-label-caps text-label-caps text-on-surface-variant px-1.5 py-0.5 bg-surface-variant rounded uppercase">
+                            {a.hub_integrations.platform} — {a.hub_integrations.name}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -90,6 +107,14 @@ export default function Approvals() {
                       {a.input.order_id ? t("approvals.refundOrder").replace("{id}", String(a.input.order_id)) : a.tool_name}
                     </p>
                   </div>
+                  {a.hub_integrations && MONEY_MOVEMENT_WARNINGS[a.hub_integrations.platform]?.[a.tool_name] && (
+                    <div className="flex items-start gap-3 p-4 bg-error-container/20 rounded border border-error/50 border-l-4 border-l-error">
+                      <span className="material-symbols-outlined text-error text-[20px] shrink-0 mt-0.5">warning</span>
+                      <p className="font-body-md text-body-md text-on-surface">
+                        {MONEY_MOVEMENT_WARNINGS[a.hub_integrations.platform][a.tool_name]}
+                      </p>
+                    </div>
+                  )}
                   {typeof a.input.reason === "string" && (
                     <div className="flex flex-col gap-2 p-4 bg-surface-container rounded border border-outline-variant/50 border-l-4 border-l-tertiary-fixed-dim">
                       <span className="font-label-caps text-label-caps text-outline uppercase tracking-wider">{t("approvals.reason")}</span>
