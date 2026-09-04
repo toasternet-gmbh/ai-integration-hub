@@ -12,13 +12,44 @@
  * This is the least precedented connector in the codebase — no chat/Matrix domain existed here
  * before — so `messages.send` (the one write action) defaults to high/require_approval, same tier
  * as orders.refund: sending a message as the user to a real contact is consequential and
- * effectively irreversible once delivered. Docs: spec.matrix.org/latest/client-server-api/.
+ * effectively irreversible once delivered. `messages.list_rooms`/`messages.search` default to
+ * medium/require_approval too (corrected on audit) rather than the low/allow every other read
+ * tool gets: unlike mail.search on one business inbox, Beeper aggregates a person's entire
+ * cross-platform personal chat history, and the Policy Engine has no per-room scoping to narrow
+ * that with — see the migration's risk-posture note. Docs: spec.matrix.org/latest/client-server-api/.
  */
 import type { Connector, ConnectionResult, Capability, ToolResult } from "./types.ts";
 
 export interface MatrixCredentials {
   homeserverUrl: string;
   accessToken: string;
+}
+
+/** Thrown by request() on a non-ok response, carrying the real HTTP status — lets callers that
+ *  need to distinguish "genuinely not found" (404) from a real failure (401/5xx/network) do so,
+ *  instead of collapsing every error into the same shape. */
+class MatrixRequestError extends Error {
+  constructor(message: string, public status: number) {
+    super(message);
+  }
+}
+
+/** Runs `items` through `fn` with at most `concurrency` in flight at once — Matrix homeservers
+ *  (and Beeper's bridges in particular, which can back hundreds of rooms) rate-limit bursts of
+ *  simultaneous requests from one token, and an edge function has its own cap on concurrent
+ *  outbound connections. Unlike Promise.all(items.map(fn)), this never fires more than
+ *  `concurrency` requests at the same instant regardless of how many `items` there are. */
+async function mapWithConcurrency<T, R>(items: T[], concurrency: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  async function worker() {
+    while (next < items.length) {
+      const i = next++;
+      results[i] = await fn(items[i]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker));
+  return results;
 }
 
 export class MatrixConnector implements Connector {
@@ -36,7 +67,7 @@ export class MatrixConnector implements Connector {
     const body = await res.json().catch(() => null);
     if (!res.ok) {
       const message = (body as { error?: string })?.error ?? `Matrix HTTP ${res.status}`;
-      throw new Error(message);
+      throw new MatrixRequestError(message, res.status);
     }
     return body;
   }
@@ -59,20 +90,23 @@ export class MatrixConnector implements Connector {
       // GET /joined_rooms only returns room ids -- each room's display name is a separate piece of
       // room state (m.room.name), so it's fetched per room. A room with no explicit name (e.g. a
       // DM) has no m.room.name state event, which 404s -- treated as "unnamed" rather than failing
-      // the whole list.
+      // the whole list. Any OTHER error (401/5xx/network) on a room's lookup is re-thrown instead
+      // of being folded into the same "unnamed" result, so a real failure (e.g. a revoked token)
+      // surfaces loudly rather than looking like a room with no name. `limit` is clamped (a Beeper
+      // account can have hundreds of bridged rooms) and per-room lookups run with bounded
+      // concurrency rather than firing every request at once.
       case "messages.list_rooms": {
-        const joined = (await this.request("/joined_rooms")) as { joined_rooms?: string[] };
-        const roomIds = (joined.joined_rooms ?? []).slice(0, Number(input.limit ?? 50));
-        const rooms = await Promise.all(
-          roomIds.map(async (roomId) => {
-            try {
-              const state = (await this.request(`/rooms/${encodeURIComponent(roomId)}/state/m.room.name`)) as { name?: string };
-              return { room_id: roomId, name: state.name ?? null };
-            } catch {
-              return { room_id: roomId, name: null };
-            }
-          }),
-        );
+        const joined = (await this.request("/joined_rooms")) as { joined_rooms?: string[] } | null;
+        const roomIds = (joined?.joined_rooms ?? []).slice(0, Math.min(Number(input.limit ?? 50) || 50, 100));
+        const rooms = await mapWithConcurrency(roomIds, 5, async (roomId) => {
+          try {
+            const state = (await this.request(`/rooms/${encodeURIComponent(roomId)}/state/m.room.name`)) as { name?: string };
+            return { room_id: roomId, name: state.name ?? null };
+          } catch (err) {
+            if (err instanceof MatrixRequestError && err.status === 404) return { room_id: roomId, name: null };
+            throw err;
+          }
+        });
         return { data: rooms };
       }
       // POST /search is the real, documented full-text search endpoint

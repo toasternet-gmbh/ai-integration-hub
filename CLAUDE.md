@@ -217,3 +217,21 @@ with `redirect_uri_mismatch`).
   above: its REST API needs 10 licenses plus a paid add-on to unlock, and no public developer
   documentation exists — nothing was safe to infer, so this is a deliberate empty stub rather than
   a best-effort guess. See `lib/connectors/openhandwerk.ts`'s header comment.
+- `browserless` ships `enabled: false`. Its per-call `assertPublicHttpUrl` check on the target
+  `url` is a real but partial mitigation, not a complete one: it pattern-matches literal IPs/
+  hostnames with no DNS resolution (a domain whose A-record points at a private/metadata address
+  isn't caught), and the actual fetch happens on Browserless's own infrastructure, not this Hub's
+  — so this check protects against careless misuse, not a determined one; the real backstop is
+  expected to be Browserless's own network isolation, which this Hub doesn't control or verify.
+  See `lib/connectors/browserless.ts`'s header comment.
+- `steel` ships `enabled: false` with narrower tool coverage than Browserless (`browser.get_content`
+  and `browser.screenshot` only — no `browser.scrape`/`browser.pdf`, since no one-shot REST
+  endpoint for either could be confirmed on this API). Same partial-URL-mitigation caveat as
+  Browserless applies. See `lib/connectors/steel.ts`'s header comment.
+- `beeper` ships `enabled: false`: the least precedented domain in this codebase (no prior chat/
+  Matrix pattern to build on). `messages.list_rooms`/`messages.search` are `medium`/
+  `require_approval` rather than the `low`/`allow` every other read tool gets, since Beeper
+  aggregates a person's entire cross-platform personal chat history (iMessage/WhatsApp/Telegram/
+  Signal via bridges) and the Policy Engine has no per-room granularity to scope that down with.
+  See `lib/connectors/matrix.ts`'s header comment and
+  `supabase/migrations/20260904000003_messaging_beeper.sql`'s risk-posture note.

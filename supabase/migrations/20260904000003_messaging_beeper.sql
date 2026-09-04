@@ -6,10 +6,18 @@
 -- "user pastes a long-lived token from their own account settings" shape as WordPress's
 -- Application Password -- no consent-redirect, no Hub-wide secret.
 --
--- Risk posture: messages.list_rooms/search/get are read-only, low/allow, same tier as every other
--- read tool. messages.send is high/require_approval -- same tier as orders.refund/mail.send,
--- since sending a message as the connected user to a real contact is consequential and
--- effectively irreversible once delivered.
+-- Risk posture: messages.get is read-only for one already-identified message (room_id+message_id
+-- the caller must already have) -- low/allow, same tier as every other single-record read.
+-- messages.list_rooms and messages.search are NOT the same tier (corrected on audit): unlike
+-- mail.search on Outlook/Google, which reads one business inbox, Beeper aggregates a person's
+-- entire cross-platform personal chat history (iMessage/WhatsApp/Telegram/Signal via bridges) --
+-- messages.search is an unscoped full-text search across the content of every joined room, and
+-- messages.list_rooms enumerates all of them (room names alone are meaningful metadata: "Mom",
+-- "Dr. Smith", "Bank Support"). The Policy Engine has no per-room granularity, only
+-- (agent, tool, integration), so there's no narrower default available -- both are
+-- medium/require_approval rather than low/allow. messages.send is high/require_approval -- same
+-- tier as orders.refund/mail.send, since sending a message as the connected user to a real
+-- contact is consequential and effectively irreversible once delivered.
 --
 -- Ships enabled=false per the standard kill-switch convention until tested against a real
 -- Beeper/Matrix account.
@@ -19,12 +27,12 @@ INSERT INTO hub_platform_types (name, label, category, auth_type, enabled) VALUE
 ON CONFLICT (name) DO NOTHING;
 
 INSERT INTO hub_tool_registry (name, domain, risk, description, input_schema, supported_platforms, default_policy) VALUES
-  ('messages.list_rooms', 'messages', 'low', 'List the chats/rooms the connected user has joined on a messaging integration.',
+  ('messages.list_rooms', 'messages', 'medium', 'List the chats/rooms the connected user has joined on a messaging integration.',
    '{"type":"object","required":["integration_id"],"properties":{"integration_id":{"type":"string"},"limit":{"type":"number"}}}',
-   ARRAY['beeper'], 'allow'),
-  ('messages.search', 'messages', 'low', 'Full-text search across message content on a messaging integration.',
+   ARRAY['beeper'], 'require_approval'),
+  ('messages.search', 'messages', 'medium', 'Full-text search across message content on a messaging integration.',
    '{"type":"object","required":["integration_id","query"],"properties":{"integration_id":{"type":"string"},"query":{"type":"string"}}}',
-   ARRAY['beeper'], 'allow'),
+   ARRAY['beeper'], 'require_approval'),
   ('messages.get', 'messages', 'low', 'Get one message by id from a specific chat/room.',
    '{"type":"object","required":["integration_id","room_id","message_id"],"properties":{"integration_id":{"type":"string"},"room_id":{"type":"string"},"message_id":{"type":"string"}}}',
    ARRAY['beeper'], 'allow'),

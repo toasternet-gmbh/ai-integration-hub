@@ -9,8 +9,15 @@
 -- -- there's no interactive click/type/submit capability (that would need the CDP/session model
 -- this connector deliberately avoids for Deno-compatibility reasons), so there's no
 -- state-mutating action for the Policy Engine to gate the way orders.refund does. low/allow for
--- all four, same tier as every other read tool -- the real safeguard here is the URL-validation
--- inside the connector itself, not the policy tier.
+-- all four, same tier as every other read tool. NOTE (corrected on audit): the connector's
+-- assertPublicHttpUrl check on `url` is a real but partial mitigation, not "the safeguard" --
+-- it pattern-matches literal IPs/hostnames with no DNS resolution, so a domain whose A-record
+-- points at a private/metadata address isn't caught, AND the actual fetch of `url` happens on
+-- Browserless's own infrastructure, not this Hub's -- so this check protects against the most
+-- careless misuse, not a determined one. Requiring human approval per call wouldn't meaningfully
+-- close that gap either (a URL string alone doesn't let a reviewer judge where it resolves), so
+-- the risk tier is left low/allow; the real backstop is expected to be Browserless's own network
+-- isolation, which this Hub doesn't control or verify.
 --
 -- Ships enabled=false per the standard kill-switch convention until tested against a real
 -- Browserless account. Steel.dev (an alternative/complementary provider the founder flagged) is a

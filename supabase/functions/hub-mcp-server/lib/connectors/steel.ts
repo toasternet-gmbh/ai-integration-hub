@@ -18,18 +18,12 @@
  */
 import type { Connector, ConnectionResult, Capability, ToolResult } from "./types.ts";
 import { assertPublicHttpUrl } from "../urlGuard.ts";
+import { bytesToBase64 } from "../base64.ts";
 
 const BASE = "https://api.steel.dev";
 
 export interface SteelCredentials {
   apiKey: string;
-}
-
-function base64Encode(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary);
 }
 
 export class SteelConnector implements Connector {
@@ -59,7 +53,7 @@ export class SteelConnector implements Connector {
     }
     const contentType = res.headers.get("content-type") ?? "application/octet-stream";
     const buffer = await res.arrayBuffer();
-    return { base64: base64Encode(buffer), contentType };
+    return { base64: bytesToBase64(buffer), contentType };
   }
 
   async testConnection(): Promise<ConnectionResult> {
@@ -82,8 +76,8 @@ export class SteelConnector implements Connector {
 
     switch (tool) {
       case "browser.get_content": {
-        const data = (await this.requestJson("/v1/scrape", { url, format: ["html"] })) as { content?: { html?: string } };
-        return { data: { html: data.content?.html ?? data } };
+        const data = (await this.requestJson("/v1/scrape", { url, format: ["html"] })) as { content?: { html?: string } } | null;
+        return { data: { html: data?.content?.html ?? data } };
       }
       case "browser.screenshot": {
         const { base64, contentType } = await this.requestBinary("/v1/screenshot", { url, fullPage: Boolean(input.full_page) });

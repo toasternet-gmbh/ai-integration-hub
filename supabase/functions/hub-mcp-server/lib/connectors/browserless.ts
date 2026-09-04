@@ -4,8 +4,12 @@
  * remote-browser capability that can be pointed at any URL the caller supplies, which is why
  * every tool call below runs the target URL through `assertPublicHttpUrl` (lib/urlGuard.ts)
  * BEFORE dispatching, not just at connector-creation time the way storeUrl/siteUrl connectors do.
- * Without that, an agent could use this Hub to probe internal services or cloud metadata
- * endpoints through Browserless's own network egress.
+ * That check is a real but PARTIAL mitigation, not a complete one (see urlGuard.ts's own header):
+ * it pattern-matches literal IPs/hostnames with no DNS resolution, so a domain whose A-record
+ * points at a private/metadata address isn't caught — and the actual fetch of `url` happens on
+ * Browserless's own infrastructure, not this Hub's, so even a perfect Hub-side check wouldn't be
+ * the real backstop against Browserless's own network being reachable from wherever it runs. Ship
+ * this without overstating what it protects against.
  *
  * Deliberately uses Browserless's plain, stateless REST endpoints (`/content`, `/screenshot`,
  * `/scrape`, `/pdf` — one request launches a browser, does one thing, closes it) rather than its
@@ -19,17 +23,11 @@
  */
 import type { Connector, ConnectionResult, Capability, ToolResult } from "./types.ts";
 import { assertPublicHttpUrl } from "../urlGuard.ts";
+import { bytesToBase64 } from "../base64.ts";
 
 export interface BrowserlessCredentials {
   apiKey: string;
   endpoint?: string;
-}
-
-function base64Encode(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary);
 }
 
 export class BrowserlessConnector implements Connector {
@@ -63,7 +61,7 @@ export class BrowserlessConnector implements Connector {
     }
     const contentType = res.headers.get("content-type") ?? "application/octet-stream";
     const buffer = await res.arrayBuffer();
-    return { base64: base64Encode(buffer), contentType };
+    return { base64: bytesToBase64(buffer), contentType };
   }
 
   async testConnection(): Promise<ConnectionResult> {

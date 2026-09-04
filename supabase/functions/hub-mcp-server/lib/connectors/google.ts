@@ -7,6 +7,7 @@
  * Docs: developers.google.com/calendar/api, developers.google.com/gmail/api.
  */
 import type { Connector, ConnectionResult, Capability, ToolResult } from "./types.ts";
+import { stringToBase64Url } from "../base64.ts";
 
 const CALENDAR_BASE = "https://www.googleapis.com/calendar/v3";
 const GMAIL_BASE = "https://gmail.googleapis.com/gmail/v1";
@@ -15,13 +16,6 @@ export interface GoogleCredentials {
   accessToken: string;
   refreshToken: string;
   expiresAt: number;
-}
-
-function base64UrlEncode(input: string): string {
-  const bytes = new TextEncoder().encode(input);
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 // deno-lint-ignore no-control-regex
@@ -129,7 +123,7 @@ export class GoogleConnector implements Connector {
         const mime = [`To: ${to.join(", ")}`, `Subject: ${encodeMimeHeaderValue(subject)}`, "Content-Type: text/plain; charset=utf-8", "", bodyText].join("\r\n");
         const data = await this.request(GMAIL_BASE, "/users/me/messages/send", {
           method: "POST",
-          body: JSON.stringify({ raw: base64UrlEncode(mime) }),
+          body: JSON.stringify({ raw: stringToBase64Url(mime) }),
         });
         return { data };
       }
