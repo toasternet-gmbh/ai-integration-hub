@@ -26,11 +26,13 @@ export interface MondayCredentials {
   companiesBoardId?: string;
   dealAmountColumnId?: string;
   dealStageColumnId?: string;
+  contactEmailColumnId?: string;
 }
 
 interface MondayItem {
   id: string;
   name: string;
+  board?: { id: string };
   column_values?: { id: string; text: string | null; value: string | null }[];
 }
 
@@ -73,6 +75,29 @@ export class MondayConnector implements Connector {
     ];
   }
 
+  /** monday's `items_page` filter rules operate on column ids, and an item's own `name` isn't a
+   *  column — there's no confirmed way to apply a free-text email/name filter server-side the way
+   *  HubSpot/Pipedrive's dedicated search endpoints do. Rather than silently ignore a supplied
+   *  filter and return unrelated items indistinguishable from a real match (the previous
+   *  behavior), this throws so the caller knows the filter was NOT applied instead of risking an
+   *  agent acting on the wrong contact/company. */
+  private rejectUnsupportedFilter(input: Record<string, unknown>): void {
+    if (input.email || input.name) {
+      throw new Error("monday.com does not support server-side email/name filtering for this tool — omit email/name and filter the returned items yourself, or narrow the configured board.");
+    }
+  }
+
+  /** monday's items_page is cursor-paginated, not page-numbered — there's no way to honor an
+   *  arbitrary `page` > 1 from a stateless call. Failing loudly here beats silently always
+   *  returning page 1, which is what happened before (this connector read a `limit` field the
+   *  canonical schema never even sends). */
+  private resolvePageSize(input: Record<string, unknown>): number {
+    if (input.page != null && Number(input.page) > 1) {
+      throw new Error("monday.com search only supports the first page of results (its API is cursor-paginated, not page-numbered) — narrow the configured board instead of paging further.");
+    }
+    return Math.min(Number(input.limit ?? 25) || 25, 100);
+  }
+
   private async searchBoardItems(boardId: string, limit: number): Promise<unknown> {
     const data = (await this.graphql(
       `query ($boardId: ID!, $limit: Int!) { boards(ids: [$boardId]) { items_page(limit: $limit) { items { id name column_values { id text value } } } } }`,
@@ -81,13 +106,20 @@ export class MondayConnector implements Connector {
     return data.boards?.[0]?.items_page?.items ?? [];
   }
 
-  private async getItem(itemId: string): Promise<unknown> {
+  /** `expectedBoardId` scopes the lookup — monday item ids are global to the whole account (the
+   *  API token isn't board-scoped), so without this check a `deals.get` call could return an item
+   *  from the contacts board, or any other unrelated board the token can see, silently mislabeled
+   *  as a deal. */
+  private async getItem(itemId: string, expectedBoardId: string): Promise<unknown> {
     const data = (await this.graphql(
-      `query ($itemId: [ID!]) { items(ids: $itemId) { id name column_values { id text value } } }`,
+      `query ($itemId: [ID!]) { items(ids: $itemId) { id name board { id } column_values { id text value } } }`,
       { itemId: [itemId] },
     )) as { items?: MondayItem[] };
     const item = data.items?.[0];
     if (!item) throw new Error(`monday.com item '${itemId}' not found.`);
+    if (item.board?.id !== expectedBoardId) {
+      throw new Error(`monday.com item '${itemId}' does not belong to the board configured for this tool.`);
+    }
     return item;
   }
 
@@ -101,57 +133,63 @@ export class MondayConnector implements Connector {
 
   async execute(tool: string, input: Record<string, unknown>): Promise<ToolResult> {
     switch (tool) {
-      // monday's items_page supports column-value filter rules, but not a generic free-text
-      // search across an unknown board's columns the way HubSpot/Pipedrive's dedicated
-      // search endpoints do -- so email/name (contacts) and name (companies) filters are accepted
-      // for input-schema conformance but not applied server-side; this returns the board's items
-      // unfiltered, same posture as monday.com's own API surface for a generic board.
       case "contacts.search": {
+        this.rejectUnsupportedFilter(input);
         const boardId = this.requireBoard(this.creds.contactsBoardId, "contactsBoardId");
-        const data = await this.searchBoardItems(boardId, Number(input.limit ?? 25));
+        const data = await this.searchBoardItems(boardId, this.resolvePageSize(input));
         return { data };
       }
       case "contacts.get": {
         const contactId = String(input.contact_id ?? "");
         if (!contactId) throw new Error("contact_id is required.");
-        const data = await this.getItem(contactId);
+        const boardId = this.requireBoard(this.creds.contactsBoardId, "contactsBoardId");
+        const data = await this.getItem(contactId, boardId);
         return { data };
       }
       case "contacts.create": {
         const boardId = this.requireBoard(this.creds.contactsBoardId, "contactsBoardId");
         const name = String(input.name ?? "");
         if (!name) throw new Error("name is required.");
-        const data = await this.createItem(boardId, name);
+        const columnValues: Record<string, unknown> = {};
+        if (input.email && this.creds.contactEmailColumnId) {
+          columnValues[this.creds.contactEmailColumnId] = { email: String(input.email), text: String(input.email) };
+        }
+        const data = await this.createItem(boardId, name, columnValues);
         return { data };
       }
       case "deals.search": {
-        const data = await this.searchBoardItems(this.creds.dealsBoardId, Number(input.limit ?? 25));
+        const boardId = this.requireBoard(this.creds.dealsBoardId, "dealsBoardId");
+        const data = await this.searchBoardItems(boardId, this.resolvePageSize(input));
         return { data };
       }
       case "deals.get": {
         const dealId = String(input.deal_id ?? "");
         if (!dealId) throw new Error("deal_id is required.");
-        const data = await this.getItem(dealId);
+        const boardId = this.requireBoard(this.creds.dealsBoardId, "dealsBoardId");
+        const data = await this.getItem(dealId, boardId);
         return { data };
       }
       case "deals.create": {
+        const boardId = this.requireBoard(this.creds.dealsBoardId, "dealsBoardId");
         const name = String(input.name ?? "");
         if (!name) throw new Error("name is required.");
         const columnValues: Record<string, unknown> = {};
         if (input.amount != null && this.creds.dealAmountColumnId) columnValues[this.creds.dealAmountColumnId] = input.amount;
         if (input.stage && this.creds.dealStageColumnId) columnValues[this.creds.dealStageColumnId] = { label: String(input.stage) };
-        const data = await this.createItem(this.creds.dealsBoardId, name, columnValues);
+        const data = await this.createItem(boardId, name, columnValues);
         return { data };
       }
       case "companies.search": {
+        this.rejectUnsupportedFilter(input);
         const boardId = this.requireBoard(this.creds.companiesBoardId, "companiesBoardId");
-        const data = await this.searchBoardItems(boardId, Number(input.limit ?? 25));
+        const data = await this.searchBoardItems(boardId, this.resolvePageSize(input));
         return { data };
       }
       case "companies.get": {
         const companyId = String(input.company_id ?? "");
         if (!companyId) throw new Error("company_id is required.");
-        const data = await this.getItem(companyId);
+        const boardId = this.requireBoard(this.creds.companiesBoardId, "companiesBoardId");
+        const data = await this.getItem(companyId, boardId);
         return { data };
       }
       default:

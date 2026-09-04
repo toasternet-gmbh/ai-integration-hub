@@ -38,7 +38,7 @@ export const definitions: ToolDefinition[] = [
             "contentful: {spaceId, accessToken, environmentId?, managementToken?} (managementToken enables cms.pages.create); clockify: {workspaceId, apiKey}; " +
             "prestashop: {storeUrl, accessToken (webservice key)}; hubspot: {accessToken (private app token)}; " +
             "pipedrive: {companyDomain, apiToken}; " +
-            "monday: {apiToken, dealsBoardId, contactsBoardId?, companiesBoardId?, dealAmountColumnId?, dealStageColumnId?} (board/column ids are account-specific — from the target monday.com board's own settings); " +
+            "monday: {apiToken, dealsBoardId, contactsBoardId?, companiesBoardId?, dealAmountColumnId?, dealStageColumnId?, contactEmailColumnId?} (board/column ids are account-specific — from the target monday.com board's own settings); " +
             "clockin: {apiToken}; clockodo: {email, apiKey}; " +
             "weclapp: {tenant, apiToken}; billwerk: {privateKey} (Billwerk+/Frisbii); " +
             "papershift: {apiToken, interfaceLanguage?}; 123erfasst: {clientId, clientSecret}; " +

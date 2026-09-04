@@ -95,7 +95,7 @@ export async function loadConnector(integration: { platform: string; credentials
     case "pipedrive":
       return new PipedriveConnector(creds as { companyDomain: string; apiToken: string });
     case "monday":
-      return new MondayConnector(creds as { apiToken: string; dealsBoardId: string; contactsBoardId?: string; companiesBoardId?: string; dealAmountColumnId?: string; dealStageColumnId?: string });
+      return new MondayConnector(creds as { apiToken: string; dealsBoardId: string; contactsBoardId?: string; companiesBoardId?: string; dealAmountColumnId?: string; dealStageColumnId?: string; contactEmailColumnId?: string });
     case "clockin":
       return new ClockinConnector(creds as { apiToken: string });
     case "clockodo":

@@ -129,6 +129,8 @@ export const STRINGS: Record<string, { en: string; de: string }> = {
   "integrations.webserviceKey": { en: "Webservice key", de: "Webservice-Key" },
   "integrations.companyDomain": { en: "Company domain", de: "Firmen-Domain" },
   "integrations.dealsBoardId": { en: "Deals board ID", de: "Deals-Board-ID" },
+  "integrations.mondayContactsBoardId": { en: "Contacts board ID (optional)", de: "Kontakte-Board-ID (optional)" },
+  "integrations.mondayCompaniesBoardId": { en: "Companies board ID (optional)", de: "Unternehmen-Board-ID (optional)" },
   "integrations.privateKey": { en: "Private key", de: "Private Key" },
   "integrations.email": { en: "Email", de: "E-Mail" },
   "integrations.accountId": { en: "Account ID", de: "Konto-ID" },

@@ -43,6 +43,13 @@ export default function Integrations() {
   const [institutionId, setInstitutionId] = useState("");
   const [institutionsBusy, setInstitutionsBusy] = useState(false);
 
+  // monday.com has no dedicated contact/company object — these two boards are optional (deals
+  // work without them) but must be settable through the connect form, or contacts.*/companies.*
+  // are advertised in the catalog yet unreachable for anyone who doesn't know to bypass the UI
+  // with a raw create_integration call.
+  const [mondayContactsBoardId, setMondayContactsBoardId] = useState("");
+  const [mondayCompaniesBoardId, setMondayCompaniesBoardId] = useState("");
+
   async function reload() {
     try { setRows(await mcp<Integration[]>("list_integrations", {}, { projectId })); } catch (e) { setErr((e as Error).message); }
   }
@@ -92,6 +99,10 @@ export default function Integrations() {
     setBusy(true);
     try {
       const credentials = buildCredentials(platform, { storeUrl, key, secret });
+      if (platform === "monday") {
+        if (mondayContactsBoardId) (credentials as Record<string, unknown>).contactsBoardId = mondayContactsBoardId;
+        if (mondayCompaniesBoardId) (credentials as Record<string, unknown>).companiesBoardId = mondayCompaniesBoardId;
+      }
       await mcp("create_integration", { platform, name, credentials }, { projectId });
       // Re-fetch rather than trust a hardcoded capability list — hub_integrations.capabilities
       // is what create_integration actually populates, and it varies by platform/tool support.
@@ -105,7 +116,7 @@ export default function Integrations() {
           ? `Connected — ${toolNames.length} ${toolNames.length === 1 ? "capability" : "capabilities"} discovered: ${toolNames.join(", ")}`
           : `Connected — no capabilities discovered yet for ${platform}. Check the integration's status once the next sync completes.`,
       });
-      setName(""); setStoreUrl(""); setKey(""); setSecret("");
+      setName(""); setStoreUrl(""); setKey(""); setSecret(""); setMondayContactsBoardId(""); setMondayCompaniesBoardId("");
     } catch (e) { setResult({ ok: false, message: (e as Error).message }); } finally { setBusy(false); }
   }
 
@@ -239,6 +250,18 @@ export default function Integrations() {
                 <PlatformCredentialFields
                   platform={platform} storeUrl={storeUrl} onStoreUrl={setStoreUrl} keyValue={key} onKey={setKey} secret={secret} onSecret={setSecret}
                 />
+                {platform === "monday" && (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">{t("integrations.mondayContactsBoardId").toUpperCase()}</label>
+                      <input value={mondayContactsBoardId} onChange={(e) => setMondayContactsBoardId(e.target.value)} className="w-full px-4 py-2 border border-outline-variant rounded font-mono-data text-mono-data bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" />
+                    </div>
+                    <div>
+                      <label className="block font-label-caps text-label-caps text-on-surface-variant mb-1">{t("integrations.mondayCompaniesBoardId").toUpperCase()}</label>
+                      <input value={mondayCompaniesBoardId} onChange={(e) => setMondayCompaniesBoardId(e.target.value)} className="w-full px-4 py-2 border border-outline-variant rounded font-mono-data text-mono-data bg-surface-container-lowest text-on-surface focus:outline-none focus:border-primary" />
+                    </div>
+                  </div>
+                )}
                 {platform === "gocardless" && (
                   <div className="space-y-5">
                     <div>

@@ -29,9 +29,16 @@ INSERT INTO hub_platform_types (name, label, category, auth_type, enabled) VALUE
   ('clockodo', 'Clockodo', 'time_tracking', 'api_key', false)
 ON CONFLICT (name) DO NOTHING;
 
-UPDATE hub_tool_registry SET supported_platforms = supported_platforms || ARRAY['pipedrive', 'monday']
+-- One value per guarded UPDATE (matching the clockin/clockodo statements below) rather than a
+-- single multi-value append guarded on only one of the two values -- keeps this safe to reapply
+-- even if a future migration ever adds one of these two platforms to these rows independently.
+UPDATE hub_tool_registry SET supported_platforms = supported_platforms || ARRAY['pipedrive']
 WHERE name IN ('contacts.search', 'contacts.get', 'contacts.create', 'deals.search', 'deals.get', 'deals.create', 'companies.search', 'companies.get')
   AND NOT ('pipedrive' = ANY(supported_platforms));
+
+UPDATE hub_tool_registry SET supported_platforms = supported_platforms || ARRAY['monday']
+WHERE name IN ('contacts.search', 'contacts.get', 'contacts.create', 'deals.search', 'deals.get', 'deals.create', 'companies.search', 'companies.get')
+  AND NOT ('monday' = ANY(supported_platforms));
 
 UPDATE hub_tool_registry SET supported_platforms = supported_platforms || ARRAY['clockin']
 WHERE name IN ('time_entries.search', 'time_entries.create', 'projects.search')

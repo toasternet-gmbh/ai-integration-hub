@@ -12,8 +12,19 @@ export interface PipedriveCredentials {
   apiToken: string;
 }
 
+// Pipedrive company domains are a plain DNS subdomain label (letters/digits/hyphens, no dots,
+// no scheme) — validated up front so a malformed value (e.g. a pasted full URL containing '#',
+// '/', or '@') can't shift the actual request host out from under `x-api-token`, which would
+// otherwise send the token — and any data an agent submits via contacts.create/deals.create —
+// to whatever host precedes the special character instead of Pipedrive.
+const VALID_COMPANY_DOMAIN = /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$/;
+
 export class PipedriveConnector implements Connector {
-  constructor(private creds: PipedriveCredentials) {}
+  constructor(private creds: PipedriveCredentials) {
+    if (!VALID_COMPANY_DOMAIN.test(creds.companyDomain)) {
+      throw new Error("Pipedrive companyDomain must be just the subdomain label (e.g. 'mycompany' from mycompany.pipedrive.com) — no scheme, slashes, or dots.");
+    }
+  }
 
   private get base(): string {
     return `https://${this.creds.companyDomain}.pipedrive.com/api/v2`;
@@ -47,6 +58,21 @@ export class PipedriveConnector implements Connector {
       { domain: "deals", tools: ["deals.search", "deals.get", "deals.create"] },
       { domain: "companies", tools: ["companies.search", "companies.get"] },
     ];
+  }
+
+  // The canonical deals.create schema documents `stage` as a plain string (same posture as
+  // HubSpot's `stage`), but Pipedrive's API wants a numeric `stage_id` — a caller passing a
+  // human-readable name like "Qualified" must not have it silently coerced to NaN/null (which
+  // Pipedrive would then treat as "no stage" and fall back to the pipeline's default, dropping
+  // the caller's intent with no error). Numeric strings pass straight through; anything else is
+  // resolved by exact, case-insensitive name against GET /stages (real, confirmed endpoint —
+  // developers.pipedrive.com/docs/api/v2/Stages).
+  private async resolveStageId(stage: string): Promise<number> {
+    if (/^\d+$/.test(stage)) return Number(stage);
+    const data = (await this.request("/stages")) as { data?: { id: number; name: string }[] };
+    const match = (data.data ?? []).find((s) => s.name.toLowerCase() === stage.toLowerCase());
+    if (!match) throw new Error(`Pipedrive stage '${stage}' not found. Pass a numeric stage_id, or an exact stage name from this account's pipelines.`);
+    return match.id;
   }
 
   async execute(tool: string, input: Record<string, unknown>): Promise<ToolResult> {
@@ -102,7 +128,7 @@ export class PipedriveConnector implements Connector {
         if (!name) throw new Error("name is required.");
         const body: Record<string, unknown> = { title: name };
         if (input.amount != null) body.value = input.amount;
-        if (input.stage) body.stage_id = Number(input.stage);
+        if (input.stage) body.stage_id = await this.resolveStageId(String(input.stage));
         const data = await this.request("/deals", { method: "POST", body: JSON.stringify(body) });
         return { data };
       }

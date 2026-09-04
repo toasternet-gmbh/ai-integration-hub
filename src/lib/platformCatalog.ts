@@ -445,8 +445,8 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
   {
     id: "monday", category: "crm", name: "monday.com", icon: "view_kanban", color: "#FF3D57",
     description: {
-      en: "Contact, deal, and company search, lookup, and creation on a monday sales CRM account, mapped onto the customer's own Deals/Contacts/Accounts boards via monday's GraphQL API.",
-      de: "Kontakt-, Deal- und Unternehmenssuche, -abfrage und -erstellung auf einem monday-sales-CRM-Konto, abgebildet auf die eigenen Deals-/Kontakte-/Konten-Boards des Kunden über die GraphQL-API von monday.",
+      en: "Contact, deal, and company search, lookup, and creation on a monday sales CRM account, mapped onto the customer's own Deals/Contacts/Accounts boards via monday's GraphQL API. The Deals board is required to connect; the Contacts and Companies boards are optional fields in the connect form — leave them blank to connect deals only.",
+      de: "Kontakt-, Deal- und Unternehmenssuche, -abfrage und -erstellung auf einem monday-sales-CRM-Konto, abgebildet auf die eigenen Deals-/Kontakte-/Konten-Boards des Kunden über die GraphQL-API von monday. Das Deals-Board ist zum Verbinden erforderlich; die Kontakte- und Unternehmen-Boards sind optionale Felder im Verbindungsformular — leer lassen, um nur Deals zu verbinden.",
     },
     capabilities: [
       { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
