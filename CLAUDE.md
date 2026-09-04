@@ -162,18 +162,22 @@ with `redirect_uri_mismatch`).
 
 ## Known gaps
 
-- As of 2026-09-04, this session's newly-added connectors (Pipedrive, monday.com, weclapp,
-  Billwerk+/Frisbii, clockin, Clockodo, 123erfasst, Papershift, openHandwerk, Outlook, Google,
-  Browserless, Steel.dev, Beeper) plus GoCardless were flipped from `enabled: false` to
-  `enabled: true` (`supabase/migrations/20260904000005_enable_new_platforms.sql`) per an explicit
-  founder decision to prioritize agent-facing MCP tool availability over this project's usual
-  "tested against a real, fully-authorized customer account" bar before flipping a kill switch —
-  the bar PrestaShop's flip in `20260827000009_ecommerce_prestashop_enable.sql` did meet.
-  `enabled: true` here does **not** mean verified: every caveat below about unconfirmed endpoints,
-  guessed field names, or untested filters still applies to these platforms exactly as before —
-  the flip only means the Policy Engine and `create_integration` no longer block a project from
-  trying them. DATEV, JTL, TYPO3, and Magento's pre-existing verification gaps are unaffected by
-  this decision and remain as described below.
+- As of 2026-09-04, **every** `hub_platform_types` row is `enabled: true` — first this session's
+  newly-added connectors (Pipedrive, monday.com, weclapp, Billwerk+/Frisbii, clockin, Clockodo,
+  123erfasst, Papershift, openHandwerk, Outlook, Google, Browserless, Steel.dev, Beeper) plus
+  GoCardless (`supabase/migrations/20260904000005_enable_new_platforms.sql`), then the last four
+  holdouts — DATEV, JTL, TYPO3, HubSpot, Clockify, Contentful
+  (`supabase/migrations/20260904000006_enable_all_platforms.sql`; lexoffice, wordpress, toggl,
+  sevdesk, and personio had already been flipped live on this project's dev DB by an earlier,
+  unmigrated admin action, which that migration also makes reproducible for a fresh deploy). This
+  is an explicit founder decision to prioritize agent-facing MCP tool availability over this
+  project's usual "tested against a real, fully-authorized customer account" bar before flipping a
+  kill switch — the bar PrestaShop's flip in `20260827000009_ecommerce_prestashop_enable.sql` did
+  meet. `enabled: true` here does **not** mean verified: every caveat below about unconfirmed
+  endpoints, guessed field names, untested filters, or (for JTL) a **confirmed-wrong** API host
+  still applies exactly as before — the flip only means the Policy Engine and `create_integration`
+  no longer block a project from trying a platform. Confirm the specific caveat for a platform
+  below before relying on it for a real customer.
 - `hub-billing`/`hub-billing-webhook` are built but not fully wired up against this project's own
   Supabase stack yet (test-mode Stripe keys only).
 - Resend has no verified sending domain — auth emails only reach the account owner.
@@ -187,11 +191,13 @@ with `redirect_uri_mismatch`).
   real demo order/product data through the Hub — but that's still Docker demo data, not a real
   customer's own store, so it's not yet at the "real customer account" bar the others in this
   group need.
-- DATEV, JTL, and TYPO3 connectors are unverified and ship `enabled: false`: DATEV requires DATEV
-  Marktplatz partner certification (no public sandbox); JTL's real API host couldn't be found
-  through public research (the guessed one is confirmed wrong); TYPO3 core has no built-in REST
-  API for content, so it only works against a site running a specific community extension
-  (`cundd/rest`). See each connector file's header comment before touching it.
+- DATEV, JTL, and TYPO3 connectors are unverified but now ship `enabled: true` (see the
+  founder-decision note above): DATEV requires DATEV Marktplatz partner certification (no public
+  sandbox) — every call will fail without it; JTL's real API host couldn't be found through public
+  research and **the guessed one is confirmed wrong** — every call will fail with a connection
+  error, not just an unverified one; TYPO3 core has no built-in REST API for content, so it only
+  works against a site running a specific community extension (`cundd/rest`). See each connector
+  file's header comment before touching it.
 - Magento ships `enabled: true` (has since the very first `hub_platform_types` migration) but has
   no verification evidence anywhere — no commit, no prior doc — per
   `supabase/migrations/20260902000000_hub_platform_types_verification_status.sql`. Confirm it

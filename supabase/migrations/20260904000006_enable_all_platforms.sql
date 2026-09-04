@@ -1,0 +1,11 @@
+-- Founder decision: enable every remaining platform type, no exceptions -- clockify, contentful,
+-- datev, and hubspot were the last four still `enabled: false` at the time of this migration
+-- (jtl, typo3, lexoffice, wordpress, toggl, sevdesk, and personio had already been flipped live on
+-- this project's dev DB by an earlier, unmigrated admin action -- this migration also makes that
+-- state reproducible for a fresh deploy). Blanket WHERE clause rather than an explicit name list
+-- so this also covers any future platform inserted with the enabled column's own DEFAULT false.
+--
+-- `enabled: true` still does NOT mean verified -- see CLAUDE.md's "Known gaps" section, updated
+-- alongside this migration, for what's still actually unconfirmed or outright broken (e.g. JTL's
+-- guessed API host) per platform. This only removes the Policy Engine / create_integration gate.
+UPDATE hub_platform_types SET enabled = true WHERE enabled = false;
