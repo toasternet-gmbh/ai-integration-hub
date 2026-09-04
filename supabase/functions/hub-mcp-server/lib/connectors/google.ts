@@ -24,6 +24,21 @@ function base64UrlEncode(input: string): string {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+// deno-lint-ignore no-control-regex
+const ASCII_ONLY = /^[\x00-\x7F]*$/;
+
+/** RFC 5322 header field bodies are US-ASCII only; RFC 2047 "encoded-word" syntax
+ *  (`=?UTF-8?B?<base64>?=`) is how a non-ASCII value (e.g. a German subject line with umlauts)
+ *  gets into one without violating the spec or getting mangled by strict mail systems. Left
+ *  as-is when already pure ASCII, which is the common case and needs no encoding at all. */
+function encodeMimeHeaderValue(value: string): string {
+  if (ASCII_ONLY.test(value)) return value;
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return `=?UTF-8?B?${btoa(binary)}?=`;
+}
+
 export class GoogleConnector implements Connector {
   constructor(private creds: GoogleCredentials) {}
 
@@ -111,7 +126,7 @@ export class GoogleConnector implements Connector {
         const subject = String(input.subject ?? "");
         const bodyText = String(input.body ?? "");
         if (to.length === 0 || !subject) throw new Error("to and subject are required.");
-        const mime = [`To: ${to.join(", ")}`, `Subject: ${subject}`, "Content-Type: text/plain; charset=utf-8", "", bodyText].join("\r\n");
+        const mime = [`To: ${to.join(", ")}`, `Subject: ${encodeMimeHeaderValue(subject)}`, "Content-Type: text/plain; charset=utf-8", "", bodyText].join("\r\n");
         const data = await this.request(GMAIL_BASE, "/users/me/messages/send", {
           method: "POST",
           body: JSON.stringify({ raw: base64UrlEncode(mime) }),

@@ -4,6 +4,7 @@
 import type { ToolDefinition, ToolModule } from "../lib/types.ts";
 import { encryptCredentials } from "../lib/crypto.ts";
 import { loadConnector } from "../lib/connectors/factory.ts";
+import { loadConnectorWithRefresh } from "../lib/connectors/oauthRefresh.ts";
 
 const SAFE_COLUMNS = "id, project_id, platform, name, status, capabilities, last_sync_at, error_status, created_at";
 
@@ -127,7 +128,7 @@ export const handlers: ToolModule["handlers"] = {
     if (error) throw new Error(error.message);
     if (!integration) throw new Error("Integration not found.");
 
-    const connector = await loadConnector(integration);
+    const connector = await loadConnectorWithRefresh(admin, integration);
     const result = await connector.testConnection();
     const { data: updated, error: updErr } = await admin
       .from("hub_integrations")

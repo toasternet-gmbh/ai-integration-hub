@@ -13,6 +13,19 @@
 
 export type OAuth2Platform = "outlook" | "google";
 
+/** Single source of truth for "which platforms go through this generic OAuth2 consent-redirect
+ *  flow" — tools/oauthConnections.ts and lib/connectors/oauthRefresh.ts both derive their
+ *  platform checks from this instead of maintaining their own separate hardcoded lists, so the
+ *  three can't drift out of sync (previously outlook/google were listed independently in three
+ *  places plus the frontend). Does NOT include 'gocardless', which is also `auth_type: 'oauth2'`
+ *  in hub_platform_types but uses its own bespoke, non-refreshing bank-requisition flow instead
+ *  of this one — see lib/gocardless.ts. */
+export const OAUTH2_PLATFORMS: readonly OAuth2Platform[] = ["outlook", "google"];
+
+export function isOAuth2Platform(platform: string): platform is OAuth2Platform {
+  return (OAUTH2_PLATFORMS as readonly string[]).includes(platform);
+}
+
 interface ProviderConfig {
   authorizeUrl: string;
   tokenUrl: string;

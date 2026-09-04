@@ -154,7 +154,11 @@ stack.
 Required env (`.env.supabase`, gitignored — see `.env.example` for the template):
 `CREDENTIALS_ENCRYPTION_KEY` (32 raw bytes, base64 — connector credential encryption) is required;
 `GOCARDLESS_SECRET_ID`/`GOCARDLESS_SECRET_KEY` are optional, needed only to enable the
-`gocardless` banking platform.
+`gocardless` banking platform; `MICROSOFT_CLIENT_ID`/`MICROSOFT_CLIENT_SECRET`/
+`MICROSOFT_TENANT_ID` and `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` are optional, needed only to
+enable the `outlook`/`google` productivity platforms — see `.env.example`'s comments for the
+redirect-URI registration requirement (both `/en/...` and `/de/...` variants, or connections fail
+with `redirect_uri_mismatch`).
 
 ## Known gaps
 
@@ -181,3 +185,6 @@ Required env (`.env.supabase`, gitignored — see `.env.example` for the templat
   `supabase/migrations/20260902000000_hub_platform_types_verification_status.sql`. Confirm it
   against a real Magento store before relying on it; it does not belong in the "reaches the real
   API" group above until that happens.
+- `outlook` and `google` (productivity: calendar + mail) ship `enabled: false` pending
+  `MICROSOFT_CLIENT_ID`/`SECRET` and `GOOGLE_CLIENT_ID`/`SECRET` being configured and a real
+  consent-redirect round-trip being tested end-to-end — see `.env.example`'s comments on both.

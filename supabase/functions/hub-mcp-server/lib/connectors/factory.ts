@@ -114,8 +114,11 @@ export async function loadConnector(integration: { platform: string; credentials
       return new OutlookConnector(creds as { accessToken: string; refreshToken: string; expiresAt: number });
     case "google":
       return new GoogleConnector(creds as { accessToken: string; refreshToken: string; expiresAt: number });
-    case "browserless":
-      return new BrowserlessConnector(creds as { apiKey: string; endpoint?: string });
+    case "browserless": {
+      const c = creds as { apiKey: string; endpoint?: string };
+      if (c.endpoint) assertPublicHttpUrl(c.endpoint, "endpoint");
+      return new BrowserlessConnector(c);
+    }
     case "beeper": {
       const c = creds as { homeserverUrl: string; accessToken: string };
       assertPublicHttpUrl(c.homeserverUrl, "homeserverUrl");

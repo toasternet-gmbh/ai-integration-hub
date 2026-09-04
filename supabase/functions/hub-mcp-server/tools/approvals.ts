@@ -8,7 +8,7 @@
  */
 import type { ToolContext, ToolDefinition, ToolModule } from "../lib/types.ts";
 import { recordAudit } from "../lib/policy.ts";
-import { loadConnector } from "../lib/connectors/factory.ts";
+import { loadConnectorWithRefresh } from "../lib/connectors/oauthRefresh.ts";
 import { requireOwner } from "../lib/authz.ts";
 
 export const definitions: ToolDefinition[] = [
@@ -95,7 +95,7 @@ export const handlers: ToolModule["handlers"] = {
     if (!integration) throw new Error("Integration no longer exists — approval recorded as approved but not executed.");
 
     try {
-      const connector = await loadConnector(integration);
+      const connector = await loadConnectorWithRefresh(admin, integration);
       const result = await connector.execute(claimed.tool_name, (claimed.input ?? {}) as Record<string, unknown>);
       const { error: updErr } = await admin.from("hub_action_approvals").update({ status: "executed", result: result.data }).eq("id", approvalId);
       if (updErr) console.error("[resolve_approval] executed but failed to mark row 'executed':", updErr.message);

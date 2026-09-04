@@ -13,23 +13,43 @@
 import type { Connector } from "./types.ts";
 import type { SupabaseAdmin } from "../types.ts";
 import { decryptCredentials, encryptCredentials } from "../crypto.ts";
-import { refreshTokens } from "../oauth2.ts";
+import { isOAuth2Platform, refreshTokens } from "../oauth2.ts";
 import { loadConnector } from "./factory.ts";
 
-const REFRESHABLE_PLATFORMS = new Set<string>(["outlook", "google"]);
+interface OAuth2Creds {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+}
 
 export async function loadConnectorWithRefresh(
   admin: SupabaseAdmin,
   integration: { id: string; platform: string; credentials_encrypted: string },
 ): Promise<Connector> {
-  if (!REFRESHABLE_PLATFORMS.has(integration.platform)) return loadConnector(integration);
+  if (!isOAuth2Platform(integration.platform)) return loadConnector(integration);
 
-  const creds = (await decryptCredentials(integration.credentials_encrypted)) as { accessToken: string; refreshToken: string; expiresAt: number };
+  const creds = (await decryptCredentials(integration.credentials_encrypted)) as unknown as OAuth2Creds;
   if (creds.expiresAt > Date.now() + 60_000) return loadConnector(integration);
 
-  const refreshed = await refreshTokens(integration.platform, creds.refreshToken);
-  const encrypted = await encryptCredentials({ ...refreshed });
-  const { error } = await admin.from("hub_integrations").update({ credentials_encrypted: encrypted }).eq("id", integration.id);
-  if (error) throw new Error(error.message);
-  return loadConnector({ platform: integration.platform, credentials_encrypted: encrypted });
+  // Microsoft rotates refresh tokens on each redemption — two concurrent calls against the same
+  // near-expiry integration can both read this same stale refreshToken and race to redeem it;
+  // the loser gets `invalid_grant` directly from Microsoft, not from anything this function
+  // controls, so there's no lock that prevents the race itself. Instead: on failure, re-check
+  // whether a concurrent call already won and left the row with a still-valid token — if so, use
+  // that instead of failing the whole request over a race the caller didn't cause.
+  try {
+    const refreshed = await refreshTokens(integration.platform, creds.refreshToken);
+    const encrypted = await encryptCredentials({ ...refreshed });
+    const { error } = await admin.from("hub_integrations").update({ credentials_encrypted: encrypted }).eq("id", integration.id);
+    if (error) throw new Error(error.message);
+    return loadConnector({ platform: integration.platform, credentials_encrypted: encrypted });
+  } catch (err) {
+    const { data: latest, error: fetchErr } = await admin
+      .from("hub_integrations").select("credentials_encrypted").eq("id", integration.id).maybeSingle();
+    if (!fetchErr && latest) {
+      const latestCreds = (await decryptCredentials(latest.credentials_encrypted)) as unknown as OAuth2Creds;
+      if (latestCreds.expiresAt > Date.now() + 60_000) return loadConnector({ platform: integration.platform, credentials_encrypted: latest.credentials_encrypted });
+    }
+    throw err;
+  }
 }
