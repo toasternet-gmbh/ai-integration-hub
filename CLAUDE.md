@@ -301,8 +301,14 @@ with `redirect_uri_mismatch`).
   `messages.search` are `medium`/`require_approval` rather than the `low`/`allow` every other read
   tool gets, since Beeper aggregates a person's entire cross-platform personal chat history
   (iMessage/WhatsApp/Telegram/Signal via bridges) and the Policy Engine has no per-room granularity
-  to scope that down with. See `lib/connectors/matrix.ts`'s header comment and
-  `supabase/migrations/20260904000003_messaging_beeper.sql`'s risk-posture note.
+  to scope that down with. **Live-tested 2026-09-04** against Beeper's real homeserver
+  (`homeserverUrl: https://matrix.beeper.com`) with a deliberately invalid access token:
+  `GET /_matrix/client/v3/account/whoami` returned the canonical Matrix spec error
+  `401 {"errcode": "M_UNKNOWN_TOKEN", "error": "Invalid access token"}`, and the connector surfaced
+  that `.error` field correctly with no parsing bug — confirms the plain Matrix Client-Server API
+  approach and this specific homeserver both work as designed. Still not tested with a *valid*
+  token against a real account's own rooms/messages. See `lib/connectors/matrix.ts`'s header
+  comment and `supabase/migrations/20260904000003_messaging_beeper.sql`'s risk-posture note.
 - The public connect/quickconnect/blueprint pages (`src/pages/QuickConnect.tsx`,
   `src/pages/Integrations.tsx`, `src/pages/Blueprint.tsx`, `src/components/PlatformPicker.tsx`) no
   longer render the "Unverified"/"API-verified"/"Real-customer-verified" badge per platform — the
