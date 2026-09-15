@@ -23,7 +23,7 @@ export const definitions: ToolDefinition[] = [
       properties: {
         platform: {
           type: "string",
-          enum: ["woocommerce", "shopware", "shopify", "magento", "wordpress", "lexoffice", "toggl", "sevdesk", "personio", "datev", "jtl", "typo3", "contentful", "clockify", "prestashop", "hubspot", "pipedrive", "monday", "clockin", "clockodo", "weclapp", "billwerk", "papershift", "123erfasst", "openhandwerk", "browserless", "beeper", "steel"],
+          enum: ["woocommerce", "shopware", "shopify", "magento", "wordpress", "lexoffice", "toggl", "sevdesk", "personio", "datev", "jtl", "typo3", "contentful", "clockify", "prestashop", "hubspot", "pipedrive", "monday", "clockin", "clockodo", "weclapp", "billwerk", "papershift", "123erfasst", "openhandwerk", "browserless", "beeper", "steel", "sage", "odoo", "quicken", "salesforce", "zendesk", "jira", "notion", "quickbooks"],
         },
         name: { type: "string" },
         credentials: {
@@ -45,7 +45,15 @@ export const definitions: ToolDefinition[] = [
             "openhandwerk: {apiKey, accountId} (unverified stub — see lib/connectors/openhandwerk.ts); " +
             "browserless: {apiKey, endpoint?} (endpoint is the region/self-hosted host assigned at signup); " +
             "beeper: {homeserverUrl, accessToken} (a Matrix access token from your Beeper/Matrix client's own account settings); " +
-            "steel: {apiKey} (fewer tools than browserless — see lib/connectors/steel.ts).",
+            "steel: {apiKey} (fewer tools than browserless — see lib/connectors/steel.ts); " +
+            "sage: {apiToken} (stub); " +
+            "odoo: {url, db?, username?, apiKey} (stub); " +
+            "quicken: {apiToken} (stub); " +
+            "salesforce: {instanceUrl, apiToken} (stub); " +
+            "zendesk: {subdomain, email, apiToken} (stub); " +
+            "jira: {domain, email, apiToken} (stub); " +
+            "notion: {apiToken} (stub); " +
+            "quickbooks: {apiToken} (stub).",
         },
       },
     },

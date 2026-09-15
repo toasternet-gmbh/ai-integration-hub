@@ -387,6 +387,19 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
     verificationStatus: "api_verified",
   },
   {
+    id: "notion", category: "cms", name: "Notion", icon: "note_alt", color: "#000000",
+    description: {
+      en: "Page, post/database, and project management via Notion API. Implemented as a stub.",
+      de: "Seiten-, Beitrags-/Datenbank- und Projektverwaltung über die Notion API. Als Stub implementiert.",
+    },
+    capabilities: [
+      { domain: "cms.pages", tools: ["cms.pages.search", "cms.pages.get", "cms.pages.create", "cms.pages.update"] },
+      { domain: "cms.posts", tools: ["cms.posts.search", "cms.posts.get", "cms.posts.create", "cms.posts.update"] },
+      { domain: "projects", tools: ["projects.search", "projects.get", "projects.create"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
     id: "clockify", category: "time_tracking", name: "Clockify", icon: "timer", color: "#03A9F4",
     description: {
       en: "Time entry search, lookup, logging, editing, deletion, and reporting, plus project, client, and tag tools, against a Clockify workspace.",
@@ -443,6 +456,35 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
     verificationStatus: "unverified",
   },
   {
+    id: "salesforce", category: "crm", name: "Salesforce", icon: "cloud", color: "#00A1E0",
+    description: {
+      en: "Contact, deal, company, ticket, owner, and association management via Salesforce API. Implemented as a stub.",
+      de: "Kontakt-, Deal-, Unternehmens-, Ticket-, Eigentümer- und Assoziationsverwaltung über die Salesforce API. Als Stub implementiert.",
+    },
+    capabilities: [
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
+      { domain: "deals", tools: ["deals.search", "deals.get", "deals.create"] },
+      { domain: "companies", tools: ["companies.search", "companies.get"] },
+      { domain: "tickets", tools: ["tickets.search", "tickets.get", "tickets.create"] },
+      { domain: "owners", tools: ["owners.search"] },
+      { domain: "associations", tools: ["associations.list", "associations.create"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "zendesk", category: "crm", name: "Zendesk", icon: "support_agent", color: "#03363D",
+    description: {
+      en: "Ticket, contact, and company management via Zendesk Support API. Implemented as a stub.",
+      de: "Ticket-, Kontakt- und Unternehmensverwaltung über die Zendesk Support API. Als Stub implementiert.",
+    },
+    capabilities: [
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
+      { domain: "companies", tools: ["companies.search", "companies.get"] },
+      { domain: "tickets", tools: ["tickets.search", "tickets.get", "tickets.create"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
     id: "monday", category: "crm", name: "monday.com", icon: "view_kanban", color: "#FF3D57",
     description: {
       en: "Contact, deal, and company search, lookup, and creation on a monday sales CRM account, mapped onto the customer's own Deals/Contacts/Accounts boards via monday's GraphQL API. The Deals board is required to connect; the Contacts and Companies boards are optional fields in the connect form — leave them blank to connect deals only.",
@@ -493,6 +535,20 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
     verificationStatus: "unverified",
   },
   {
+    id: "odoo", category: "erp", name: "Odoo", icon: "widgets", color: "#714B67",
+    description: {
+      en: "Contact, invoice, product, and order management via Odoo ERP API. Implemented as a stub.",
+      de: "Kontakt-, Rechnungs-, Produkt- und Bestellverwaltung über die Odoo ERP API. Als Stub implementiert.",
+    },
+    capabilities: [
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create", "contacts.update", "contacts.addresses.search", "contacts.addresses.create"] },
+      { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create", "invoices.finalize", "invoices.record_payment", "invoices.void"] },
+      { domain: "products", tools: ["products.search", "products.get", "products.create"] },
+      { domain: "orders", tools: ["orders.search", "orders.get", "orders.create"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
     id: "billwerk", category: "bookkeeping", name: "Billwerk+", icon: "receipt_long", color: "#5D3FD3",
     description: {
       en: "Customer and invoice search, lookup, and creation on Billwerk+ (now rebranded Frisbii Billing & Pay) via its on-demand charge API — a subscription-billing platform, not a general bookkeeping system.",
@@ -501,6 +557,48 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
     capabilities: [
       { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create"] },
       { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "sage", category: "bookkeeping", name: "Sage", icon: "book", color: "#00D639",
+    description: {
+      en: "Invoice and contact search, lookup, and creation via Sage Business Cloud Accounting API. Implemented as a stub.",
+      de: "Rechnungs- und Kontaktsuche, -abfrage und -erstellung über die Sage Business Cloud Accounting API. Als Stub implementiert.",
+    },
+    capabilities: [
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create", "contacts.update", "contacts.addresses.search", "contacts.addresses.create"] },
+      { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create", "invoices.finalize", "invoices.record_payment", "invoices.void"] },
+      { domain: "credit_notes", tools: ["credit_notes.search", "credit_notes.get", "credit_notes.create"] },
+      { domain: "vouchers", tools: ["vouchers.create_from_file"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "quicken", category: "bookkeeping", name: "Quicken", icon: "account_balance", color: "#005596",
+    description: {
+      en: "Invoice and contact management via Quicken API. Implemented as a stub.",
+      de: "Rechnungs- und Kontaktverwaltung über die Quicken API. Als Stub implementiert.",
+    },
+    capabilities: [
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create", "contacts.update", "contacts.addresses.search", "contacts.addresses.create"] },
+      { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create", "invoices.finalize", "invoices.record_payment", "invoices.void"] },
+      { domain: "credit_notes", tools: ["credit_notes.search", "credit_notes.get", "credit_notes.create"] },
+      { domain: "vouchers", tools: ["vouchers.create_from_file"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "quickbooks", category: "bookkeeping", name: "QuickBooks", icon: "account_balance", color: "#2CA01C",
+    description: {
+      en: "Invoice and contact management via QuickBooks Online API. Implemented as a stub.",
+      de: "Rechnungs- und Kontaktverwaltung über die QuickBooks Online API. Als Stub implementiert.",
+    },
+    capabilities: [
+      { domain: "contacts", tools: ["contacts.search", "contacts.get", "contacts.create", "contacts.update", "contacts.addresses.search", "contacts.addresses.create"] },
+      { domain: "invoices", tools: ["invoices.search", "invoices.get", "invoices.create", "invoices.finalize", "invoices.record_payment", "invoices.void"] },
+      { domain: "credit_notes", tools: ["credit_notes.search", "credit_notes.get", "credit_notes.create"] },
+      { domain: "vouchers", tools: ["vouchers.create_from_file"] },
     ],
     verificationStatus: "unverified",
   },
@@ -556,6 +654,19 @@ export const PLATFORM_CATALOG: PlatformMeta[] = [
     capabilities: [
       { domain: "calendar", tools: ["calendar.list_events", "calendar.search", "calendar.create_event"] },
       { domain: "mail", tools: ["mail.search", "mail.get", "mail.send"] },
+    ],
+    verificationStatus: "unverified",
+  },
+  {
+    id: "jira", category: "productivity", name: "Jira", icon: "task", color: "#0052CC",
+    description: {
+      en: "Project, ticket, and employee management via Jira API. Implemented as a stub.",
+      de: "Projekt-, Ticket- und Mitarbeiterverwaltung über die Jira API. Als Stub implementiert.",
+    },
+    capabilities: [
+      { domain: "projects", tools: ["projects.search", "projects.get", "projects.create"] },
+      { domain: "tickets", tools: ["tickets.search", "tickets.get", "tickets.create"] },
+      { domain: "employees", tools: ["employees.search", "employees.get"] },
     ],
     verificationStatus: "unverified",
   },

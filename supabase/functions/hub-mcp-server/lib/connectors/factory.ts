@@ -30,6 +30,14 @@ import { GoogleConnector } from "./google.ts";
 import { BrowserlessConnector } from "./browserless.ts";
 import { MatrixConnector } from "./matrix.ts";
 import { SteelConnector } from "./steel.ts";
+import { SageConnector } from "./sage.ts";
+import { OdooConnector } from "./odoo.ts";
+import { QuickenConnector } from "./quicken.ts";
+import { SalesforceConnector } from "./salesforce.ts";
+import { ZendeskConnector } from "./zendesk.ts";
+import { JiraConnector } from "./jira.ts";
+import { NotionConnector } from "./notion.ts";
+import { QuickBooksConnector } from "./quickbooks.ts";
 import { decryptCredentials } from "../crypto.ts";
 import { assertPublicHttpUrl } from "../urlGuard.ts";
 
@@ -126,6 +134,28 @@ export async function loadConnector(integration: { platform: string; credentials
     }
     case "steel":
       return new SteelConnector(creds as { apiKey: string });
+    case "sage":
+      return new SageConnector(creds as { apiToken: string });
+    case "odoo": {
+      const c = creds as { url: string; db?: string; username?: string; apiKey: string };
+      assertPublicHttpUrl(c.url, "url");
+      return new OdooConnector(c);
+    }
+    case "quicken":
+      return new QuickenConnector(creds as { apiToken: string });
+    case "salesforce": {
+      const c = creds as { instanceUrl: string; apiToken: string };
+      assertPublicHttpUrl(c.instanceUrl, "instanceUrl");
+      return new SalesforceConnector(c);
+    }
+    case "zendesk":
+      return new ZendeskConnector(creds as { subdomain: string; email: string; apiToken: string });
+    case "jira":
+      return new JiraConnector(creds as { domain: string; email: string; apiToken: string });
+    case "notion":
+      return new NotionConnector(creds as { apiToken: string });
+    case "quickbooks":
+      return new QuickBooksConnector(creds as { apiToken: string });
     default:
       throw new Error(`No connector implemented for platform '${integration.platform}'.`);
   }
