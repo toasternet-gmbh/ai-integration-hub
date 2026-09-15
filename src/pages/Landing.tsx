@@ -37,6 +37,21 @@ export default function Landing() {
                   {t("landing.viewDocs")}
                 </Link>
               </div>
+              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-on-surface-variant font-label-caps text-label-caps">
+                <span className="shrink-0">{t("landing.integratesWith")}:</span>
+                <div className="flex gap-6 items-center flex-wrap opacity-75">
+                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">shopping_cart</span> {t("landing.cat.ecommerce")}</span>
+                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">receipt_long</span> {t("landing.cat.bookkeeping")}</span>
+                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">handshake</span> {t("landing.cat.crm")}</span>
+                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">schedule</span> {t("landing.cat.timeTracking")}</span>
+                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">account_balance</span> {t("landing.cat.banking")}</span>
+                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">edit_note</span> {t("landing.cat.cms")}</span>
+                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">warehouse</span> {t("landing.cat.erp")}</span>
+                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">task</span> {t("landing.cat.productivity")}</span>
+                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">smart_toy</span> {t("landing.cat.automation")}</span>
+                  <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[18px]">chat</span> {t("landing.cat.messaging")}</span>
+                </div>
+              </div>
             </div>
 
             <div className="lg:col-span-7 mt-12 lg:mt-0 relative group">
@@ -66,6 +81,36 @@ export default function Landing() {
                   <div className="flex items-center gap-2 ml-11">
                     <span className="material-symbols-outlined text-[16px] text-secondary-fixed">check_circle</span>
                     <span className="font-mono-data text-[12px] text-secondary-fixed">{t("landing.hero.approvedNote")}</span>
+                  </div>
+
+                  <div className="w-full h-px bg-outline-variant/30 my-2" />
+                  
+                  <div className="flex items-start gap-3">
+                    <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-[16px] text-outline-variant">person</span>
+                    </span>
+                    <p className="font-body-md text-[14px] text-on-primary leading-relaxed pt-1">&ldquo;{t("landing.hero.youAsk2")}&rdquo;</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-[16px] text-secondary-fixed">smart_toy</span>
+                    </span>
+                    <p className="font-body-md text-[14px] text-outline-variant leading-relaxed pt-1">{t("landing.hero.assistantReplies2")}</p>
+                  </div>
+
+                  <div className="w-full h-px bg-outline-variant/30 my-2" />
+
+                  <div className="flex items-start gap-3">
+                    <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-[16px] text-outline-variant">person</span>
+                    </span>
+                    <p className="font-body-md text-[14px] text-on-primary leading-relaxed pt-1">&ldquo;{t("landing.hero.youAsk3")}&rdquo;</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-[16px] text-secondary-fixed">smart_toy</span>
+                    </span>
+                    <p className="font-body-md text-[14px] text-outline-variant leading-relaxed pt-1">{t("landing.hero.assistantReplies3")}</p>
                   </div>
                 </div>
               </div>
